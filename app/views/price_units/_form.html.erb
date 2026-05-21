@@ -1,0 +1,20 @@
+<%= render "shared/form_errors", record: price_unit %>
+
+<%= form_with model: price_unit, class: "form-layout", html: { autocomplete: "off" } do |form| %>
+  <div class="form-grid">
+    <div class="field-group">
+      <%= form.label :name, "Price unit name" %>
+      <%= form.text_field :name %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :short_name, "Short name" %>
+      <%= form.text_field :short_name %>
+    </div>
+  </div>
+
+  <div class="inline-actions">
+    <%= form.submit price_unit.persisted? ? "Update Price Unit" : "Create Price Unit", class: "button button-primary" %>
+    <%= link_to "Back", price_units_path, class: "button button-ghost" %>
+  </div>
+<% end %>

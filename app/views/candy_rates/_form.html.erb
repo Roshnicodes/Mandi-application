@@ -1,0 +1,55 @@
+<%= render "shared/form_errors", record: candy_rate %>
+
+<%= form_with model: [ cotton_bulletin, candy_rate ], class: "form-layout", html: { autocomplete: "off" } do |form| %>
+  <div class="form-grid-three">
+    <div class="field-group">
+      <%= form.label :category, "Candy section" %>
+      <%= form.select :category, CandyRate::CATEGORIES.map { |key, label| [ label, key ] }, { prompt: "Select section" } %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :parameter, "Parameter" %>
+      <%= form.text_field :parameter %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :position, "Display order" %>
+      <%= form.number_field :position, step: 1 %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :madhya_pradesh_rate, "Madhya Pradesh" %>
+      <%= form.text_field :madhya_pradesh_rate %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :maharashtra_29mm_rate, "Maharashtra 29 MM" %>
+      <%= form.text_field :maharashtra_29mm_rate %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :maharashtra_31mm_rate, "Maharashtra 31 MM" %>
+      <%= form.text_field :maharashtra_31mm_rate %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :odisha_29mm_rate, "Odisha 29 MM" %>
+      <%= form.text_field :odisha_29mm_rate %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :odisha_30mm_rate, "Odisha 30 MM" %>
+      <%= form.text_field :odisha_30mm_rate %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :reference, "Reference" %>
+      <%= form.text_field :reference %>
+    </div>
+  </div>
+
+  <div class="inline-actions">
+    <%= form.submit candy_rate.persisted? ? "Update Candy Rate" : "Save Candy Rate", class: "button button-primary" %>
+    <%= link_to "Back", cotton_bulletin_path(cotton_bulletin), class: "button button-ghost" %>
+  </div>
+<% end %>

@@ -1,0 +1,26 @@
+<%= render "shared/form_errors", record: cotton_bulletin %>
+
+<%= form_with model: cotton_bulletin, class: "form-layout", html: { autocomplete: "off" } do |form| %>
+  <div class="form-grid-two">
+    <div class="field-group">
+      <%= form.label :report_date, "Report date" %>
+      <%= form.date_field :report_date %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :title, "Bulletin title" %>
+      <%= form.text_field :title %>
+      <p class="field-note">Yahi title overview page me focus group ki tarah use hoga.</p>
+    </div>
+  </div>
+
+  <div class="field-group">
+    <%= form.label :notes, "Notes" %>
+    <%= form.text_area :notes %>
+  </div>
+
+  <div class="inline-actions">
+    <%= form.submit cotton_bulletin.persisted? ? "Update Bulletin" : "Create Bulletin", class: "button button-primary" %>
+    <%= link_to "Back", cotton_bulletins_path, class: "button button-ghost" %>
+  </div>
+<% end %>

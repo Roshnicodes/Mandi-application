@@ -1,0 +1,53 @@
+<% content_for :title, "State Master" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Master Setup</p>
+      <h1>State master</h1>
+      <p class="muted-text">Build the top-level geography used across districts, markets and report forms.</p>
+    </div>
+    <div class="page-actions">
+      <%= link_to "Add State", new_state_path, class: "button button-primary" %>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-card-header">
+      <div>
+        <h2 class="table-title">Configured states</h2>
+        <p class="table-subtitle">Top-level geography used for district, market and daily report entry.</p>
+      </div>
+    </div>
+
+    <% if @states.any? %>
+      <div class="data-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @states.each do |state| %>
+              <tr>
+                <td><%= state.name %></td>
+                <td><%= state.updated_at.strftime("%d %b %Y") %></td>
+                <td>
+                  <div class="inline-actions">
+                    <%= link_to "Edit", edit_state_path(state), class: "button button-secondary" %>
+                    <%= button_to "Delete", state_path(state), method: :delete, class: "button button-danger", form: { data: { turbo_confirm: "Delete this state?" }, class: "button-to-inline" } %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">Abhi tak koi state master create nahi hua hai.</div>
+    <% end %>
+  </div>
+</section>

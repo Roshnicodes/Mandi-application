@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= app_title(content_for(:title)) %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Mandi App">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  </head>
+
+  <body class="<%= authenticated? ? "app-shell-body" : "auth-shell-body" %>">
+    <% if authenticated? %>
+      <div class="app-shell">
+        <aside class="sidebar" id="app-sidebar" data-app-sidebar>
+          <div class="sidebar-mobile-header">
+            <span class="sidebar-mobile-brand">Mandi Pro</span>
+            <button type="button" class="sidebar-close-button" data-sidebar-close aria-label="Close navigation">
+              <span></span>
+              <span></span>
+            </button>
+          </div>
+
+          <div class="brand-card">
+            <div class="brand-top">
+              <div class="brand-mark">MP</div>
+              <span class="brand-status">
+                <span class="brand-status-dot"></span>
+                Live workspace
+              </span>
+            </div>
+
+            <div class="brand-copy">
+              <p class="eyebrow">Agriculture reporting suite</p>
+              <h1>Mandi Pro</h1>
+              <p class="brand-copy-text">Manage mandi masters, daily arrivals and pricing reports from one focused control room.</p>
+            </div>
+
+            <div class="brand-tags">
+              <span class="brand-tag">Masters</span>
+              <span class="brand-tag">Reports</span>
+              <span class="brand-tag">Markets</span>
+            </div>
+          </div>
+
+          <nav class="nav-stack">
+            <div class="nav-group">
+              <p class="nav-label">Workspace</p>
+              <% primary_navigation.each do |item| %>
+                <%= link_to item[:label], item[:path], class: ["nav-link", item[:active] ? "active" : nil] %>
+              <% end %>
+            </div>
+
+            <div class="nav-group">
+              <p class="nav-label">Masters</p>
+              <% master_navigation.each do |item| %>
+                <%= link_to item[:label], item[:path], class: ["nav-link", item[:active] ? "active" : nil] %>
+              <% end %>
+            </div>
+          </nav>
+        </aside>
+
+        <button type="button" class="sidebar-overlay" data-sidebar-overlay aria-hidden="true" tabindex="-1"></button>
+
+        <main class="app-main">
+          <header class="topbar">
+            <div class="topbar-leading">
+              <button
+                type="button"
+                class="mobile-nav-button"
+                data-sidebar-toggle
+                aria-expanded="false"
+                aria-controls="app-sidebar"
+              >
+                <span></span>
+                <span></span>
+                <span></span>
+                <em>Menu</em>
+              </button>
+
+              <div class="topbar-copy">
+                <p class="eyebrow">Operational Control</p>
+                <h2>Market Rate Management</h2>
+                <p class="topbar-subtitle">Keep mandi masters clean, update daily arrivals faster and manage reporting from one workspace.</p>
+              </div>
+            </div>
+
+            <div class="topbar-actions">
+              <div class="user-pill">
+                <span class="user-pill-name"><%= current_user.name %></span>
+                <span class="user-pill-meta"><%= Date.current.strftime("%d %b %Y") %></span>
+              </div>
+              <%= button_to "Logout", session_path, method: :delete, class: "button button-ghost" %>
+            </div>
+          </header>
+
+          <div class="page-frame">
+            <%= render "shared/flash" %>
+            <%= yield %>
+          </div>
+        </main>
+      </div>
+    <% else %>
+      <div class="auth-shell">
+        <%= render "shared/flash" %>
+        <%= yield %>
+      </div>
+    <% end %>
+
+    <%= render "shared/mandi_ui_script" %>
+  </body>
+</html>

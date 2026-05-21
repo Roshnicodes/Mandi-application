@@ -1,0 +1,10 @@
+<% if record.errors.any? %>
+  <div class="form-errors">
+    <strong>Please review the highlighted issues:</strong>
+    <ul>
+      <% record.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>

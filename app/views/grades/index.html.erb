@@ -1,0 +1,47 @@
+<% content_for :title, "Grade Master" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Master Setup</p>
+      <h1>Grade master</h1>
+    </div>
+    <div class="page-actions">
+      <%= link_to "Add Grade", new_grade_path, class: "button button-primary" %>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <% if @grades.any? %>
+      <div class="data-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Grade</th>
+              <th>Commodity</th>
+              <th>Variety</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @grades.each do |grade| %>
+              <tr>
+                <td><%= grade.name %></td>
+                <td><%= grade.commodity.name %></td>
+                <td><%= grade.variety&.name || "All varieties" %></td>
+                <td>
+                  <div class="inline-actions">
+                    <%= link_to "Edit", edit_grade_path(grade), class: "button button-secondary" %>
+                    <%= button_to "Delete", grade_path(grade), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">Abhi tak grades create nahi hue hain.</div>
+    <% end %>
+  </div>
+</section>

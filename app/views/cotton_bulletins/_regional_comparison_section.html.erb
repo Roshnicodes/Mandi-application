@@ -1,0 +1,58 @@
+<div class="table-card report-sheet-card">
+  <div class="sheet-header">
+    <div>
+      <p class="eyebrow">Comparison Matrix</p>
+      <h2 class="table-title">Regional price comparison</h2>
+      <p class="table-subtitle">OC Cotton, Bonus, Total aur Moisture jaise row items ko multi-location matrix me save kariye.</p>
+    </div>
+    <div class="inline-actions">
+      <%= link_to "Add Comparison Line", new_cotton_bulletin_cotton_regional_comparison_path(bulletin), class: "button button-secondary" %>
+    </div>
+  </div>
+
+  <% if records.any? %>
+    <div class="data-table-wrapper">
+      <table class="report-grid-table">
+        <thead>
+          <tr>
+            <th>Line Item</th>
+            <th>Raipur</th>
+            <th>Ojhar</th>
+            <th>Kukshi</th>
+            <th>Pati</th>
+            <th>Sausar</th>
+            <th>Jobat</th>
+            <th>Odisha</th>
+            <th>Extra 1</th>
+            <th>Extra 2</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% records.each do |record| %>
+            <tr>
+              <td><%= record.line_item %></td>
+              <td><%= record.raipur_value.presence || "-" %></td>
+              <td><%= record.ojhar_value.presence || "-" %></td>
+              <td><%= record.kukshi_value.presence || "-" %></td>
+              <td><%= record.pati_value.presence || "-" %></td>
+              <td><%= record.sausar_value.presence || "-" %></td>
+              <td><%= record.jobat_value.presence || "-" %></td>
+              <td><%= record.odisha_value.presence || "-" %></td>
+              <td><%= record.extra_value_one.presence || "-" %></td>
+              <td><%= record.extra_value_two.presence || "-" %></td>
+              <td>
+                <div class="inline-actions">
+                  <%= link_to "Edit", edit_cotton_bulletin_cotton_regional_comparison_path(bulletin, record), class: "button button-secondary" %>
+                  <%= button_to "Delete", cotton_bulletin_cotton_regional_comparison_path(bulletin, record), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="empty-state">Regional comparison matrix abhi empty hai.</div>
+  <% end %>
+</div>

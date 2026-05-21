@@ -1,0 +1,135 @@
+<% content_for :title, "Daily Price Arrival Reports" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Report Entry</p>
+      <h1>Daily price arrival reports</h1>
+      <p class="muted-text">Capture min, max, modal price and arrival quantity exactly like your mandi sheets.</p>
+    </div>
+    <div class="page-actions">
+      <%= link_to "Add Daily Report", new_daily_price_arrival_report_path, class: "button button-primary" %>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="table-title">Filter reports</h2>
+        <p class="table-subtitle">Quickly narrow the grid by geography, commodity or date range.</p>
+      </div>
+    </div>
+
+    <%= form_with url: daily_price_arrival_reports_path, method: :get, class: "filters-form" do |form| %>
+      <div class="form-grid-three">
+        <div class="field-group">
+          <%= form.label :state_id, "State" %>
+          <%= form.collection_select :state_id, @states, :id, :name, { include_blank: "All states", selected: params[:state_id] } %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :district_id, "District" %>
+          <%= form.collection_select :district_id, @districts, :id, :name, { include_blank: "All districts", selected: params[:district_id] } %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :market_id, "Market" %>
+          <%= form.collection_select :market_id, @markets, :id, :name, { include_blank: "All markets", selected: params[:market_id] } %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :commodity_group_id, "Commodity group" %>
+          <%= form.collection_select :commodity_group_id, @commodity_groups, :id, :name, { include_blank: "All groups", selected: params[:commodity_group_id] } %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :commodity_id, "Commodity" %>
+          <%= form.collection_select :commodity_id, @commodities, :id, :name, { include_blank: "All commodities", selected: params[:commodity_id] } %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :variety_id, "Variety" %>
+          <%= form.collection_select :variety_id, @varieties, :id, :name, { include_blank: "All varieties", selected: params[:variety_id] } %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :from_date, "From date" %>
+          <%= form.date_field :from_date, value: params[:from_date] %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :to_date, "To date" %>
+          <%= form.date_field :to_date, value: params[:to_date] %>
+        </div>
+      </div>
+
+      <div class="inline-actions">
+        <%= form.submit "Apply filters", class: "button button-primary" %>
+        <%= link_to "Reset", daily_price_arrival_reports_path, class: "button button-ghost" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="stat-card">
+      <span class="stat-label">Visible reports</span>
+      <strong><%= number_with_delimiter(@filtered_count) %></strong>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Total arrival quantity</span>
+      <strong><%= number_with_precision(@filtered_arrival_total, precision: 2) %></strong>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <% if @reports.any? %>
+      <div class="data-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Created On</th>
+              <th>Arrival Date</th>
+              <th>State</th>
+              <th>District</th>
+              <th>Market</th>
+              <th>Commodity</th>
+              <th>Variety</th>
+              <th>Grade</th>
+              <th>Min</th>
+              <th>Max</th>
+              <th>Modal</th>
+              <th>Arrival Qty</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @reports.each do |report| %>
+              <tr>
+                <td><%= report.created_at.strftime("%d %b %Y, %I:%M %p") %></td>
+                <td><%= report.arrival_date.strftime("%d %b %Y") %></td>
+                <td><%= report.state.name %></td>
+                <td><%= report.district.name %></td>
+                <td><%= report.market.name %></td>
+                <td><%= report.commodity.name %></td>
+                <td><%= report.variety.name %></td>
+                <td><%= report.grade.name %></td>
+                <td class="numeric-cell"><%= number_with_precision(report.min_price, precision: 2) %></td>
+                <td class="numeric-cell"><%= number_with_precision(report.max_price, precision: 2) %></td>
+                <td class="numeric-cell"><%= number_with_precision(report.modal_price, precision: 2) %></td>
+                <td class="numeric-cell"><%= number_with_precision(report.arrival_quantity, precision: 2) %> <%= report.arrival_unit.short_name.presence || report.arrival_unit.name %></td>
+                <td>
+                  <div class="inline-actions">
+                    <%= link_to "Edit", edit_daily_price_arrival_report_path(report), class: "button button-secondary" %>
+                    <%= button_to "Delete", daily_price_arrival_report_path(report), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">Selected filters ke liye koi daily report nahi mila.</div>
+    <% end %>
+  </div>
+</section>

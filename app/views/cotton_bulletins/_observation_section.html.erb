@@ -1,0 +1,130 @@
+<%
+  display_title = title.presence || CottonMarketObservation::CATEGORIES.fetch(category)
+  name_label =
+    case category
+    when "gin_wise"
+      "Gin Name"
+    when "tdn_moisture"
+      "Source / Unit"
+    else
+      "Mandi Name"
+    end
+
+  if category == "comparison_sheet" && records.any?
+    comparison_count = records.size.to_f
+    avg_total_arrival = records.sum { |record| record.total_arrival.to_f } / comparison_count
+    avg_traders_buy = records.sum { |record| record.traders_buy.to_f } / comparison_count
+    avg_traders_percentage = records.sum { |record| record.traders_percentage.to_f } / comparison_count
+    avg_cci_buy = records.sum { |record| record.cci_buy.to_f } / comparison_count
+    avg_cci_percentage = records.sum { |record| record.effective_cci_percentage.to_f } / comparison_count
+  end
+%>
+
+<div class="table-card report-sheet-card">
+  <div class="sheet-header">
+    <div>
+      <p class="eyebrow">Excel Section</p>
+      <h2 class="table-title"><%= display_title %></h2>
+      <p class="table-subtitle">Fill this section exactly the way the daily cotton sheet is maintained.</p>
+    </div>
+    <div class="inline-actions">
+      <%= link_to "Add Line", new_cotton_bulletin_cotton_market_observation_path(bulletin, category: category), class: "button button-secondary" %>
+    </div>
+  </div>
+
+  <% if records.any? %>
+    <div class="data-table-wrapper">
+      <table class="report-grid-table">
+        <thead>
+          <% case category %>
+          <% when "mandi_wise", "cci_mandi" %>
+            <tr>
+              <th>S. No</th>
+              <th><%= name_label %></th>
+              <th>Arrival Qty (In Qtl)</th>
+              <th>Minimum Price</th>
+              <th>Maximum Price</th>
+              <th>Modal Price</th>
+              <th>Reference / Remark</th>
+              <th>Actions</th>
+            </tr>
+          <% when "gin_wise", "tdn_moisture" %>
+            <tr>
+              <th>S. No</th>
+              <th><%= name_label %></th>
+              <th>Arrival Qty (In Qtl)</th>
+              <th>Moisture</th>
+              <th>Arrival Price</th>
+              <th>Remark</th>
+              <th>Actions</th>
+            </tr>
+          <% when "comparison_sheet" %>
+            <tr>
+              <th>Date</th>
+              <th>Total Arr</th>
+              <th>Traders Buying</th>
+              <th>Traders %</th>
+              <th>CCI Buying</th>
+              <th>CCI %</th>
+              <th>Remark</th>
+              <th>Actions</th>
+            </tr>
+          <% end %>
+        </thead>
+        <tbody>
+          <% records.each_with_index do |record, index| %>
+            <tr>
+              <% case category %>
+              <% when "mandi_wise", "cci_mandi" %>
+                <td><%= record.position.presence || index + 1 %></td>
+                <td><%= record.name %></td>
+                <td class="numeric-cell"><%= number_with_precision(record.arrival_quantity, precision: 2, strip_insignificant_zeros: false) %></td>
+                <td class="numeric-cell"><%= number_with_precision(record.minimum_price, precision: 2, strip_insignificant_zeros: false) %></td>
+                <td class="numeric-cell"><%= number_with_precision(record.maximum_price, precision: 2, strip_insignificant_zeros: false) %></td>
+                <td class="numeric-cell"><%= number_with_precision(record.modal_price, precision: 2, strip_insignificant_zeros: false) %></td>
+                <td><%= record.remarks.presence || "-" %></td>
+              <% when "gin_wise", "tdn_moisture" %>
+                <td><%= record.position.presence || index + 1 %></td>
+                <td><%= record.name %></td>
+                <td class="numeric-cell"><%= record.arrival_quantity.present? ? number_with_precision(record.arrival_quantity, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+                <td><%= record.moisture.presence || "-" %></td>
+                <td><%= record.arrival_price.presence || "-" %></td>
+                <td><%= record.remarks.presence || "-" %></td>
+              <% when "comparison_sheet" %>
+                <td><%= (record.observation_date || bulletin.report_date).strftime("%d-%b-%y") %></td>
+                <td class="numeric-cell"><%= record.total_arrival.present? ? number_with_precision(record.total_arrival, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+                <td class="numeric-cell"><%= record.traders_buy.present? ? number_with_precision(record.traders_buy, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+                <td class="numeric-cell"><%= record.traders_percentage.present? ? number_with_precision(record.traders_percentage, precision: 2) : "-" %></td>
+                <td class="numeric-cell"><%= record.cci_buy.present? ? number_with_precision(record.cci_buy, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+                <td class="numeric-cell"><%= record.effective_cci_percentage.present? ? number_with_precision(record.effective_cci_percentage, precision: 2) : "-" %></td>
+                <td><%= record.remarks.presence || "-" %></td>
+              <% end %>
+              <td>
+                <div class="inline-actions">
+                  <%= link_to "Edit", edit_cotton_bulletin_cotton_market_observation_path(bulletin, record), class: "button button-secondary" %>
+                  <%= button_to "Delete", cotton_bulletin_cotton_market_observation_path(bulletin, record), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+        <% if category == "comparison_sheet" && records.any? %>
+          <tfoot>
+            <tr class="report-average-row">
+              <td>Average</td>
+              <td class="numeric-cell"><%= number_with_precision(avg_total_arrival, precision: 2) %></td>
+              <td class="numeric-cell"><%= number_with_precision(avg_traders_buy, precision: 2) %></td>
+              <td class="numeric-cell"><%= number_with_precision(avg_traders_percentage, precision: 2) %></td>
+              <td class="numeric-cell"><%= number_with_precision(avg_cci_buy, precision: 2) %></td>
+              <td class="numeric-cell"><%= number_with_precision(avg_cci_percentage, precision: 2) %></td>
+              <td>-</td>
+              <td>-</td>
+            </tr>
+          </tfoot>
+        <% end %>
+      </table>
+    </div>
+  <% else %>
+    <div class="empty-state">Is section me abhi koi line add nahi hui hai.</div>
+  <% end %>
+</div>

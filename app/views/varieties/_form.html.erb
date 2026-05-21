@@ -1,0 +1,20 @@
+<%= render "shared/form_errors", record: variety %>
+
+<%= form_with model: variety, class: "form-layout", html: { autocomplete: "off" } do |form| %>
+  <div class="form-grid">
+    <div class="field-group">
+      <%= form.label :commodity_id, "Commodity" %>
+      <%= form.collection_select :commodity_id, @commodities, :id, :name, { prompt: "Select commodity" } %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :name, "Variety name" %>
+      <%= form.text_field :name %>
+    </div>
+  </div>
+
+  <div class="inline-actions">
+    <%= form.submit variety.persisted? ? "Update Variety" : "Create Variety", class: "button button-primary" %>
+    <%= link_to "Back", varieties_path, class: "button button-ghost" %>
+  </div>
+<% end %>

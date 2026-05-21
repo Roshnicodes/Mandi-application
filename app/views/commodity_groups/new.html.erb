@@ -1,0 +1,15 @@
+<% content_for :title, "New Commodity Group" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Master Setup</p>
+      <h1>Create commodity group</h1>
+      <p class="muted-text">Reporting me commodities ko better organize karne ke liye cluster add kariye.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <%= render "form", commodity_group: @commodity_group %>
+  </div>
+</section>

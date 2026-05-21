@@ -1,0 +1,27 @@
+<%= render "shared/form_errors", record: commodity %>
+
+<%= form_with model: commodity, class: "form-layout", html: { autocomplete: "off" } do |form| %>
+  <div class="form-grid">
+    <div class="field-group">
+      <%= form.label :commodity_group_id, "Commodity group" %>
+      <%= form.collection_select :commodity_group_id, @commodity_groups, :id, :name, { prompt: "Select group" } %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :name, "Commodity name" %>
+      <%= form.text_field :name %>
+    </div>
+  </div>
+
+  <div class="field-group">
+    <label class="checkbox-label">
+      <%= form.check_box :organic %>
+      Organic commodity
+    </label>
+  </div>
+
+  <div class="inline-actions">
+    <%= form.submit commodity.persisted? ? "Update Commodity" : "Create Commodity", class: "button button-primary" %>
+    <%= link_to "Back", commodities_path, class: "button button-ghost" %>
+  </div>
+<% end %>

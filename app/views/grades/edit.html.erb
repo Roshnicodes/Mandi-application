@@ -1,0 +1,15 @@
+<% content_for :title, "Edit Grade" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Master Setup</p>
+      <h1>Edit grade</h1>
+      <p class="muted-text">Grade mappings ko edit karke report entry logic ko relevant rakhiye.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <%= render "form", grade: @grade %>
+  </div>
+</section>

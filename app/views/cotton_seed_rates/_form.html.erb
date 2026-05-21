@@ -1,0 +1,40 @@
+<%= render "shared/form_errors", record: cotton_seed_rate %>
+
+<%= form_with model: [ cotton_bulletin, cotton_seed_rate ], class: "form-layout", html: { autocomplete: "off" } do |form| %>
+  <div class="form-grid-three">
+    <div class="field-group">
+      <%= form.label :particular, "Particular" %>
+      <%= form.text_field :particular %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :madhya_pradesh_rate, "Madhya Pradesh rate" %>
+      <%= form.text_field :madhya_pradesh_rate %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :odisha_rate, "Odisha rate" %>
+      <%= form.text_field :odisha_rate %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :maharashtra_rate, "Maharashtra rate" %>
+      <%= form.text_field :maharashtra_rate %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :reference, "Reference" %>
+      <%= form.text_field :reference %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :position, "Display order" %>
+      <%= form.number_field :position, step: 1 %>
+    </div>
+  </div>
+
+  <div class="inline-actions">
+    <%= form.submit cotton_seed_rate.persisted? ? "Update Seed Rate" : "Save Seed Rate", class: "button button-primary" %>
+    <%= link_to "Back", cotton_bulletin_path(cotton_bulletin), class: "button button-ghost" %>
+  </div>
+<% end %>

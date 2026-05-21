@@ -1,0 +1,45 @@
+<% content_for :title, "Price Unit Master" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Master Setup</p>
+      <h1>Price unit master</h1>
+    </div>
+    <div class="page-actions">
+      <%= link_to "Add Price Unit", new_price_unit_path, class: "button button-primary" %>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <% if @price_units.any? %>
+      <div class="data-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Unit</th>
+              <th>Short name</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @price_units.each do |unit| %>
+              <tr>
+                <td><%= unit.name %></td>
+                <td><%= unit.short_name.presence || "-" %></td>
+                <td>
+                  <div class="inline-actions">
+                    <%= link_to "Edit", edit_price_unit_path(unit), class: "button button-secondary" %>
+                    <%= button_to "Delete", price_unit_path(unit), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">Abhi tak koi price unit create nahi hua hai.</div>
+    <% end %>
+  </div>
+</section>

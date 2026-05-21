@@ -1,0 +1,45 @@
+<% content_for :title, "District Master" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Master Setup</p>
+      <h1>District master</h1>
+    </div>
+    <div class="page-actions">
+      <%= link_to "Add District", new_district_path, class: "button button-primary" %>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <% if @districts.any? %>
+      <div class="data-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>District</th>
+              <th>State</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @districts.each do |district| %>
+              <tr>
+                <td><%= district.name %></td>
+                <td><%= district.state.name %></td>
+                <td>
+                  <div class="inline-actions">
+                    <%= link_to "Edit", edit_district_path(district), class: "button button-secondary" %>
+                    <%= button_to "Delete", district_path(district), method: :delete, class: "button button-danger", form: { data: { turbo_confirm: "Delete this district?" }, class: "button-to-inline" } %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">Abhi tak koi district master create nahi hua hai.</div>
+    <% end %>
+  </div>
+</section>

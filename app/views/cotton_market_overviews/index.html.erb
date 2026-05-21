@@ -1,0 +1,250 @@
+<% content_for :title, "Cotton Overview" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Overall Sheet</p>
+      <h1>Cotton market overview</h1>
+      <p class="muted-text">Review historical bulletin lanes in one wide overview, similar to your monthly Kukshi / Anjad Excel sheet.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="table-title">Overview filters</h2>
+        <p class="table-subtitle">Filter by bulletin title and date range to build the historical sheet.</p>
+      </div>
+    </div>
+
+    <%= form_with url: cotton_market_overviews_path, method: :get, class: "filters-form" do |form| %>
+      <div class="form-grid-three">
+        <div class="field-group">
+          <%= form.label :title, "Bulletin title" %>
+          <%= form.select :title, @titles, { include_blank: "All bulletin titles", selected: params[:title] } %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :from_date, "From date" %>
+          <%= form.date_field :from_date, value: params[:from_date] %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :to_date, "To date" %>
+          <%= form.date_field :to_date, value: params[:to_date] %>
+        </div>
+      </div>
+
+      <div class="inline-actions">
+        <%= form.submit "Build Overview", class: "button button-primary" %>
+        <%= link_to "Reset", cotton_market_overviews_path, class: "button button-ghost" %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @grouped_bulletins.any? %>
+    <% @grouped_bulletins.each do |title, bulletins| %>
+      <% mandi_rows = bulletins.flat_map { |bulletin| bulletin.cotton_market_observations.select { |row| row.category == "mandi_wise" }.sort_by { |row| [row.position || 999_999, row.created_at] }.map { |row| [bulletin, row] } } %>
+      <% cci_rows = bulletins.flat_map { |bulletin| bulletin.cotton_market_observations.select { |row| row.category == "cci_mandi" }.sort_by { |row| [row.position || 999_999, row.created_at] }.map { |row| [bulletin, row] } } %>
+      <% tdn_rows = bulletins.flat_map { |bulletin| bulletin.cotton_market_observations.select { |row| row.category == "tdn_moisture" }.sort_by { |row| [row.position || 999_999, row.created_at] }.map { |row| [bulletin, row] } } %>
+      <% comparison_rows = bulletins.flat_map { |bulletin| bulletin.cotton_market_observations.select { |row| row.category == "comparison_sheet" }.sort_by { |row| [row.position || 999_999, row.created_at] }.map { |row| [bulletin, row] } } %>
+      <% total_arrival = mandi_rows.sum { |_bulletin, row| row.arrival_quantity.to_f } %>
+      <% avg_min = mandi_rows.any? ? mandi_rows.sum { |_bulletin, row| row.minimum_price.to_f } / mandi_rows.size : 0 %>
+      <% avg_max = mandi_rows.any? ? mandi_rows.sum { |_bulletin, row| row.maximum_price.to_f } / mandi_rows.size : 0 %>
+      <% avg_modal = mandi_rows.any? ? mandi_rows.sum { |_bulletin, row| row.modal_price.to_f } / mandi_rows.size : 0 %>
+
+      <div class="overview-group-card">
+        <div class="sheet-header">
+          <div>
+            <p class="eyebrow">Historical Focus</p>
+            <h2 class="table-title"><%= title %></h2>
+            <p class="table-subtitle">Bulletins covered: <%= bulletins.first.report_date.strftime("%d %b %Y") %> to <%= bulletins.last.report_date.strftime("%d %b %Y") %></p>
+          </div>
+        </div>
+
+        <div class="overview-lane-grid">
+          <div class="table-card overview-lane">
+            <div class="sheet-header compact">
+              <div>
+                <h3 class="sheet-mini-title">Kukshi Mandi Rates</h3>
+              </div>
+            </div>
+            <% if mandi_rows.any? %>
+              <div class="data-table-wrapper">
+                <table class="report-grid-table compact-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Arrival Qty</th>
+                      <th>Min</th>
+                      <th>Max</th>
+                      <th>Modal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% mandi_rows.each do |bulletin, row| %>
+                      <tr>
+                        <td><%= bulletin.report_date.strftime("%d-%b-%y") %></td>
+                        <td class="numeric-cell"><%= number_with_precision(row.arrival_quantity, precision: 2, strip_insignificant_zeros: false) %></td>
+                        <td class="numeric-cell"><%= number_with_precision(row.minimum_price, precision: 0) %></td>
+                        <td class="numeric-cell"><%= number_with_precision(row.maximum_price, precision: 0) %></td>
+                        <td class="numeric-cell"><%= number_with_precision(row.modal_price, precision: 0) %></td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
+            <% else %>
+              <div class="empty-state compact-empty">No mandi wise rows.</div>
+            <% end %>
+          </div>
+
+          <div class="table-card overview-lane">
+            <div class="sheet-header compact">
+              <div>
+                <h3 class="sheet-mini-title">CCI Mandi Rates</h3>
+              </div>
+            </div>
+            <% if cci_rows.any? %>
+              <div class="data-table-wrapper">
+                <table class="report-grid-table compact-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Arrival Qty</th>
+                      <th>Min</th>
+                      <th>Max</th>
+                      <th>Modal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% cci_rows.each do |bulletin, row| %>
+                      <tr>
+                        <td><%= bulletin.report_date.strftime("%d-%b-%y") %></td>
+                        <td class="numeric-cell"><%= row.arrival_quantity.present? ? number_with_precision(row.arrival_quantity, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+                        <td class="numeric-cell"><%= row.minimum_price.present? ? number_with_precision(row.minimum_price, precision: 0) : "-" %></td>
+                        <td class="numeric-cell"><%= row.maximum_price.present? ? number_with_precision(row.maximum_price, precision: 0) : "-" %></td>
+                        <td class="numeric-cell"><%= row.modal_price.present? ? number_with_precision(row.modal_price, precision: 0) : "-" %></td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
+            <% else %>
+              <div class="empty-state compact-empty">No CCI rows.</div>
+            <% end %>
+          </div>
+
+          <div class="table-card overview-lane">
+            <div class="sheet-header compact">
+              <div>
+                <h3 class="sheet-mini-title">TDN Rates With Moisture</h3>
+              </div>
+            </div>
+            <% if tdn_rows.any? %>
+              <div class="data-table-wrapper">
+                <table class="report-grid-table compact-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Arrival Qty</th>
+                      <th>Moisture</th>
+                      <th>Arrival Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% tdn_rows.each do |bulletin, row| %>
+                      <tr>
+                        <td><%= bulletin.report_date.strftime("%d-%b-%y") %></td>
+                        <td class="numeric-cell"><%= row.arrival_quantity.present? ? number_with_precision(row.arrival_quantity, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+                        <td><%= row.moisture.presence || "-" %></td>
+                        <td><%= row.arrival_price.presence || "-" %></td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
+            <% else %>
+              <div class="empty-state compact-empty">No TDN rows.</div>
+            <% end %>
+          </div>
+
+          <div class="table-card overview-lane">
+            <div class="sheet-header compact">
+              <div>
+                <h3 class="sheet-mini-title">Comparison Sheet</h3>
+              </div>
+            </div>
+            <% if comparison_rows.any? %>
+              <% comparison_count = comparison_rows.size.to_f %>
+              <% avg_total_arr = comparison_rows.sum { |_bulletin, row| row.total_arrival.to_f } / comparison_count %>
+              <% avg_traders_buy = comparison_rows.sum { |_bulletin, row| row.traders_buy.to_f } / comparison_count %>
+              <% avg_traders_pct = comparison_rows.sum { |_bulletin, row| row.traders_percentage.to_f } / comparison_count %>
+              <% avg_cci_buy = comparison_rows.sum { |_bulletin, row| row.cci_buy.to_f } / comparison_count %>
+              <% avg_cci_pct = comparison_rows.sum { |_bulletin, row| row.effective_cci_percentage.to_f } / comparison_count %>
+              <div class="data-table-wrapper">
+                <table class="report-grid-table compact-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Total Arr</th>
+                      <th>Traders Buy</th>
+                      <th>Traders %</th>
+                      <th>CCI Buy</th>
+                      <th>CCI %</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% comparison_rows.each do |bulletin, row| %>
+                      <tr>
+                        <td><%= (row.observation_date || bulletin.report_date).strftime("%d-%b-%y") %></td>
+                        <td class="numeric-cell"><%= row.total_arrival.present? ? number_with_precision(row.total_arrival, precision: 0) : "-" %></td>
+                        <td class="numeric-cell"><%= row.traders_buy.present? ? number_with_precision(row.traders_buy, precision: 0) : "-" %></td>
+                        <td class="numeric-cell"><%= row.traders_percentage.present? ? number_with_precision(row.traders_percentage, precision: 0) : "-" %></td>
+                        <td class="numeric-cell"><%= row.cci_buy.present? ? number_with_precision(row.cci_buy, precision: 0) : "-" %></td>
+                        <td class="numeric-cell"><%= row.effective_cci_percentage.present? ? number_with_precision(row.effective_cci_percentage, precision: 0) : "-" %></td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                  <tfoot>
+                    <tr class="report-average-row">
+                      <td>Average</td>
+                      <td class="numeric-cell"><%= number_with_precision(avg_total_arr, precision: 0) %></td>
+                      <td class="numeric-cell"><%= number_with_precision(avg_traders_buy, precision: 0) %></td>
+                      <td class="numeric-cell"><%= number_with_precision(avg_traders_pct, precision: 0) %></td>
+                      <td class="numeric-cell"><%= number_with_precision(avg_cci_buy, precision: 0) %></td>
+                      <td class="numeric-cell"><%= number_with_precision(avg_cci_pct, precision: 0) %></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            <% else %>
+              <div class="empty-state compact-empty">No comparison rows.</div>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="overview-summary-band">
+          <div class="overview-summary-chip">
+            <span>Total Arrival Qty</span>
+            <strong><%= number_with_precision(total_arrival, precision: 2) %></strong>
+          </div>
+          <div class="overview-summary-chip">
+            <span>Average Min Price</span>
+            <strong><%= mandi_rows.any? ? number_with_precision(avg_min, precision: 2) : "-" %></strong>
+          </div>
+          <div class="overview-summary-chip">
+            <span>Average Max Price</span>
+            <strong><%= mandi_rows.any? ? number_with_precision(avg_max, precision: 2) : "-" %></strong>
+          </div>
+          <div class="overview-summary-chip">
+            <span>Average Modal Price</span>
+            <strong><%= mandi_rows.any? ? number_with_precision(avg_modal, precision: 2) : "-" %></strong>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="empty-state">Selected filters ke liye koi cotton overview data nahi mila.</div>
+  <% end %>
+</section>

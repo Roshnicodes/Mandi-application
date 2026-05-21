@@ -1,0 +1,122 @@
+<% content_for :title, "Arrival Summary" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Excel Summary</p>
+      <h1>Daily arrival summary</h1>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="table-title">Summary filters</h2>
+        <p class="table-subtitle">Choose state and date window to build the report sheet.</p>
+      </div>
+    </div>
+
+    <%= form_with url: daily_arrival_summaries_path, method: :get, class: "filters-form" do |form| %>
+      <div class="form-grid-three">
+        <div class="field-group">
+          <%= form.label :state_id, "State" %>
+          <%= form.collection_select :state_id, @states, :id, :name, { include_blank: "All states", selected: params[:state_id] } %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :from_date, "From date" %>
+          <%= form.date_field :from_date, value: params[:from_date] %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :to_date, "To date" %>
+          <%= form.date_field :to_date, value: params[:to_date] %>
+        </div>
+      </div>
+
+      <div class="inline-actions">
+        <%= form.submit "Generate Summary", class: "button button-primary" %>
+        <%= link_to "Reset", daily_arrival_summaries_path, class: "button button-ghost" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="summary-report-card">
+    <p class="eyebrow">Generated Title</p>
+    <h2 class="summary-report-title"><%= @report_title %></h2>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="stat-card">
+      <span class="stat-label">Grouped blocks</span>
+      <strong><%= @grouped_reports.size %></strong>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Visible rows</span>
+      <strong><%= @reports.size %></strong>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Arrival quantity total</span>
+      <strong><%= number_with_precision(@total_arrival_quantity, precision: 2) %></strong>
+    </div>
+  </div>
+
+  <% if @grouped_reports.any? %>
+    <% @grouped_reports.each do |district, reports| %>
+      <div class="table-card report-sheet-card">
+        <div class="sheet-header">
+          <div>
+            <p class="eyebrow">District Block</p>
+            <h2 class="table-title"><%= district.name %></h2>
+            <p class="table-subtitle">Grouped market rows for this district inside the selected summary window.</p>
+          </div>
+        </div>
+
+        <div class="data-table-wrapper">
+          <table class="report-grid-table">
+            <thead>
+              <tr>
+                <th>Created On</th>
+                <th>District</th>
+                <th>Market</th>
+                <th>Commodity Group</th>
+                <th>Commodity</th>
+                <th>Variety</th>
+                <th>Grade</th>
+                <th>Min Price</th>
+                <th>Max Price</th>
+                <th>Modal Price</th>
+                <th>Price Unit</th>
+                <th>Arrival Quantity</th>
+                <th>Arrival Unit</th>
+                <th>Arrival Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% reports.sort_by { |report| [report.market.name, -report.arrival_date.jd, -report.created_at.to_i] }.each do |report| %>
+                <tr>
+                  <td><%= report.created_at.strftime("%d %b %Y, %I:%M %p") %></td>
+                  <td><%= report.district.name %></td>
+                  <td><%= report.market.name %></td>
+                  <td><%= report.commodity_group.name %></td>
+                  <td><%= report.commodity.name %></td>
+                  <td><%= report.variety.name %></td>
+                  <td><%= report.grade.name %></td>
+                  <td class="numeric-cell"><%= number_with_precision(report.min_price, precision: 2) %></td>
+                  <td class="numeric-cell"><%= number_with_precision(report.max_price, precision: 2) %></td>
+                  <td class="numeric-cell"><%= number_with_precision(report.modal_price, precision: 2) %></td>
+                  <td><%= report.price_unit.short_name.presence || report.price_unit.name %></td>
+                  <td class="numeric-cell"><%= number_with_precision(report.arrival_quantity, precision: 2) %></td>
+                  <td><%= report.arrival_unit.short_name.presence || report.arrival_unit.name %></td>
+                  <td><%= report.arrival_date.strftime("%d-%m-%Y") %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="empty-state">Selected filters ke liye summary generate karne layak data abhi available nahi hai.</div>
+  <% end %>
+</section>

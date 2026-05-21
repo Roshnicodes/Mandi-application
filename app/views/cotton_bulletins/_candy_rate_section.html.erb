@@ -1,0 +1,54 @@
+<div class="table-card report-sheet-card">
+  <div class="sheet-header">
+    <div>
+      <p class="eyebrow">Smart Info</p>
+      <h2 class="table-title"><%= title %></h2>
+      <p class="table-subtitle">Parameter-wise candy rate entries for sheet comparison.</p>
+    </div>
+    <div class="inline-actions">
+      <%= link_to "Add Candy Rate", new_cotton_bulletin_candy_rate_path(bulletin, category: category), class: "button button-secondary" %>
+    </div>
+  </div>
+
+  <% if records.any? %>
+    <div class="data-table-wrapper">
+      <table class="report-grid-table">
+        <thead>
+          <tr>
+            <th>S. No</th>
+            <th>Parameter</th>
+            <th>Madhya Pradesh</th>
+            <th>Maharashtra 29 MM</th>
+            <th>Maharashtra 31 MM</th>
+            <th>Odisha 29 MM</th>
+            <th>Odisha 30 MM</th>
+            <th>Reference</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% records.each_with_index do |record, index| %>
+            <tr>
+              <td><%= record.position.presence || index + 1 %></td>
+              <td><%= record.parameter %></td>
+              <td><%= record.madhya_pradesh_rate.presence || "-" %></td>
+              <td><%= record.maharashtra_29mm_rate.presence || "-" %></td>
+              <td><%= record.maharashtra_31mm_rate.presence || "-" %></td>
+              <td><%= record.odisha_29mm_rate.presence || "-" %></td>
+              <td><%= record.odisha_30mm_rate.presence || "-" %></td>
+              <td><%= record.reference.presence || "-" %></td>
+              <td>
+                <div class="inline-actions">
+                  <%= link_to "Edit", edit_cotton_bulletin_candy_rate_path(bulletin, record), class: "button button-secondary" %>
+                  <%= button_to "Delete", cotton_bulletin_candy_rate_path(bulletin, record), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="empty-state"><%= title %> section abhi empty hai.</div>
+  <% end %>
+</div>

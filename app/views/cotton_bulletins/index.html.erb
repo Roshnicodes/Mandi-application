@@ -1,0 +1,64 @@
+<% content_for :title, "Cotton Bulletins" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Cotton Reporting</p>
+      <h1>Daily cotton bulletins</h1>
+      <p class="muted-text">Create one bulletin per date or mandi focus, then fill mandi wise, gin wise, candy and comparison sections exactly like your Excel sheets.</p>
+    </div>
+    <div class="page-actions">
+      <%= link_to "Add Cotton Bulletin", new_cotton_bulletin_path, class: "button button-primary" %>
+    </div>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="stat-card">
+      <span class="stat-label">Total bulletins</span>
+      <strong><%= number_with_delimiter(@cotton_bulletins.count) %></strong>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Latest bulletin</span>
+      <strong><%= @cotton_bulletins.first&.report_date&.strftime("%d %b %Y") || "No data" %></strong>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <% if @cotton_bulletins.any? %>
+      <div class="data-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Report Date</th>
+              <th>Bulletin Title</th>
+              <th>Notes</th>
+              <th>Section Rows</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @cotton_bulletins.each do |bulletin| %>
+              <tr>
+                <td><%= bulletin.report_date.strftime("%d %b %Y") %></td>
+                <td><%= bulletin.title %></td>
+                <td><%= bulletin.notes.presence || "-" %></td>
+                <td class="numeric-cell">
+                  <%= bulletin.cotton_market_observations.count + bulletin.cotton_seed_rates.count + bulletin.candy_rates.count + bulletin.cotton_regional_comparisons.count + bulletin.cotton_call_performances.count %>
+                </td>
+                <td>
+                  <div class="inline-actions">
+                    <%= link_to "Open", cotton_bulletin_path(bulletin), class: "button button-primary" %>
+                    <%= link_to "Edit", edit_cotton_bulletin_path(bulletin), class: "button button-secondary" %>
+                    <%= button_to "Delete", cotton_bulletin_path(bulletin), method: :delete, class: "button button-danger", form: { data: { turbo_confirm: "Delete this cotton bulletin?" }, class: "button-to-inline" } %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">Abhi tak koi cotton bulletin create nahi hua hai.</div>
+    <% end %>
+  </div>
+</section>

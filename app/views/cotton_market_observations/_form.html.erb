@@ -1,0 +1,98 @@
+<%= render "shared/form_errors", record: cotton_market_observation %>
+
+<%= form_with model: [ cotton_bulletin, cotton_market_observation ], class: "form-layout", html: { autocomplete: "off" } do |form| %>
+  <div class="field-group">
+    <%= form.label :category, "Section category" %>
+    <%= form.select :category, CottonMarketObservation::CATEGORIES.map { |key, label| [ label, key ] }, { prompt: "Select section" } %>
+    <p class="field-note">`Mandi wise` aur `CCI` me min-max-modal bhariye. `Gin wise` aur `TDN` me moisture/arrival price. `Comparison sheet` me total arrival, traders buying, traders %, CCI buying aur CCI % bhariye.</p>
+  </div>
+
+  <div class="form-grid-three">
+    <div class="field-group">
+      <%= form.label :name, "Market / gin name" %>
+      <%= form.text_field :name %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :arrival_quantity, "Arrival quantity" %>
+      <%= form.number_field :arrival_quantity, step: :any %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :position, "Display order" %>
+      <%= form.number_field :position, step: 1 %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :observation_date, "Row date" %>
+      <%= form.date_field :observation_date %>
+      <p class="field-note">Comparison sheet aur historical cotton rows ke liye useful. Blank chhodoge to bulletin date use hogi.</p>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :minimum_price, "Minimum price" %>
+      <%= form.number_field :minimum_price, step: :any %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :maximum_price, "Maximum price" %>
+      <%= form.number_field :maximum_price, step: :any %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :modal_price, "Modal price" %>
+      <%= form.number_field :modal_price, step: :any %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :moisture, "Moisture" %>
+      <%= form.text_field :moisture %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :arrival_price, "Arrival price" %>
+      <%= form.text_field :arrival_price %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :total_arrival, "Total arrival" %>
+      <%= form.number_field :total_arrival, step: :any %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :traders_buy, "Traders buy" %>
+      <%= form.number_field :traders_buy, step: :any %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :traders_percentage, "Traders %" %>
+      <%= form.number_field :traders_percentage, step: :any %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :cci_buy, "CCI buy" %>
+      <%= form.number_field :cci_buy, step: :any %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :cci_percentage, "CCI %" %>
+      <%= form.number_field :cci_percentage, step: :any %>
+      <p class="field-note">Purana single percentage field bhi compatible rahega, lekin ab exact comparison format ke liye alag CCI % save hoga.</p>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :buy_percentage, "Legacy buy %" %>
+      <%= form.number_field :buy_percentage, step: :any %>
+    </div>
+  </div>
+
+  <div class="field-group">
+    <%= form.label :remarks, "Reference / remark" %>
+    <%= form.text_area :remarks %>
+  </div>
+
+  <div class="inline-actions">
+    <%= form.submit cotton_market_observation.persisted? ? "Update Observation" : "Save Observation", class: "button button-primary" %>
+    <%= link_to "Back", cotton_bulletin_path(cotton_bulletin), class: "button button-ghost" %>
+  </div>
+<% end %>

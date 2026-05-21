@@ -1,0 +1,15 @@
+<% content_for :title, "New Candy Rate" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Smart Info</p>
+      <h1>Add candy rate</h1>
+      <p class="muted-text">Add one row for MCH or DCH candy rate section.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <%= render "form", cotton_bulletin: @cotton_bulletin, candy_rate: @candy_rate %>
+  </div>
+</section>

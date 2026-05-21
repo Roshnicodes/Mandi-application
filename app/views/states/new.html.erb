@@ -1,0 +1,15 @@
+<% content_for :title, "New State" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Master Setup</p>
+      <h1>Create state</h1>
+      <p class="muted-text">Geography hierarchy ko sahi base se start kariye.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <%= render "form", state: @state %>
+  </div>
+</section>

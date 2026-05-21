@@ -1,0 +1,210 @@
+<% content_for :title, "Dashboard" %>
+
+<%
+  greeting_name = current_user.name.to_s.split.first.presence || "Team"
+  top_state_count = @state_summaries.values.max.to_i
+  top_state_count = 1 if top_state_count.zero?
+%>
+
+<section class="responsive-stack dashboard-shell">
+  <div class="dashboard-hero">
+    <div class="dashboard-hero-copy">
+      <p class="eyebrow">Control Center</p>
+      <h1>Mandi reporting at a glance</h1>
+      <p class="dashboard-lead">Welcome back, <%= greeting_name %>. Track arrivals, keep master data clean and move faster into daily mandi rate updates from one focused workspace.</p>
+
+      <div class="dashboard-pill-row">
+        <div class="dashboard-pill">
+          <span class="dashboard-pill-label">Latest reporting day</span>
+          <strong><%= @latest_report_date&.strftime("%d %b %Y") || "No data" %></strong>
+        </div>
+        <div class="dashboard-pill">
+          <span class="dashboard-pill-label">Commodities active</span>
+          <strong><%= number_with_delimiter(@commodities_covered) %></strong>
+        </div>
+        <div class="dashboard-pill">
+          <span class="dashboard-pill-label">States reporting</span>
+          <strong><%= number_with_delimiter(@state_summaries.size) %></strong>
+        </div>
+      </div>
+
+      <div class="page-actions dashboard-actions">
+        <%= link_to "Add Daily Report", new_daily_price_arrival_report_path, class: "button button-primary" %>
+        <%= link_to "Manage Markets", markets_path, class: "button button-secondary" %>
+      </div>
+    </div>
+
+    <aside class="live-clock-card" data-live-clock data-timezone="Asia/Kolkata">
+      <div class="live-clock-face">
+        <span class="clock-orbit-line"></span>
+        <span class="clock-hover-sweep"></span>
+        <span class="clock-ring clock-ring-outer"></span>
+        <span class="clock-ring clock-ring-inner"></span>
+        <span class="clock-axis clock-axis-vertical"></span>
+        <span class="clock-axis clock-axis-horizontal"></span>
+        <span class="clock-number clock-number-12">12</span>
+        <span class="clock-number clock-number-3">3</span>
+        <span class="clock-number clock-number-6">6</span>
+        <span class="clock-number clock-number-9">9</span>
+        <span class="clock-hand clock-hand-hour" data-clock-hour></span>
+        <span class="clock-hand clock-hand-minute" data-clock-minute></span>
+        <span class="clock-hand clock-hand-second" data-clock-second></span>
+        <span class="clock-center-dot"></span>
+      </div>
+
+      <div class="live-clock-meta">
+        <span class="live-clock-badge">Live mandi watch</span>
+        <strong class="live-clock-time" data-clock-time>--:--:--</strong>
+        <span class="live-clock-date" data-clock-date>--</span>
+        <span class="live-clock-zone" data-clock-context>Asia/Kolkata</span>
+      </div>
+
+      <div class="live-clock-signal">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </aside>
+  </div>
+
+  <div class="dashboard-summary-grid">
+    <article class="stat-card dashboard-stat-card dashboard-stat-highlight">
+      <span class="dashboard-stat-kicker">Latest arrival date</span>
+      <strong><%= @latest_report_date&.strftime("%d %b %Y") || "No data" %></strong>
+      <p class="dashboard-stat-note">Most recent mandi reporting day captured in the system.</p>
+    </article>
+
+    <article class="stat-card dashboard-stat-card">
+      <span class="dashboard-stat-kicker">Total reports</span>
+      <strong><%= number_with_delimiter(@total_reports) %></strong>
+      <p class="dashboard-stat-note">All saved daily arrival and rate entries.</p>
+    </article>
+
+    <article class="stat-card dashboard-stat-card">
+      <span class="dashboard-stat-kicker">Markets covered</span>
+      <strong><%= number_with_delimiter(@markets_covered) %></strong>
+      <p class="dashboard-stat-note">Distinct mandis actively represented in reporting.</p>
+    </article>
+
+    <article class="stat-card dashboard-stat-card">
+      <span class="dashboard-stat-kicker">Commodities covered</span>
+      <strong><%= number_with_delimiter(@commodities_covered) %></strong>
+      <p class="dashboard-stat-note">Commodity lines currently flowing into rate records.</p>
+    </article>
+
+    <article class="stat-card dashboard-stat-card">
+      <span class="dashboard-stat-kicker">Arrival qty on latest date</span>
+      <strong><%= number_with_precision(@today_arrival_quantity, precision: 2, delimiter: ",") %></strong>
+      <p class="dashboard-stat-note">Latest reporting-day quantity received across markets.</p>
+    </article>
+  </div>
+
+  <div class="dashboard-content-grid">
+    <div class="table-card dashboard-table-card">
+      <div class="table-card-header">
+        <div>
+          <h2 class="table-title">Recent daily reports</h2>
+          <p class="table-subtitle">Latest prices from mandi-level market updates.</p>
+        </div>
+        <%= link_to "View all", daily_price_arrival_reports_path, class: "button button-ghost" %>
+      </div>
+
+      <% if @recent_reports.any? %>
+        <div class="data-table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Created On</th>
+                <th>Arrival Date</th>
+                <th>Market</th>
+                <th>Commodity</th>
+                <th>Grade</th>
+                <th>Modal Price</th>
+                <th>Arrival Qty</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @recent_reports.each do |report| %>
+                <tr>
+                  <td><%= report.created_at.strftime("%d %b %Y, %I:%M %p") %></td>
+                  <td><%= report.arrival_date.strftime("%d %b %Y") %></td>
+                  <td><%= report.market.name %></td>
+                  <td><%= report.commodity.name %></td>
+                  <td><%= report.grade.name %></td>
+                  <td class="numeric-cell"><%= number_to_currency(report.modal_price, unit: "", precision: 2) %> <%= report.price_unit.short_name.presence || report.price_unit.name %></td>
+                  <td class="numeric-cell"><%= number_with_precision(report.arrival_quantity, precision: 2) %> <%= report.arrival_unit.short_name.presence || report.arrival_unit.name %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="empty-state">
+          Daily report abhi add nahi hua hai. Pehla market update create karke dashboard ko live data se fill kariye.
+        </div>
+      <% end %>
+    </div>
+
+    <div class="dashboard-side-stack">
+      <div class="card dashboard-coverage-card">
+        <div class="card-header">
+          <div>
+            <h2 class="table-title">State coverage</h2>
+            <p class="table-subtitle">Top states by number of saved reports.</p>
+          </div>
+        </div>
+
+        <% if @state_summaries.any? %>
+          <div class="coverage-list">
+            <% @state_summaries.each do |state_name, count| %>
+              <div class="coverage-row">
+                <div class="coverage-row-header">
+                  <span><%= state_name %></span>
+                  <strong><%= count %></strong>
+                </div>
+                <div class="coverage-bar">
+                  <span style="width: <%= [((count.to_f / top_state_count) * 100).round(1), 12].max %>%"></span>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="empty-state">
+            State coverage yahan tab dikhna shuru hoga jab reports save honge.
+          </div>
+        <% end %>
+      </div>
+
+      <div class="card dashboard-quick-card">
+        <div class="card-header">
+          <div>
+            <h2 class="table-title">Quick workflow</h2>
+            <p class="table-subtitle">Jump straight into the most-used mandi tasks.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-shortcuts">
+          <%= link_to new_daily_price_arrival_report_path, class: "dashboard-shortcut" do %>
+            <strong>Add today&apos;s report</strong>
+            <span>Capture min, max, modal and arrival quantity in one flow.</span>
+          <% end %>
+
+          <%= link_to daily_arrival_summaries_path, class: "dashboard-shortcut" do %>
+            <strong>Build arrival summary</strong>
+            <span>Generate grouped district-wise report blocks .</span>
+          <% end %>
+
+          <%= link_to cotton_bulletins_path, class: "dashboard-shortcut" do %>
+            <strong>Open cotton bulletins</strong>
+            <span>Fill mandi wise, gin wise, candy and comparison sections in one place.</span>
+          <% end %>
+
+          <%= link_to markets_path, class: "dashboard-shortcut" do %>
+            <strong>Review markets</strong>
+            <span>Check mandi and APMC masters before uploading new rates.</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

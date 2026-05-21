@@ -1,0 +1,54 @@
+<% content_for :title, "Commodity Master" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Master Setup</p>
+      <h1>Commodity master</h1>
+      <p class="muted-text">Maintain commodity list, organic flag and reporting group mapping.</p>
+    </div>
+    <div class="page-actions">
+      <%= link_to "Add Commodity", new_commodity_path, class: "button button-primary" %>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <% if @commodities.any? %>
+      <div class="data-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Commodity</th>
+              <th>Group</th>
+              <th>Type</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @commodities.each do |commodity| %>
+              <tr>
+                <td><%= commodity.name %></td>
+                <td><%= commodity.commodity_group.name %></td>
+                <td>
+                  <% if commodity.organic? %>
+                    <span class="badge badge-warning">Organic</span>
+                  <% else %>
+                    <span class="badge">Standard</span>
+                  <% end %>
+                </td>
+                <td>
+                  <div class="inline-actions">
+                    <%= link_to "Edit", edit_commodity_path(commodity), class: "button button-secondary" %>
+                    <%= button_to "Delete", commodity_path(commodity), method: :delete, class: "button button-danger", form: { data: { turbo_confirm: "Delete this commodity?" }, class: "button-to-inline" } %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">Abhi tak koi commodity master create nahi hua hai.</div>
+    <% end %>
+  </div>
+</section>

@@ -1,0 +1,15 @@
+<% content_for :title, "Edit Call Performance" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Call Sheet</p>
+      <h1>Edit call performance row</h1>
+      <p class="muted-text">Update totals and satisfaction numbers for this bulletin.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <%= render "form", cotton_bulletin: @cotton_bulletin, cotton_call_performance: @cotton_call_performance %>
+  </div>
+</section>

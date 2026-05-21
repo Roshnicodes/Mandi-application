@@ -1,0 +1,48 @@
+<% content_for :title, "Variety Master" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Master Setup</p>
+      <h1>Variety master</h1>
+      <p class="muted-text">Commodity ke andar varieties maintain kariye for more precise market entries.</p>
+    </div>
+    <div class="page-actions">
+      <%= link_to "Add Variety", new_variety_path, class: "button button-primary" %>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <% if @varieties.any? %>
+      <div class="data-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Variety</th>
+              <th>Commodity</th>
+              <th>Group</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @varieties.each do |variety| %>
+              <tr>
+                <td><%= variety.name %></td>
+                <td><%= variety.commodity.name %></td>
+                <td><%= variety.commodity.commodity_group.name %></td>
+                <td>
+                  <div class="inline-actions">
+                    <%= link_to "Edit", edit_variety_path(variety), class: "button button-secondary" %>
+                    <%= button_to "Delete", variety_path(variety), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">Abhi tak varieties create nahi hui hain.</div>
+    <% end %>
+  </div>
+</section>

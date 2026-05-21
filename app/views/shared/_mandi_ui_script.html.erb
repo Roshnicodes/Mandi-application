@@ -1,0 +1,298 @@
+<script>
+  const parsePayload = (element, key) => {
+    const raw = element?.dataset?.[key];
+    if (!raw) return [];
+
+    try {
+      return JSON.parse(raw);
+    } catch (_error) {
+      return [];
+    }
+  };
+
+  const renderSelectOptions = (select, items, placeholder, selectedValue = null) => {
+    if (!select) return;
+
+    const currentValue = selectedValue ?? select.dataset.selected ?? select.value;
+    select.innerHTML = "";
+
+    const placeholderOption = document.createElement("option");
+    placeholderOption.value = "";
+    placeholderOption.textContent = placeholder;
+    select.appendChild(placeholderOption);
+
+    items.forEach((item) => {
+      const option = document.createElement("option");
+      option.value = item.id;
+      option.textContent = item.label || item.name;
+      option.selected = String(item.id) === String(currentValue);
+      select.appendChild(option);
+    });
+  };
+
+  const setupMarketForm = () => {
+    document.querySelectorAll("[data-market-form]").forEach((root) => {
+      const stateSelect = root.querySelector("[data-state-select]");
+      const districtSelect = root.querySelector("[data-district-select]");
+      const districts = parsePayload(root, "districts");
+
+      const refreshDistricts = () => {
+        const selectedStateId = stateSelect?.value;
+        const filteredDistricts = selectedStateId ? districts.filter((district) => String(district.state_id) === String(selectedStateId)) : districts;
+        renderSelectOptions(districtSelect, filteredDistricts, "Select district");
+      };
+
+      stateSelect?.addEventListener("change", refreshDistricts);
+      refreshDistricts();
+    });
+  };
+
+  const setupGradeForm = () => {
+    document.querySelectorAll("[data-grade-form]").forEach((root) => {
+      const commoditySelect = root.querySelector("[data-commodity-select]");
+      const varietySelect = root.querySelector("[data-variety-select]");
+      const varieties = parsePayload(root, "varieties");
+
+      const refreshVarieties = () => {
+        const selectedCommodityId = commoditySelect?.value;
+        const filteredVarieties = selectedCommodityId ? varieties.filter((variety) => String(variety.commodity_id) === String(selectedCommodityId)) : varieties;
+        renderSelectOptions(varietySelect, filteredVarieties, "Optional variety");
+      };
+
+      commoditySelect?.addEventListener("change", refreshVarieties);
+      refreshVarieties();
+    });
+  };
+
+  const setupReportForm = () => {
+    document.querySelectorAll("[data-report-form]").forEach((root) => {
+      const stateSelect = root.querySelector("[data-state-select]");
+      const districtSelect = root.querySelector("[data-district-select]");
+      const marketSelect = root.querySelector("[data-market-select]");
+      const groupSelect = root.querySelector("[data-commodity-group-select]");
+      const commoditySelect = root.querySelector("[data-commodity-select]");
+      const varietySelect = root.querySelector("[data-variety-select]");
+      const gradeSelect = root.querySelector("[data-grade-select]");
+
+      const districts = parsePayload(root, "districts");
+      const markets = parsePayload(root, "markets");
+      const commodities = parsePayload(root, "commodities");
+      const varieties = parsePayload(root, "varieties");
+      const grades = parsePayload(root, "grades");
+
+      const refreshDistricts = () => {
+        const selectedStateId = stateSelect?.value;
+        const filteredDistricts = selectedStateId ? districts.filter((district) => String(district.state_id) === String(selectedStateId)) : districts;
+        renderSelectOptions(districtSelect, filteredDistricts, "Select district");
+        refreshMarkets();
+      };
+
+      const refreshMarkets = () => {
+        const selectedDistrictId = districtSelect?.value;
+        const filteredMarkets = selectedDistrictId ? markets.filter((market) => String(market.district_id) === String(selectedDistrictId)) : markets;
+        renderSelectOptions(marketSelect, filteredMarkets, "Select market");
+      };
+
+      const refreshCommodities = () => {
+        const selectedGroupId = groupSelect?.value;
+        const filteredCommodities = selectedGroupId ? commodities.filter((commodity) => String(commodity.commodity_group_id) === String(selectedGroupId)) : commodities;
+        renderSelectOptions(commoditySelect, filteredCommodities, "Select commodity");
+        refreshVarieties();
+      };
+
+      const refreshVarieties = () => {
+        const selectedCommodityId = commoditySelect?.value;
+        const filteredVarieties = selectedCommodityId ? varieties.filter((variety) => String(variety.commodity_id) === String(selectedCommodityId)) : varieties;
+        renderSelectOptions(varietySelect, filteredVarieties, "Select variety");
+        refreshGrades();
+      };
+
+      const refreshGrades = () => {
+        const selectedCommodityId = commoditySelect?.value;
+        const selectedVarietyId = varietySelect?.value;
+        const filteredGrades = grades.filter((grade) => {
+          const commodityMatches = selectedCommodityId ? String(grade.commodity_id) === String(selectedCommodityId) : true;
+          const varietyMatches = !grade.variety_id || !selectedVarietyId || String(grade.variety_id) === String(selectedVarietyId);
+          return commodityMatches && varietyMatches;
+        });
+        renderSelectOptions(gradeSelect, filteredGrades, "Select grade");
+      };
+
+      stateSelect?.addEventListener("change", refreshDistricts);
+      districtSelect?.addEventListener("change", refreshMarkets);
+      groupSelect?.addEventListener("change", refreshCommodities);
+      commoditySelect?.addEventListener("change", refreshVarieties);
+      varietySelect?.addEventListener("change", refreshGrades);
+
+      refreshDistricts();
+      refreshCommodities();
+    });
+  };
+
+  const setupDeleteConfirm = () => {
+    document.querySelectorAll("form.button-to-inline").forEach((form) => {
+      if (form.dataset.confirmBound === "true") return;
+
+      form.dataset.confirmBound = "true";
+      form.addEventListener("submit", (event) => {
+        if (!window.confirm("Are you sure you want to delete this record?")) {
+          event.preventDefault();
+        }
+      });
+    });
+  };
+
+  const setupResponsiveSidebar = () => {
+    const sidebar = document.querySelector("[data-app-sidebar]");
+    const overlay = document.querySelector("[data-sidebar-overlay]");
+    const toggleButtons = document.querySelectorAll("[data-sidebar-toggle]");
+    const closeButtons = document.querySelectorAll("[data-sidebar-close]");
+    const navLinks = document.querySelectorAll(".sidebar .nav-link");
+
+    if (!sidebar || !overlay || toggleButtons.length === 0) return;
+
+    const setExpanded = (expanded) => {
+      toggleButtons.forEach((button) => button.setAttribute("aria-expanded", expanded ? "true" : "false"));
+    };
+
+    const closeSidebar = () => {
+      document.body.classList.remove("sidebar-open");
+      setExpanded(false);
+    };
+
+    const openSidebar = () => {
+      document.body.classList.add("sidebar-open");
+      setExpanded(true);
+    };
+
+    toggleButtons.forEach((button) => {
+      if (button.dataset.sidebarBound === "true") return;
+
+      button.dataset.sidebarBound = "true";
+      button.addEventListener("click", () => {
+        if (document.body.classList.contains("sidebar-open")) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
+      });
+    });
+
+    closeButtons.forEach((button) => {
+      if (button.dataset.sidebarBound === "true") return;
+
+      button.dataset.sidebarBound = "true";
+      button.addEventListener("click", closeSidebar);
+    });
+
+    if (overlay.dataset.sidebarBound !== "true") {
+      overlay.dataset.sidebarBound = "true";
+      overlay.addEventListener("click", closeSidebar);
+    }
+
+    navLinks.forEach((link) => {
+      if (link.dataset.sidebarBound === "true") return;
+
+      link.dataset.sidebarBound = "true";
+      link.addEventListener("click", () => {
+        if (window.innerWidth <= 980) closeSidebar();
+      });
+    });
+
+    if (window.innerWidth > 980) closeSidebar();
+  };
+
+  const clearLiveClockTimers = () => {
+    window.mandiClockTimers = window.mandiClockTimers || [];
+    window.mandiClockTimers.forEach((timer) => window.clearInterval(timer));
+    window.mandiClockTimers = [];
+    document.body.classList.remove("sidebar-open");
+  };
+
+  const setupLiveClock = () => {
+    clearLiveClockTimers();
+
+    document.querySelectorAll("[data-live-clock]").forEach((root) => {
+      const timeZone = root.dataset.timezone || "Asia/Kolkata";
+      const timeNode = root.querySelector("[data-clock-time]");
+      const dateNode = root.querySelector("[data-clock-date]");
+      const contextNode = root.querySelector("[data-clock-context]");
+      const hourHand = root.querySelector("[data-clock-hour]");
+      const minuteHand = root.querySelector("[data-clock-minute]");
+      const secondHand = root.querySelector("[data-clock-second]");
+
+      const timeFormatter = new Intl.DateTimeFormat("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+        timeZone
+      });
+
+      const dateFormatter = new Intl.DateTimeFormat("en-IN", {
+        weekday: "long",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        timeZone
+      });
+
+      const partsFormatter = new Intl.DateTimeFormat("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+        hourCycle: "h23",
+        timeZone
+      });
+
+      const updateClock = () => {
+        const now = new Date();
+        const parts = Object.fromEntries(
+          partsFormatter
+            .formatToParts(now)
+            .filter((part) => part.type !== "literal")
+            .map((part) => [part.type, part.value])
+        );
+
+        const hours = Number(parts.hour || 0);
+        const minutes = Number(parts.minute || 0);
+        const seconds = Number(parts.second || 0);
+
+        const hourAngle = ((hours % 12) + minutes / 60) * 30;
+        const minuteAngle = (minutes + seconds / 60) * 6;
+        const secondAngle = seconds * 6;
+
+        if (timeNode) timeNode.textContent = timeFormatter.format(now);
+        if (dateNode) dateNode.textContent = dateFormatter.format(now);
+
+        if (contextNode) {
+          contextNode.textContent =
+            hours < 12 ? "Fresh morning arrivals window" :
+            hours < 17 ? "Active mandi reporting hours" :
+            "Evening review and closing update";
+        }
+
+        if (hourHand) hourHand.style.transform = `translateX(-50%) rotate(${hourAngle}deg)`;
+        if (minuteHand) minuteHand.style.transform = `translateX(-50%) rotate(${minuteAngle}deg)`;
+        if (secondHand) secondHand.style.transform = `translateX(-50%) rotate(${secondAngle}deg)`;
+      };
+
+      updateClock();
+      window.mandiClockTimers.push(window.setInterval(updateClock, 1000));
+    });
+  };
+
+  const bootMandiUi = () => {
+    setupMarketForm();
+    setupGradeForm();
+    setupReportForm();
+    setupDeleteConfirm();
+    setupResponsiveSidebar();
+    setupLiveClock();
+  };
+
+  document.addEventListener("DOMContentLoaded", bootMandiUi);
+  document.addEventListener("turbo:load", bootMandiUi);
+  document.addEventListener("turbo:before-cache", clearLiveClockTimers);
+</script>

@@ -1,0 +1,46 @@
+<% content_for :title, "Commodity Group Master" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Master Setup</p>
+      <h1>Commodity group master</h1>
+      <p class="muted-text">Organize commodities into reporting-friendly clusters like Pulses, Cotton or Organic Cotton.</p>
+    </div>
+    <div class="page-actions">
+      <%= link_to "Add Group", new_commodity_group_path, class: "button button-primary" %>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <% if @commodity_groups.any? %>
+      <div class="data-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @commodity_groups.each do |group| %>
+              <tr>
+                <td><%= group.name %></td>
+                <td><%= group.description.presence || "-" %></td>
+                <td>
+                  <div class="inline-actions">
+                    <%= link_to "Edit", edit_commodity_group_path(group), class: "button button-secondary" %>
+                    <%= button_to "Delete", commodity_group_path(group), method: :delete, class: "button button-danger", form: { data: { turbo_confirm: "Delete this commodity group?" }, class: "button-to-inline" } %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">Abhi tak commodity groups create nahi hue hain.</div>
+    <% end %>
+  </div>
+</section>

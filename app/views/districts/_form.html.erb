@@ -1,0 +1,20 @@
+<%= render "shared/form_errors", record: district %>
+
+<%= form_with model: district, class: "form-layout", html: { autocomplete: "off" } do |form| %>
+  <div class="form-grid">
+    <div class="field-group">
+      <%= form.label :state_id, "State" %>
+      <%= form.collection_select :state_id, @states, :id, :name, { prompt: "Select state" } %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :name, "District name" %>
+      <%= form.text_field :name %>
+    </div>
+  </div>
+
+  <div class="inline-actions">
+    <%= form.submit district.persisted? ? "Update District" : "Create District", class: "button button-primary" %>
+    <%= link_to "Back", districts_path, class: "button button-ghost" %>
+  </div>
+<% end %>

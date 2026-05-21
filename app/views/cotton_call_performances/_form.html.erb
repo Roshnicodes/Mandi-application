@@ -1,0 +1,45 @@
+<%= render "shared/form_errors", record: cotton_call_performance %>
+
+<%= form_with model: [ cotton_bulletin, cotton_call_performance ], class: "form-layout", html: { autocomplete: "off" } do |form| %>
+  <div class="form-grid-three">
+    <div class="field-group">
+      <%= form.label :total_calls, "Total calls" %>
+      <%= form.number_field :total_calls, step: 1 %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :fully_satisfied, "Fully satisfied" %>
+      <%= form.number_field :fully_satisfied, step: 1 %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :call_again, "Call again" %>
+      <%= form.number_field :call_again, step: 1 %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :wrong_call, "Wrong call" %>
+      <%= form.number_field :wrong_call, step: 1 %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :invalid_exist, "Invalid / exist" %>
+      <%= form.number_field :invalid_exist, step: 1 %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :satisfaction_percent, "Satisfaction %" %>
+      <%= form.number_field :satisfaction_percent, step: :any %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :position, "Display order" %>
+      <%= form.number_field :position, step: 1 %>
+    </div>
+  </div>
+
+  <div class="inline-actions">
+    <%= form.submit cotton_call_performance.persisted? ? "Update Call Row" : "Save Call Row", class: "button button-primary" %>
+    <%= link_to "Back", cotton_bulletin_path(cotton_bulletin), class: "button button-ghost" %>
+  </div>
+<% end %>

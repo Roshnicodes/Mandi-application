@@ -1,0 +1,27 @@
+<%= render "shared/form_errors", record: market %>
+
+<div data-market-form data-districts="<%= json_escape(@districts_data.to_json) %>">
+  <%= form_with model: market, class: "form-layout", html: { autocomplete: "off" } do |form| %>
+    <div class="form-grid">
+      <div class="field-group">
+        <label for="selected_state_id">State</label>
+        <%= select_tag :selected_state_id, options_from_collection_for_select(@states, :id, :name, @selected_state_id), include_blank: "Select state", data: { state_select: true } %>
+      </div>
+
+      <div class="field-group">
+        <%= form.label :district_id, "District" %>
+        <%= form.collection_select :district_id, District.none, :id, :name, { prompt: "Select district" }, { data: { district_select: true } } %>
+      </div>
+
+      <div class="field-group">
+        <%= form.label :name, "Market / APMC name" %>
+        <%= form.text_field :name %>
+      </div>
+    </div>
+
+    <div class="inline-actions">
+      <%= form.submit market.persisted? ? "Update Market" : "Create Market", class: "button button-primary" %>
+      <%= link_to "Back", markets_path, class: "button button-ghost" %>
+    </div>
+  <% end %>
+</div>

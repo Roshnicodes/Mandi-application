@@ -1,0 +1,15 @@
+<% content_for :title, "New Daily Report" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Report Entry</p>
+      <h1>Add daily price arrival report</h1>
+      <p class="muted-text">Sheet-style mandi data ko structured form me save kariye.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <%= render "form", daily_price_arrival_report: @daily_price_arrival_report %>
+  </div>
+</section>

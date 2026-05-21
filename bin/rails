@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+if ARGV.first == "server"
+  load_path_cache = File.expand_path("../tmp/cache/bootsnap/load-path-cache", __dir__)
+  File.delete(load_path_cache) if File.exist?(load_path_cache)
+end
+
+APP_PATH = File.expand_path("../config/application", __dir__)
+require_relative "../config/boot"
+require "rails/commands"

@@ -1,0 +1,15 @@
+<% content_for :title, "New Grade" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Master Setup</p>
+      <h1>Create grade</h1>
+      <p class="muted-text">Commodity-wise grade setup se form entry aur reports dono accurate hote hain.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <%= render "form", grade: @grade %>
+  </div>
+</section>

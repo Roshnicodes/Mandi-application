@@ -1,0 +1,15 @@
+<% content_for :title, "Edit Cotton Seed Rate" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Smart Info</p>
+      <h1>Edit cotton seed rate</h1>
+      <p class="muted-text">Update the smart info row for this bulletin.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <%= render "form", cotton_bulletin: @cotton_bulletin, cotton_seed_rate: @cotton_seed_rate %>
+  </div>
+</section>

@@ -1,0 +1,15 @@
+<% content_for :title, "New Cotton Bulletin" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Cotton Reporting</p>
+      <h1>Create cotton bulletin</h1>
+      <p class="muted-text">Start one sheet container for a specific day, mandi focus or cotton rate pack.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <%= render "form", cotton_bulletin: @cotton_bulletin %>
+  </div>
+</section>

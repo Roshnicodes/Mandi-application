@@ -1,0 +1,18 @@
+<%= render "shared/form_errors", record: commodity_group %>
+
+<%= form_with model: commodity_group, class: "form-layout", html: { autocomplete: "off" } do |form| %>
+  <div class="field-group">
+    <%= form.label :name, "Commodity group name" %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div class="field-group">
+    <%= form.label :description, "Description" %>
+    <%= form.text_area :description %>
+  </div>
+
+  <div class="inline-actions">
+    <%= form.submit commodity_group.persisted? ? "Update Group" : "Create Group", class: "button button-primary" %>
+    <%= link_to "Back", commodity_groups_path, class: "button button-ghost" %>
+  </div>
+<% end %>

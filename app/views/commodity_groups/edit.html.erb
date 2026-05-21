@@ -1,0 +1,15 @@
+<% content_for :title, "Edit Commodity Group" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Master Setup</p>
+      <h1>Edit commodity group</h1>
+      <p class="muted-text">Group naming ko report semantics ke hisaab se update kariye.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <%= render "form", commodity_group: @commodity_group %>
+  </div>
+</section>

@@ -1,0 +1,15 @@
+<% content_for :title, "Edit Regional Comparison" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Comparison Matrix</p>
+      <h1>Edit regional comparison line</h1>
+      <p class="muted-text">Update the matrix row for this cotton bulletin.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <%= render "form", cotton_bulletin: @cotton_bulletin, cotton_regional_comparison: @cotton_regional_comparison %>
+  </div>
+</section>

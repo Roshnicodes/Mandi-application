@@ -1,0 +1,48 @@
+<% content_for :title, "Market Master" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Master Setup</p>
+      <h1>Market / APMC master</h1>
+      <p class="muted-text">Maintain mandi locations with proper district and state linkage.</p>
+    </div>
+    <div class="page-actions">
+      <%= link_to "Add Market", new_market_path, class: "button button-primary" %>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <% if @markets.any? %>
+      <div class="data-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Market</th>
+              <th>District</th>
+              <th>State</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @markets.each do |market| %>
+              <tr>
+                <td><%= market.name %></td>
+                <td><%= market.district.name %></td>
+                <td><%= market.district.state.name %></td>
+                <td>
+                  <div class="inline-actions">
+                    <%= link_to "Edit", edit_market_path(market), class: "button button-secondary" %>
+                    <%= button_to "Delete", market_path(market), method: :delete, class: "button button-danger", form: { data: { turbo_confirm: "Delete this market?" }, class: "button-to-inline" } %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">Abhi tak koi market or APMC create nahi hua hai.</div>
+    <% end %>
+  </div>
+</section>

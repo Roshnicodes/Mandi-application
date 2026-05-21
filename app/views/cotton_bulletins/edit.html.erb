@@ -1,0 +1,15 @@
+<% content_for :title, "Edit Cotton Bulletin" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Cotton Reporting</p>
+      <h1>Edit cotton bulletin</h1>
+      <p class="muted-text">Adjust the sheet heading, date or notes before continuing with section entries.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <%= render "form", cotton_bulletin: @cotton_bulletin %>
+  </div>
+</section>

@@ -1,0 +1,27 @@
+<%= render "shared/form_errors", record: grade %>
+
+<div data-grade-form data-varieties="<%= json_escape(@varieties_data.to_json) %>">
+  <%= form_with model: grade, class: "form-layout", html: { autocomplete: "off" } do |form| %>
+    <div class="form-grid">
+      <div class="field-group">
+        <%= form.label :commodity_id, "Commodity" %>
+        <%= form.collection_select :commodity_id, @commodities, :id, :name, { prompt: "Select commodity" }, { data: { commodity_select: true } } %>
+      </div>
+
+      <div class="field-group">
+        <%= form.label :variety_id, "Variety" %>
+        <%= form.collection_select :variety_id, Variety.none, :id, :name, { prompt: "Optional variety" }, { data: { variety_select: true } } %>
+      </div>
+
+      <div class="field-group">
+        <%= form.label :name, "Grade name" %>
+        <%= form.text_field :name %>
+      </div>
+    </div>
+
+    <div class="inline-actions">
+      <%= form.submit grade.persisted? ? "Update Grade" : "Create Grade", class: "button button-primary" %>
+      <%= link_to "Back", grades_path, class: "button button-ghost" %>
+    </div>
+  <% end %>
+</div>

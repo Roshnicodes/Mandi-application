@@ -1,0 +1,50 @@
+<div class="table-card report-sheet-card">
+  <div class="sheet-header">
+    <div>
+      <p class="eyebrow">Smart Info</p>
+      <h2 class="table-title">Cotton seed rate</h2>
+      <p class="table-subtitle">Particular-wise MP, Odisha aur Maharashtra rates yahan store kariye.</p>
+    </div>
+    <div class="inline-actions">
+      <%= link_to "Add Seed Rate", new_cotton_bulletin_cotton_seed_rate_path(bulletin), class: "button button-secondary" %>
+    </div>
+  </div>
+
+  <% if records.any? %>
+    <div class="data-table-wrapper">
+      <table class="report-grid-table">
+        <thead>
+          <tr>
+            <th>S. No</th>
+            <th>Particular</th>
+            <th>Madhya Pradesh</th>
+            <th>Odisha</th>
+            <th>Maharashtra</th>
+            <th>Reference</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% records.each_with_index do |record, index| %>
+            <tr>
+              <td><%= record.position.presence || index + 1 %></td>
+              <td><%= record.particular %></td>
+              <td><%= record.madhya_pradesh_rate.presence || "-" %></td>
+              <td><%= record.odisha_rate.presence || "-" %></td>
+              <td><%= record.maharashtra_rate.presence || "-" %></td>
+              <td><%= record.reference.presence || "-" %></td>
+              <td>
+                <div class="inline-actions">
+                  <%= link_to "Edit", edit_cotton_bulletin_cotton_seed_rate_path(bulletin, record), class: "button button-secondary" %>
+                  <%= button_to "Delete", cotton_bulletin_cotton_seed_rate_path(bulletin, record), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="empty-state">Cotton seed rate section abhi empty hai.</div>
+  <% end %>
+</div>

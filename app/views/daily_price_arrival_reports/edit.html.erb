@@ -1,0 +1,15 @@
+<% content_for :title, "Edit Daily Report" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Report Entry</p>
+      <h1>Edit daily price arrival report</h1>
+      <p class="muted-text">Saved mandi entry ko update karke actual market position reflect kariye.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <%= render "form", daily_price_arrival_report: @daily_price_arrival_report %>
+  </div>
+</section>

@@ -1,0 +1,58 @@
+<% content_for :title, @cotton_bulletin.title %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Cotton Sheet Builder</p>
+      <h1><%= @cotton_bulletin.title %></h1>
+      <p class="muted-text">
+        Report date: <strong><%= @cotton_bulletin.report_date.strftime("%d %b %Y") %></strong>
+        <% if @cotton_bulletin.notes.present? %>
+          · <%= @cotton_bulletin.notes %>
+        <% end %>
+      </p>
+    </div>
+    <div class="page-actions">
+      <%= link_to "Edit Bulletin", edit_cotton_bulletin_path(@cotton_bulletin), class: "button button-secondary" %>
+      <%= link_to "Back to Bulletins", cotton_bulletins_path, class: "button button-ghost" %>
+    </div>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="stat-card">
+      <span class="stat-label">Observation rows</span>
+      <strong><%= @cotton_bulletin.cotton_market_observations.count %></strong>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Candy + seed rows</span>
+      <strong><%= @cotton_bulletin.cotton_seed_rates.count + @cotton_bulletin.candy_rates.count %></strong>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Comparison rows</span>
+      <strong><%= @cotton_bulletin.cotton_regional_comparisons.count + @cotton_bulletin.cotton_call_performances.count %></strong>
+    </div>
+  </div>
+
+  <div class="report-sheet-grid report-sheet-grid-two">
+    <%= render "observation_section", bulletin: @cotton_bulletin, records: @mandi_observations, category: "mandi_wise", title: "Raw Cotton Rate - Mandi Wise" %>
+    <%= render "observation_section", bulletin: @cotton_bulletin, records: @gin_observations, category: "gin_wise", title: "Raw Cotton Rate - Gin Wise" %>
+  </div>
+
+  <div class="report-sheet-grid report-sheet-grid-three">
+    <%= render "observation_section", bulletin: @cotton_bulletin, records: @cci_observations, category: "cci_mandi", title: "CCI Mandi Rates" %>
+    <%= render "observation_section", bulletin: @cotton_bulletin, records: @tdn_observations, category: "tdn_moisture", title: "TDN Rates With Moisture" %>
+    <%= render "observation_section", bulletin: @cotton_bulletin, records: @comparison_observations, category: "comparison_sheet", title: "Comparison Sheet (In Qtl)" %>
+  </div>
+
+  <div class="report-sheet-grid report-sheet-grid-two">
+    <%= render "seed_rate_section", bulletin: @cotton_bulletin, records: @seed_rates %>
+    <%= render "regional_comparison_section", bulletin: @cotton_bulletin, records: @regional_comparisons %>
+  </div>
+
+  <div class="report-sheet-grid report-sheet-grid-two">
+    <%= render "candy_rate_section", bulletin: @cotton_bulletin, records: @mch_rates, category: "mch", title: "Candy Rate (MCH)" %>
+    <%= render "candy_rate_section", bulletin: @cotton_bulletin, records: @dch_rates, category: "dch", title: "Candy Rate (DCH)" %>
+  </div>
+
+  <%= render "call_performance_section", bulletin: @cotton_bulletin, records: @call_performances %>
+</section>

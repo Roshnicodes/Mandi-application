@@ -1,0 +1,59 @@
+<% content_for :title, "Sign In" %>
+
+<%
+  gallery_columns = [
+    [
+      { image: "login_gallery/mandi-grains.png", label: "Grain arrivals" },
+      { image: "login_gallery/anaj-auction-floor.png", label: "Anaj auction floor" }
+    ],
+    [
+      { image: "login_gallery/mandi-cotton.png", label: "Cotton auction yard" },
+      { image: "login_gallery/mandi-pulses.png", label: "Pulse trading scene" }
+    ]
+  ]
+%>
+
+<section class="auth-grid">
+  <div class="auth-hero auth-hero-gallery">
+    <div class="gallery-badge">Live mandi gallery</div>
+
+    <div class="gallery-columns">
+      <% gallery_columns.each_with_index do |items, index| %>
+        <div class="gallery-column <%= index.even? ? "gallery-column-up" : "gallery-column-down" %>">
+          <div class="gallery-strip">
+            <% (items + items).each do |item| %>
+              <figure class="gallery-card">
+                <%= image_tag item[:image], alt: item[:label], loading: "lazy" %>
+                <figcaption><%= item[:label] %></figcaption>
+              </figure>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="auth-card">
+    <p class="eyebrow">Welcome Back</p>
+    <h2>Sign in to your mandi workspace</h2>
+    <p class="muted-text">Use your credentials to continue to the reporting dashboard.</p>
+
+    <%= form_with url: session_path, class: "auth-form" do |form| %>
+      <div class="field-group">
+        <%= form.label :email_address, "Email address" %>
+        <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", value: params[:email_address] %>
+      </div>
+
+      <div class="field-group">
+        <%= form.label :password, "Password" %>
+        <%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72 %>
+      </div>
+
+      <%= form.submit "Sign in to dashboard", class: "button button-primary button-block" %>
+    <% end %>
+
+    <div class="auth-footer">
+      <%= link_to "Forgot password?", new_password_path, class: "text-link" %>
+    </div>
+  </div>
+</section>

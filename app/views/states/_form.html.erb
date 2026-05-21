@@ -1,0 +1,13 @@
+<%= render "shared/form_errors", record: state %>
+
+<%= form_with model: state, class: "form-layout", html: { autocomplete: "off" } do |form| %>
+  <div class="field-group">
+    <%= form.label :name, "State name" %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div class="inline-actions">
+    <%= form.submit state.persisted? ? "Update State" : "Create State", class: "button button-primary" %>
+    <%= link_to "Back", states_path, class: "button button-ghost" %>
+  </div>
+<% end %>

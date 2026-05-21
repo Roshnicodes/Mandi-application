@@ -1,0 +1,30 @@
+<% content_for :title, "Reset Password" %>
+
+<section class="auth-grid auth-grid-compact">
+  <div class="auth-hero">
+    <p class="eyebrow">Password Assistance</p>
+    <h1>Reset access without losing your workspace.</h1>
+    <p class="auth-copy">
+      Reset instructions email address par bheje jayenge. Aap fir se secure login ke saath mandi dashboard access kar paayenge.
+    </p>
+  </div>
+
+  <div class="auth-card">
+    <p class="eyebrow">Forgot Password</p>
+    <h2>Request reset instructions</h2>
+    <p class="muted-text">Enter the email address linked to your account.</p>
+
+    <%= form_with url: passwords_path, class: "auth-form" do |form| %>
+      <div class="field-group">
+        <%= form.label :email_address, "Email address" %>
+        <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", value: params[:email_address] %>
+      </div>
+
+      <%= form.submit "Send reset instructions", class: "button button-primary button-block" %>
+    <% end %>
+
+    <div class="auth-footer">
+      <%= link_to "Back to login", new_session_path, class: "text-link" %>
+    </div>
+  </div>
+</section>

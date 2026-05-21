@@ -1,0 +1,65 @@
+<%= render "shared/form_errors", record: cotton_regional_comparison %>
+
+<%= form_with model: [ cotton_bulletin, cotton_regional_comparison ], class: "form-layout", html: { autocomplete: "off" } do |form| %>
+  <div class="form-grid-three">
+    <div class="field-group">
+      <%= form.label :line_item, "Line item" %>
+      <%= form.text_field :line_item %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :raipur_value, "Raipur" %>
+      <%= form.text_field :raipur_value %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :ojhar_value, "Ojhar" %>
+      <%= form.text_field :ojhar_value %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :kukshi_value, "Kukshi" %>
+      <%= form.text_field :kukshi_value %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :pati_value, "Pati" %>
+      <%= form.text_field :pati_value %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :sausar_value, "Sausar" %>
+      <%= form.text_field :sausar_value %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :jobat_value, "Jobat" %>
+      <%= form.text_field :jobat_value %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :odisha_value, "Odisha" %>
+      <%= form.text_field :odisha_value %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :extra_value_one, "Extra value 1" %>
+      <%= form.text_field :extra_value_one %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :extra_value_two, "Extra value 2" %>
+      <%= form.text_field :extra_value_two %>
+    </div>
+
+    <div class="field-group">
+      <%= form.label :position, "Display order" %>
+      <%= form.number_field :position, step: 1 %>
+    </div>
+  </div>
+
+  <div class="inline-actions">
+    <%= form.submit cotton_regional_comparison.persisted? ? "Update Comparison Line" : "Save Comparison Line", class: "button button-primary" %>
+    <%= link_to "Back", cotton_bulletin_path(cotton_bulletin), class: "button button-ghost" %>
+  </div>
+<% end %>
