@@ -1,0 +1,247 @@
+<% content_for :title, "#{CottonMarketObservation::CATEGORIES.fetch(@category)} Grid" %>
+<% attachment_accept = ".csv,.pdf,.xls,.xlsx,.jpg,.jpeg,.png,.webp,.doc,.docx,.txt,.zip,image/*,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Cotton Sheet Builder</p>
+      <h1><%= CottonMarketObservation::CATEGORIES.fetch(@category) %> quick entry</h1>
+    </div>
+    <div class="page-actions">
+      <%= link_to "Back to Bulletin", cotton_bulletin_path(@cotton_bulletin, anchor: "observation-section-#{@category}"), class: "button button-ghost" %>
+    </div>
+  </div>
+
+  <% if @grid_errors.present? %>
+    <div class="form-errors">
+      <strong>Grid save errors</strong>
+      <ul>
+        <% @grid_errors.each do |error| %>
+          <li><%= error %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="table-card report-sheet-card" data-grid-scope>
+    <div class="sheet-header">
+      <div>
+        <p class="eyebrow">Excel Style Entry</p>
+        <h2 class="table-title"><%= CottonMarketObservation::CATEGORIES.fetch(@category) %></h2>
+      </div>
+    </div>
+
+    <div class="sheet-toolbar">
+      <div class="sheet-mandi-tabs">
+        <% @mandi_names.each do |mandi_name| %>
+          <%= link_to mandi_name, grid_cotton_bulletin_cotton_market_observations_path(@cotton_bulletin, category: @category, mandi: mandi_name), class: ["sheet-tab-link", ("is-active" if @mandi_filter == mandi_name)].compact.join(" ") %>
+        <% end %>
+      </div>
+
+      <div class="inline-actions">
+        <button
+          type="button"
+          class="button button-secondary button-compact"
+          data-grid-toggle="custom-observation-row"
+          aria-expanded="<%= @show_custom_row %>"
+        >
+          + New Mandi
+        </button>
+      </div>
+    </div>
+
+    <div class="data-table-wrapper">
+      <table class="report-grid-table sheet-entry-table">
+        <thead>
+          <tr>
+            <th>S. No</th>
+            <th>Mandi Name</th>
+            <th>Arrival Qty (In Qtl)</th>
+            <th>Minimum Price</th>
+            <th>Maximum Price</th>
+            <th>Modal Price</th>
+            <th>Reference / Remark</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="custom-observation-row" class="sheet-entry-inline-form-row <%= "is-open" if @show_custom_row %>" data-grid-row data-reset-on-open="<%= @custom_mandi_observation.errors.blank? %>" <%= "hidden" unless @show_custom_row %>>
+            <% custom_form_id = "custom_observation_form" %>
+            <td class="sheet-inline-flag-cell">
+              <%= form_with model: [@cotton_bulletin, @custom_mandi_observation], multipart: true, html: { id: custom_form_id, autocomplete: "off" } do |form| %>
+                <%= hidden_field_tag :return_to_grid, true %>
+                <%= form.hidden_field :category, value: @category %>
+              <% end %>
+              <span class="sheet-inline-flag">New</span>
+            </td>
+            <td>
+              <%= text_field_tag "cotton_market_observation[name]", @custom_mandi_observation.name, class: "sheet-entry-input", autocomplete: "off", form: custom_form_id, placeholder: "Mandi name" %>
+            </td>
+            <td>
+              <%= number_field_tag "cotton_market_observation[arrival_quantity]", @custom_mandi_observation.arrival_quantity, step: :any, class: "sheet-entry-input", autocomplete: "off", form: custom_form_id, placeholder: "Arrival qty" %>
+            </td>
+            <td>
+              <%= number_field_tag "cotton_market_observation[minimum_price]", @custom_mandi_observation.minimum_price, step: :any, class: "sheet-entry-input", autocomplete: "off", form: custom_form_id, placeholder: "Minimum" %>
+            </td>
+            <td>
+              <%= number_field_tag "cotton_market_observation[maximum_price]", @custom_mandi_observation.maximum_price, step: :any, class: "sheet-entry-input", autocomplete: "off", form: custom_form_id, placeholder: "Maximum" %>
+            </td>
+            <td>
+              <%= number_field_tag "cotton_market_observation[modal_price]", @custom_mandi_observation.modal_price, step: :any, class: "sheet-entry-input", autocomplete: "off", form: custom_form_id, placeholder: "Modal" %>
+            </td>
+            <td>
+              <%= text_field_tag "cotton_market_observation[remarks]", @custom_mandi_observation.remarks, class: "sheet-entry-input", autocomplete: "off", form: custom_form_id, placeholder: "Reference / remark" %>
+              <div class="sheet-inline-upload">
+                <%= file_field_tag "cotton_market_observation[attachments][]", multiple: true, accept: attachment_accept, class: "sheet-entry-file-input", form: custom_form_id %>
+              </div>
+            </td>
+            <td class="sheet-entry-action-cell">
+              <div class="sheet-inline-actions">
+                <%= submit_tag("Save", class: "button button-primary button-compact", form: custom_form_id) %>
+                <button type="button" class="button button-ghost button-icon" data-grid-toggle="custom-observation-row" aria-expanded="<%= @show_custom_row %>" title="Close new mandi row" aria-label="Close new mandi row">x</button>
+              </div>
+            </td>
+          </tr>
+
+          <% @grid_rows.each do |row| %>
+            <% row_open = @active_row_name == row.name || @active_row_index.to_s == row.grid_index.to_s %>
+            <% current_record = row.records.first %>
+            <% current_serial = 1 %>
+            <tr class="sheet-grid-summary-row">
+              <td><%= current_serial %></td>
+              <td class="sheet-entry-fixed">
+                <strong><%= row.name %></strong>
+                <% if current_record.present? %>
+                  <span class="sheet-inline-hint">Saved <%= l(current_record.created_at.in_time_zone, format: :long) %></span>
+                <% end %>
+                <% if row.custom? %>
+                  <span class="sheet-inline-hint">Custom mandi</span>
+                <% end %>
+              </td>
+              <td class="numeric-cell"><%= row.arrival_quantity.present? ? number_with_precision(row.arrival_quantity, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+              <td class="numeric-cell"><%= row.minimum_price.present? ? number_with_precision(row.minimum_price, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+              <td class="numeric-cell"><%= row.maximum_price.present? ? number_with_precision(row.maximum_price, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+              <td class="numeric-cell"><%= row.modal_price.present? ? number_with_precision(row.modal_price, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+              <td class="sheet-entry-fixed">
+                <%= row.remarks %>
+                <% if current_record&.attachments&.attached? %>
+                  <div class="attachment-list sheet-inline-attachments">
+                    <% current_record.attachments.each do |attachment| %>
+                      <%= link_to rails_blob_path(attachment, disposition: "attachment"), class: "attachment-chip sheet-inline-attachment-chip" do %>
+                        <strong><%= attachment.filename.to_s %></strong>
+                        <span><%= number_to_human_size(attachment.byte_size) %></span>
+                      <% end %>
+                    <% end %>
+                  </div>
+                <% end %>
+              </td>
+              <td class="sheet-entry-action-cell">
+                <% if current_record.present? %>
+                  <%= button_to "x", cotton_bulletin_cotton_market_observation_path(@cotton_bulletin, current_record), method: :delete, params: { return_to_grid: true, category: @category, mandi: row.name }, class: "button button-danger button-icon", title: "Remove latest record", form: { class: "button-to-inline" } %>
+                <% end %>
+              </td>
+            </tr>
+            <% previous_records = row.records.drop(1) %>
+            <% previous_records.each_with_index do |record, previous_index| %>
+              <tr class="sheet-entry-previous-row">
+                <td><%= previous_index + 2 %></td>
+                <td class="sheet-entry-fixed">
+                  <strong><%= row.name %></strong>
+                  <span class="sheet-inline-hint">Saved <%= l(record.created_at.in_time_zone, format: :long) %></span>
+                </td>
+                <td class="numeric-cell"><%= record.arrival_quantity.present? ? number_with_precision(record.arrival_quantity, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+                <td class="numeric-cell"><%= record.minimum_price.present? ? number_with_precision(record.minimum_price, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+                <td class="numeric-cell"><%= record.maximum_price.present? ? number_with_precision(record.maximum_price, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+                <td class="numeric-cell"><%= record.modal_price.present? ? number_with_precision(record.modal_price, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+                <td class="sheet-entry-fixed">
+                  <%= record.remarks.presence || row.remarks %>
+                  <% if record.attachments.attached? %>
+                    <div class="attachment-list sheet-inline-attachments">
+                      <% record.attachments.each do |attachment| %>
+                        <%= link_to rails_blob_path(attachment, disposition: "attachment"), class: "attachment-chip sheet-inline-attachment-chip" do %>
+                          <strong><%= attachment.filename.to_s %></strong>
+                          <span><%= number_to_human_size(attachment.byte_size) %></span>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </td>
+                <td class="sheet-entry-action-cell">
+                  <%= button_to "x", cotton_bulletin_cotton_market_observation_path(@cotton_bulletin, record), method: :delete, params: { return_to_grid: true, category: @category, mandi: row.name }, class: "button button-danger button-icon", title: "Remove saved record", form: { class: "button-to-inline" } %>
+                </td>
+              </tr>
+            <% end %>
+            <tr
+              id="observation-row-<%= row.grid_index %>"
+              class="sheet-entry-inline-form-row <%= "is-open" if row_open %>"
+              data-grid-row
+              data-reset-on-open="<%= params[:rows].blank? %>"
+              <%= "hidden" unless row_open %>
+            >
+              <% form_id = "observation_form_#{row.grid_index}" %>
+              <% submitted_row = params[:rows].respond_to?(:[]) ? (params[:rows][row.grid_index.to_s] || params[:rows][row.grid_index]) : {} %>
+              <td class="sheet-inline-flag-cell">
+                <%= form_with url: save_grid_cotton_bulletin_cotton_market_observations_path(@cotton_bulletin, category: @category), method: :patch, multipart: true, html: { id: form_id, autocomplete: "off" } do %>
+                  <%= hidden_field_tag :active_row_index, row.grid_index %>
+                  <%= hidden_field_tag :mandi, @mandi_filter if @mandi_filter.present? %>
+                <% end %>
+                <span class="sheet-inline-flag"><%= row.records.size + 1 %></span>
+              </td>
+              <td class="sheet-entry-fixed">
+                <strong><%= row.name %></strong>
+                <span class="sheet-inline-hint">Add one more entry</span>
+              </td>
+              <td>
+                <%= number_field_tag "rows[#{row.grid_index}][arrival_quantity]", submitted_row&.[]("arrival_quantity"), step: :any, id: "row_#{row.grid_index}_arrival_quantity", class: "sheet-entry-input", autocomplete: "off", form: form_id, placeholder: "Arrival qty" %>
+              </td>
+              <td>
+                <%= number_field_tag "rows[#{row.grid_index}][minimum_price]", submitted_row&.[]("minimum_price"), step: :any, id: "row_#{row.grid_index}_minimum_price", class: "sheet-entry-input", autocomplete: "off", form: form_id, placeholder: "Minimum" %>
+              </td>
+              <td>
+                <%= number_field_tag "rows[#{row.grid_index}][maximum_price]", submitted_row&.[]("maximum_price"), step: :any, id: "row_#{row.grid_index}_maximum_price", class: "sheet-entry-input", autocomplete: "off", form: form_id, placeholder: "Maximum" %>
+              </td>
+              <td>
+                <%= number_field_tag "rows[#{row.grid_index}][modal_price]", submitted_row&.[]("modal_price"), step: :any, id: "row_#{row.grid_index}_modal_price", class: "sheet-entry-input", autocomplete: "off", form: form_id, placeholder: "Modal" %>
+              </td>
+              <td class="sheet-entry-fixed">
+                <%= text_field_tag "rows[#{row.grid_index}][remarks]", submitted_row&.[]("remarks").presence || row.remarks, id: "row_#{row.grid_index}_remarks", class: "sheet-entry-input", autocomplete: "off", form: form_id, placeholder: "Reference / remark" %>
+                <div class="sheet-inline-upload">
+                  <%= file_field_tag "rows[#{row.grid_index}][attachments][]", multiple: true, accept: attachment_accept, class: "sheet-entry-file-input", form: form_id %>
+                </div>
+              </td>
+              <td class="sheet-entry-action-cell">
+                <div class="sheet-inline-actions">
+                  <%= submit_tag("Save", class: "button button-primary button-compact", form: form_id) %>
+                  <button type="button" class="button button-ghost button-icon" data-grid-toggle="observation-row-<%= row.grid_index %>" aria-expanded="<%= row_open %>" title="Close add row" aria-label="Close add row">x</button>
+                </div>
+              </td>
+            </tr>
+            <tr class="sheet-entry-launch-row">
+              <td colspan="7" class="sheet-entry-launch-copy">
+                <span>Add one more entry for <strong><%= row.name %></strong></span>
+              </td>
+              <td class="sheet-entry-action-cell">
+                <div class="sheet-inline-actions">
+                  <button
+                    type="button"
+                    class="button button-primary button-icon sheet-row-toggle-button"
+                    data-grid-toggle="observation-row-<%= row.grid_index %>"
+                    aria-expanded="<%= row_open %>"
+                    title="Add new entry"
+                    aria-label="Add new entry"
+                  >
+                    +
+                  </button>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="inline-actions">
+      <%= link_to "Back", cotton_bulletin_path(@cotton_bulletin, anchor: "observation-section-#{@category}"), class: "button button-ghost" %>
+    </div>
+  </div>
+</section>

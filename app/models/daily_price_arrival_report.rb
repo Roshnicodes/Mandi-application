@@ -1,4 +1,6 @@
 class DailyPriceArrivalReport < ApplicationRecord
+  include AttachableRecord
+
   belongs_to :state
   belongs_to :district
   belongs_to :market
@@ -22,7 +24,7 @@ class DailyPriceArrivalReport < ApplicationRecord
   validate :commodity_hierarchy_matches
 
   scope :recent_first, lambda {
-    includes(:state, :district, :market, :commodity_group, :commodity, :variety, :grade, :price_unit, :arrival_unit)
+    with_attached_attachments.includes(:state, :district, :market, :commodity_group, :commodity, :variety, :grade, :price_unit, :arrival_unit)
       .order(arrival_date: :desc, created_at: :desc)
   }
 

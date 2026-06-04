@@ -30,6 +30,14 @@
 
       <div class="page-actions dashboard-actions">
         <%= link_to "Add Daily Report", new_daily_price_arrival_report_path, class: "button button-primary" %>
+        <% if @latest_cotton_bulletin.present? %>
+          <%= link_to "View Cotton Excel", export_cotton_bulletin_path(@latest_cotton_bulletin, preview: true), class: "button button-secondary", target: "_blank", rel: "noopener" %>
+          <%= link_to "Download Cotton Excel", export_cotton_bulletin_path(@latest_cotton_bulletin), class: "button button-secondary" %>
+          <%= form_with url: import_cotton_bulletin_path(@latest_cotton_bulletin), multipart: true, class: "import-inline-form" do %>
+            <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
+            <%= submit_tag "Import Cotton Excel", class: "button button-secondary" %>
+          <% end %>
+        <% end %>
         <%= link_to "Manage Markets", markets_path, class: "button button-secondary" %>
       </div>
     </div>

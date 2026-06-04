@@ -20,7 +20,7 @@
   end
 %>
 
-<div class="table-card report-sheet-card">
+<div class="table-card report-sheet-card" id="observation-section-<%= category %>">
   <div class="sheet-header">
     <div>
       <p class="eyebrow">Excel Section</p>
@@ -28,7 +28,11 @@
       <p class="table-subtitle">Fill this section exactly the way the daily cotton sheet is maintained.</p>
     </div>
     <div class="inline-actions">
-      <%= link_to "Add Line", new_cotton_bulletin_cotton_market_observation_path(bulletin, category: category), class: "button button-secondary" %>
+      <% if CottonMarketObservation.template_grid_supported?(category) %>
+        <%= link_to "Open Grid", grid_cotton_bulletin_cotton_market_observations_path(bulletin, category: category), class: "button button-secondary" %>
+      <% else %>
+        <%= link_to "Add Line", new_cotton_bulletin_cotton_market_observation_path(bulletin, category: category), class: "button button-secondary" %>
+      <% end %>
     </div>
   </div>
 

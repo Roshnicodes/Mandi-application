@@ -325,6 +325,244 @@ p {
   gap: 8px;
 }
 
+.attachment-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(248, 243, 236, 0.72), rgba(255, 255, 255, 0.88));
+  border: 1px dashed rgba(39, 58, 47, 0.18);
+}
+
+.attachment-card-copy .field-note {
+  margin-bottom: 0;
+}
+
+.attachment-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.attachment-chip {
+  display: inline-grid;
+  gap: 4px;
+  min-width: 180px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(39, 58, 47, 0.1);
+  box-shadow: 0 10px 22px rgba(31, 53, 41, 0.06);
+}
+
+.attachment-chip strong {
+  color: var(--ink);
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+
+.attachment-chip span {
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+
+.attachment-chip:hover {
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.sheet-entry-table td,
+.sheet-entry-table th {
+  white-space: nowrap;
+}
+
+.sheet-entry-input {
+  width: 100%;
+  min-width: 120px;
+  padding: 11px 12px;
+  border-radius: 10px;
+}
+
+.sheet-entry-file-input {
+  width: 100%;
+  min-width: 180px;
+  font-size: 0.82rem;
+}
+
+.sheet-inline-upload {
+  margin-top: 10px;
+}
+
+.sheet-entry-fixed {
+  white-space: normal;
+  min-width: 180px;
+}
+
+.sheet-inline-attachments {
+  margin-top: 10px;
+}
+
+.sheet-inline-attachment-chip {
+  min-width: 120px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.sheet-inline-attachment-chip strong {
+  font-size: 0.82rem;
+}
+
+.sheet-inline-attachment-chip span {
+  font-size: 0.72rem;
+}
+
+.topbar-copy,
+.page-actions,
+.topbar-actions,
+.sheet-header > *,
+.table-card-header > *,
+.card-header > *,
+.dashboard-hero-copy,
+.dashboard-pill-row,
+.sheet-toolbar,
+.sheet-mandi-tabs {
+  min-width: 0;
+}
+
+.sheet-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.sheet-mandi-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sheet-mandi-tabs::-webkit-scrollbar {
+  height: 6px;
+}
+
+.sheet-tab-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(39, 58, 47, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--ink-soft);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.sheet-tab-link.is-active {
+  background: linear-gradient(135deg, var(--accent), #4f8b58);
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(46, 106, 67, 0.18);
+}
+
+.sheet-entry-action-cell {
+  width: 132px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.sheet-row-toggle-button {
+  width: fit-content;
+  min-width: 94px;
+}
+
+.sheet-grid-summary-row td {
+  background: rgba(255, 255, 255, 0.38);
+}
+
+.sheet-entry-inline-form-row td {
+  padding: 12px;
+  vertical-align: top;
+  background: linear-gradient(180deg, rgba(246, 241, 231, 0.92), rgba(255, 255, 255, 0.96));
+  border-bottom: 1px solid rgba(39, 58, 47, 0.08);
+}
+
+.sheet-inline-flag-cell {
+  width: 72px;
+}
+
+.sheet-inline-flag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(46, 106, 67, 0.12);
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sheet-inline-hint {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+
+.sheet-inline-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sheet-entry-previous-row td {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--ink-soft);
+}
+
+.sheet-entry-launch-row td {
+  background: rgba(255, 255, 255, 0.12);
+  border-bottom: 1px dashed rgba(39, 58, 47, 0.12);
+}
+
+.sheet-entry-launch-copy {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.button-compact {
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  min-width: 96px;
+}
+
+.button-icon {
+  min-width: 44px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
 label {
   font-size: 0.93rem;
   font-weight: 700;
@@ -942,6 +1180,22 @@ tbody tr:hover {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.import-inline-form {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.import-inline-form input[type="file"] {
+  max-width: 220px;
+  padding: 9px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-strong);
+  color: var(--ink-soft);
 }
 
 .button-to-inline {
@@ -1795,6 +2049,10 @@ tbody tr:hover {
   .card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .dashboard-pill {
+    min-width: 150px;
+  }
 }
 
 @media (max-width: 980px) {
@@ -1891,6 +2149,22 @@ tbody tr:hover {
     max-width: none;
   }
 
+  .sheet-toolbar {
+    align-items: stretch;
+  }
+
+  .sheet-mandi-tabs {
+    flex-wrap: nowrap;
+    width: 100%;
+    padding-bottom: 8px;
+  }
+
+  .sheet-toolbar .inline-actions,
+  .sheet-toolbar .inline-actions .button,
+  .sheet-toolbar .inline-actions input[type="submit"] {
+    width: auto;
+  }
+
   .data-table-wrapper {
     margin-inline: -6px;
     padding-inline: 6px;
@@ -1898,6 +2172,10 @@ tbody tr:hover {
 
   .report-grid-table {
     min-width: 880px;
+  }
+
+  .sheet-entry-table.report-grid-table {
+    min-width: 1040px;
   }
 
   .compact-table.report-grid-table {
@@ -1968,7 +2246,7 @@ tbody tr:hover {
   }
 
   .topbar-subtitle {
-    font-size: 0.9rem;
+    display: none;
   }
 
   .topbar-actions {
@@ -1994,6 +2272,15 @@ tbody tr:hover {
     text-align: center;
   }
 
+  .sheet-inline-actions .button,
+  .sheet-inline-actions input[type="submit"],
+  .sheet-inline-actions form,
+  .sheet-entry-action-cell .button-to-inline,
+  .sheet-toolbar .inline-actions .button,
+  .sheet-toolbar .inline-actions input[type="submit"] {
+    width: auto;
+  }
+
   .button-to-inline {
     display: block;
   }
@@ -2015,6 +2302,11 @@ tbody tr:hover {
     min-width: 0;
   }
 
+  .dashboard-pill-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
   .live-clock-card {
     grid-template-columns: 1fr;
     width: min(100%, 280px);
@@ -2032,9 +2324,78 @@ tbody tr:hover {
     text-align: center;
   }
 
+  .sheet-toolbar {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .sheet-mandi-tabs {
+    margin-inline: -2px;
+    padding-inline: 2px 0;
+  }
+
+  .sheet-tab-link {
+    padding: 9px 12px;
+    font-size: 0.9rem;
+  }
+
+  .sheet-entry-action-cell {
+    width: 84px;
+  }
+
+  .button-compact {
+    min-width: 84px;
+    padding: 9px 13px;
+  }
+
+  .button-icon {
+    min-width: 38px;
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
+  }
+
+  .sheet-inline-actions {
+    gap: 6px;
+  }
+
+  .sheet-inline-flag {
+    min-width: 40px;
+    padding: 6px 8px;
+    font-size: 0.7rem;
+  }
+
+  .sheet-entry-launch-copy {
+    font-size: 0.84rem;
+  }
+
+  .table-card,
+  .summary-report-card,
+  .overview-group-card,
+  .report-sheet-card {
+    padding: 18px;
+  }
+
+  .report-grid-table {
+    min-width: 760px;
+  }
+
+  .sheet-entry-table.report-grid-table {
+    min-width: 980px;
+  }
+
+  .compact-table.report-grid-table {
+    min-width: 560px;
+  }
+
   th,
   td {
     padding: 12px 10px;
+  }
+
+  .attachment-chip {
+    width: 100%;
+    min-width: 0;
   }
 
   .gallery-columns {
@@ -2050,5 +2411,83 @@ tbody tr:hover {
 
   .gallery-card {
     height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 15px;
+  }
+
+  .app-main,
+  .auth-shell,
+  .sidebar {
+    padding: 14px;
+  }
+
+  .topbar,
+  .page-header,
+  .table-card,
+  .card,
+  .stat-card,
+  .summary-report-card,
+  .overview-group-card,
+  .report-sheet-card,
+  .auth-card,
+  .auth-hero {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .page-header h1 {
+    font-size: 1.85rem;
+  }
+
+  .dashboard-hero h1 {
+    font-size: 2rem;
+  }
+
+  .dashboard-lead,
+  .muted-text,
+  .table-subtitle,
+  .topbar-subtitle {
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  .brand-card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .brand-mark {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+  }
+
+  .nav-link {
+    min-height: 42px;
+    padding: 10px 12px 10px 36px;
+  }
+
+  .dashboard-shortcut,
+  .coverage-row,
+  .overview-summary-chip,
+  .dashboard-pill {
+    padding: 14px 15px;
+  }
+
+  .sheet-entry-action-cell {
+    width: 70px;
+  }
+
+  .sheet-tab-link {
+    padding: 8px 11px;
+  }
+
+  .mobile-nav-button {
+    min-width: 56px;
+    padding: 10px 12px;
   }
 }

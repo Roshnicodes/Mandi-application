@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+      body {
+        font-family: Calibri, Arial, sans-serif;
+        font-size: 12pt;
+        color: #000;
+      }
+
+      table {
+        border-collapse: collapse;
+      }
+
+      td,
+      th {
+        border: 1px solid #000;
+        padding: 3px 5px;
+        vertical-align: middle;
+        white-space: nowrap;
+      }
+
+      .sheet {
+        width: 1720px;
+      }
+
+      .no-border {
+        border: 0;
+      }
+
+      .title-cell {
+        background: #f4dfcf;
+        font-weight: 700;
+      }
+
+      .section-cell {
+        background: #d9d4bd;
+        font-weight: 700;
+        text-align: center;
+      }
+
+      .left-section-cell {
+        background: #d9d4bd;
+        font-weight: 700;
+      }
+
+      .header-cell {
+        background: #fff;
+        font-weight: 700;
+        text-align: center;
+      }
+
+      .tint-blue {
+        background: #dbeef4;
+      }
+
+      .tint-lavender {
+        background: #e4dfec;
+      }
+
+      .tint-peach {
+        background: #fcd5b4;
+      }
+
+      .highlight-row td {
+        background: #fce4d6;
+      }
+
+      .number-cell {
+        text-align: right;
+      }
+
+      .center-cell {
+        text-align: center;
+      }
+
+      .bold-cell {
+        font-weight: 700;
+      }
+
+      .blank-row td {
+        border-left: 0;
+        border-right: 0;
+        height: 18px;
+      }
+
+      .thick-top td,
+      .thick-top th {
+        border-top: 2px solid #000;
+      }
+
+      .thick-bottom td,
+      .thick-bottom th {
+        border-bottom: 2px solid #000;
+      }
+    </style>
+  </head>
+  <body>
+    <% report_date = @cotton_bulletin.report_date.strftime("%d %b - %Y") %>
+    <% dash = ->(value) { value.present? ? value : "-" } %>
+    <% number = ->(value) { value.present? ? number_with_precision(value, precision: 0, strip_insignificant_zeros: true) : "-" } %>
+    <% percent = ->(value) { value.present? ? "#{number_with_precision(value, precision: 0, strip_insignificant_zeros: true)}%" : "-" } %>
+    <% right_raw_rows = @gin_rows + @tdn_rows %>
+    <% rows_count = [@mandi_rows.size + @cci_rows.size, right_raw_rows.size].max %>
+
+    <table class="sheet">
+      <colgroup>
+        <col style="width: 44px;">
+        <col style="width: 190px;">
+        <col style="width: 125px;">
+        <col style="width: 120px;">
+        <col style="width: 120px;">
+        <col style="width: 90px;">
+        <col style="width: 220px;">
+        <col style="width: 12px;">
+        <col style="width: 48px;">
+        <col style="width: 210px;">
+        <col style="width: 88px;">
+        <col style="width: 84px;">
+        <col style="width: 96px;">
+        <col style="width: 74px;">
+        <col style="width: 74px;">
+        <col style="width: 74px;">
+        <col style="width: 74px;">
+        <col style="width: 74px;">
+      </colgroup>
+
+      <tbody>
+        <tr>
+          <td colspan="7" class="title-cell"><%= report_date %></td>
+          <td class="no-border"></td>
+          <td colspan="5" class="title-cell"><%= report_date %></td>
+          <td colspan="5" class="no-border"></td>
+        </tr>
+        <tr>
+          <td colspan="7" class="left-section-cell">Raw Cotton Rate</td>
+          <td class="no-border"></td>
+          <td colspan="5" class="left-section-cell">Raw Cotton Rate</td>
+          <td colspan="5" class="no-border"></td>
+        </tr>
+        <tr class="thick-bottom">
+          <td colspan="7" class="left-section-cell">Mandi Wise</td>
+          <td class="no-border"></td>
+          <td colspan="5" class="left-section-cell">GIN Wise</td>
+          <td colspan="5" class="no-border"></td>
+        </tr>
+        <tr class="header-row thick-bottom">
+          <th class="header-cell">S. No</th>
+          <th class="header-cell">Mandi Name</th>
+          <th class="header-cell">Arrival Qty<br>(In Qtl)</th>
+          <th class="header-cell">Minimum Price</th>
+          <th class="header-cell">Maximum Price</th>
+          <th class="header-cell">Modal Price</th>
+          <th class="header-cell">Reference / Remark</th>
+          <td class="no-border"></td>
+          <th class="header-cell">S. No</th>
+          <th class="header-cell">Gin Name</th>
+          <th class="header-cell">Arrival Qty<br>(In Qtl)</th>
+          <th class="header-cell">Moisture</th>
+          <th class="header-cell">Arrival Price</th>
+          <td colspan="5" class="no-border"></td>
+        </tr>
+
+        <% left_rows = @mandi_rows + @cci_rows %>
+        <% rows_count.times do |index| %>
+          <% left = left_rows[index] %>
+          <% gin = right_raw_rows[index] %>
+          <tr class="<%= "highlight-row" if left && left[:name].to_s.include?("CCI") %>">
+            <td class="center-cell"><%= left ? index + 1 : "" %></td>
+            <td><%= left ? left[:name] : "" %></td>
+            <td class="number-cell"><%= left ? number.call(left[:arrival_quantity]) : "" %></td>
+            <td class="number-cell"><%= left ? number.call(left[:minimum_price]) : "" %></td>
+            <td class="number-cell"><%= left ? number.call(left[:maximum_price]) : "" %></td>
+            <td class="number-cell"><%= left ? number.call(left[:modal_price]) : "" %></td>
+            <td><%= left ? dash.call(left[:remarks]) : "" %></td>
+            <td class="no-border"></td>
+            <td class="center-cell"><%= gin ? (gin.position.presence || index + 1) : "" %></td>
+            <td><%= gin&.name %></td>
+            <td class="number-cell"><%= gin ? number.call(gin.arrival_quantity) : "" %></td>
+            <td><%= gin ? dash.call(gin.moisture) : "" %></td>
+            <td><%= gin ? dash.call(gin.arrival_price) : "" %></td>
+            <td colspan="5" class="no-border"></td>
+          </tr>
+        <% end %>
+
+        <tr class="blank-row">
+          <td colspan="18"></td>
+        </tr>
+
+        <tr class="thick-top">
+          <td colspan="7" class="section-cell">Cotton Seed Rate</td>
+          <td class="no-border"></td>
+          <td colspan="10" class="no-border"></td>
+        </tr>
+        <tr>
+          <td colspan="7" class="section-cell">Smart Info</td>
+          <td class="no-border"></td>
+          <td colspan="10" class="no-border"></td>
+        </tr>
+        <tr class="header-row">
+          <th class="header-cell">S.no</th>
+          <th class="header-cell">Particular</th>
+          <th class="header-cell tint-blue">Madhya Pradesh</th>
+          <th class="header-cell tint-blue">Odisha</th>
+          <th class="header-cell tint-lavender">Maharashtra</th>
+          <th class="header-cell"></th>
+          <th class="header-cell">Reference</th>
+          <td class="no-border"></td>
+          <td colspan="10" class="no-border"></td>
+        </tr>
+        <% @seed_rows.each_with_index do |row, index| %>
+          <tr>
+            <td class="center-cell"><%= row.position.presence || index + 1 %></td>
+            <td><%= row.particular %></td>
+            <td class="number-cell"><%= dash.call(row.madhya_pradesh_rate) %></td>
+            <td class="number-cell"><%= dash.call(row.odisha_rate) %></td>
+            <td class="number-cell"><%= dash.call(row.maharashtra_rate) %></td>
+            <td></td>
+            <td><%= dash.call(row.reference) %></td>
+            <td class="no-border"></td>
+            <td colspan="10" class="no-border"></td>
+          </tr>
+        <% end %>
+
+        <tr class="blank-row">
+          <td colspan="18"></td>
+        </tr>
+
+        <tr class="thick-top">
+          <td colspan="7" class="section-cell">Candy Rate (MCH)</td>
+          <td class="no-border"></td>
+          <td class="bold-cell">Price</td>
+          <% %w[Raipur Ojhar Kukshi Pati Sausar Jobat Odisha].each do |place| %>
+            <td class="bold-cell center-cell"><%= place %></td>
+          <% end %>
+          <td class="no-border"></td>
+        </tr>
+        <tr>
+          <td colspan="7" class="section-cell">Smart Info</td>
+          <td class="no-border"></td>
+          <% regional = @regional_rows.first %>
+          <% if regional %>
+            <td class="bold-cell"><%= regional.line_item %></td>
+            <td class="number-cell"><%= dash.call(regional.raipur_value) %></td>
+            <td class="number-cell"><%= dash.call(regional.ojhar_value) %></td>
+            <td class="number-cell"><%= dash.call(regional.kukshi_value) %></td>
+            <td class="number-cell"><%= dash.call(regional.pati_value) %></td>
+            <td class="number-cell"><%= dash.call(regional.sausar_value) %></td>
+            <td class="number-cell"><%= dash.call(regional.jobat_value) %></td>
+            <td class="number-cell"><%= dash.call(regional.odisha_value) %></td>
+            <td class="number-cell"><%= dash.call(regional.extra_value_one) %></td>
+          <% else %>
+            <td colspan="10" class="no-border"></td>
+          <% end %>
+        </tr>
+        <tr>
+          <th class="header-cell">S. No</th>
+          <th class="header-cell tint-peach">Parameter (29 mm)</th>
+          <th class="header-cell tint-lavender">Madhya Pradesh<br>29 MM</th>
+          <th class="header-cell tint-lavender">Maharashtra<br>29 MM</th>
+          <th class="header-cell tint-lavender">Maharashtra<br>31 MM</th>
+          <th class="header-cell tint-blue">Odisha<br>29 MM</th>
+          <th class="header-cell tint-blue">Odisha<br>30 MM</th>
+          <td class="no-border"></td>
+          <% regional = @regional_rows.second %>
+          <% if regional %>
+            <td class="bold-cell"><%= regional.line_item %></td>
+            <td class="number-cell"><%= dash.call(regional.raipur_value) %></td>
+            <td class="number-cell"><%= dash.call(regional.ojhar_value) %></td>
+            <td class="number-cell"><%= dash.call(regional.kukshi_value) %></td>
+            <td class="number-cell"><%= dash.call(regional.pati_value) %></td>
+            <td class="number-cell"><%= dash.call(regional.sausar_value) %></td>
+            <td class="number-cell"><%= dash.call(regional.jobat_value) %></td>
+            <td class="number-cell"><%= dash.call(regional.odisha_value) %></td>
+            <td class="number-cell"><%= dash.call(regional.extra_value_one) %></td>
+          <% else %>
+            <td colspan="10" class="no-border"></td>
+          <% end %>
+        </tr>
+        <% combined_mch_count = [@mch_rows.size, @regional_rows.drop(2).size].max %>
+        <% combined_mch_count.times do |index| %>
+          <% row = @mch_rows[index] %>
+          <% regional = @regional_rows.drop(2)[index] %>
+          <tr>
+            <td class="center-cell"><%= row ? (row.position.presence || index + 1) : "" %></td>
+            <td><%= row&.parameter %></td>
+            <td class="number-cell"><%= row ? dash.call(row.madhya_pradesh_rate) : "" %></td>
+            <td class="number-cell"><%= row ? dash.call(row.maharashtra_29mm_rate) : "" %></td>
+            <td class="number-cell"><%= row ? dash.call(row.maharashtra_31mm_rate) : "" %></td>
+            <td class="number-cell"><%= row ? dash.call(row.odisha_29mm_rate) : "" %></td>
+            <td class="number-cell"><%= row ? dash.call(row.odisha_30mm_rate) : "" %></td>
+            <td class="no-border"></td>
+            <% if regional %>
+              <td class="bold-cell"><%= regional.line_item %></td>
+              <td class="number-cell"><%= dash.call(regional.raipur_value) %></td>
+              <td class="number-cell"><%= dash.call(regional.ojhar_value) %></td>
+              <td class="number-cell"><%= dash.call(regional.kukshi_value) %></td>
+              <td class="number-cell"><%= dash.call(regional.pati_value) %></td>
+              <td class="number-cell"><%= dash.call(regional.sausar_value) %></td>
+              <td class="number-cell"><%= dash.call(regional.jobat_value) %></td>
+              <td class="number-cell"><%= dash.call(regional.odisha_value) %></td>
+              <td class="number-cell"><%= dash.call(regional.extra_value_one) %></td>
+            <% else %>
+              <td colspan="10" class="no-border"></td>
+            <% end %>
+          </tr>
+        <% end %>
+
+        <tr class="blank-row">
+          <td colspan="18"></td>
+        </tr>
+
+        <tr class="thick-top">
+          <td colspan="7" class="section-cell">Candy Rate (DCH)</td>
+          <td class="no-border"></td>
+          <td colspan="2" class="no-border"></td>
+          <td class="header-cell">Total Call</td>
+          <td class="header-cell">Fully Satisfied</td>
+          <td class="header-cell">Satisfaction %</td>
+          <td class="header-cell">Call Again</td>
+          <td class="header-cell">Wrong Call</td>
+          <td class="header-cell">Invalid / Exist</td>
+          <td colspan="2" class="no-border"></td>
+        </tr>
+        <tr>
+          <td colspan="7" class="section-cell">MM Service Wise</td>
+          <td class="no-border"></td>
+          <% first_call = @call_rows.first %>
+          <td colspan="2" class="no-border"></td>
+          <td class="number-cell"><%= first_call&.total_calls %></td>
+          <td class="number-cell"><%= first_call&.fully_satisfied %></td>
+          <td class="number-cell"><%= first_call ? percent.call(first_call.satisfaction_percent) : "" %></td>
+          <td class="number-cell"><%= first_call&.call_again %></td>
+          <td class="number-cell"><%= first_call&.wrong_call %></td>
+          <td class="number-cell"><%= first_call&.invalid_exist %></td>
+          <td colspan="2" class="no-border"></td>
+        </tr>
+        <tr class="header-row">
+          <th class="header-cell">S. No</th>
+          <th class="header-cell tint-peach">Parameter</th>
+          <th class="header-cell tint-peach">Madhya Pradesh</th>
+          <th class="header-cell"></th>
+          <th class="header-cell"></th>
+          <th class="header-cell"></th>
+          <th class="header-cell"></th>
+          <td class="no-border"></td>
+          <td colspan="2" class="no-border"></td>
+          <% @call_rows.drop(1).each do |row| %>
+            <td class="number-cell"><%= row.total_calls %></td>
+            <td class="number-cell"><%= row.fully_satisfied %></td>
+            <td class="number-cell"><%= percent.call(row.satisfaction_percent) %></td>
+            <td class="number-cell"><%= row.call_again %></td>
+            <td class="number-cell"><%= row.wrong_call %></td>
+            <td class="number-cell"><%= row.invalid_exist %></td>
+            <td colspan="2" class="no-border"></td>
+          <% end %>
+        </tr>
+        <% @dch_rows.each_with_index do |row, index| %>
+          <tr>
+            <td class="center-cell"><%= row.position.presence || index + 1 %></td>
+            <td><%= row.parameter %></td>
+            <td class="number-cell"><%= dash.call(row.madhya_pradesh_rate) %></td>
+            <td class="number-cell"><%= dash.call(row.maharashtra_29mm_rate) %></td>
+            <td class="number-cell"><%= dash.call(row.maharashtra_31mm_rate) %></td>
+            <td class="number-cell"><%= dash.call(row.odisha_29mm_rate) %></td>
+            <td class="number-cell"><%= dash.call(row.odisha_30mm_rate) %></td>
+            <td class="no-border"></td>
+            <td colspan="10" class="no-border"></td>
+          </tr>
+        <% end %>
+
+        <% if @comparison_rows.present? %>
+          <tr class="blank-row">
+            <td colspan="18"></td>
+          </tr>
+          <tr class="thick-top">
+            <td colspan="7" class="section-cell">Comparison Sheet</td>
+            <td class="no-border"></td>
+            <td colspan="10" class="no-border"></td>
+          </tr>
+          <tr>
+            <th class="header-cell">Date</th>
+            <th class="header-cell">Total Arr</th>
+            <th class="header-cell">Traders Buying</th>
+            <th class="header-cell">Traders %</th>
+            <th class="header-cell">CCI Buying</th>
+            <th class="header-cell">CCI %</th>
+            <th class="header-cell">Remark</th>
+            <td class="no-border"></td>
+            <td colspan="10" class="no-border"></td>
+          </tr>
+          <% @comparison_rows.each do |row| %>
+            <tr>
+              <td><%= (row.observation_date || @cotton_bulletin.report_date).strftime("%d-%b-%y") %></td>
+              <td class="number-cell"><%= number.call(row.total_arrival) %></td>
+              <td class="number-cell"><%= number.call(row.traders_buy) %></td>
+              <td class="number-cell"><%= percent.call(row.traders_percentage) %></td>
+              <td class="number-cell"><%= number.call(row.cci_buy) %></td>
+              <td class="number-cell"><%= percent.call(row.effective_cci_percentage) %></td>
+              <td><%= dash.call(row.remarks) %></td>
+              <td class="no-border"></td>
+              <td colspan="10" class="no-border"></td>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </body>
+</html>

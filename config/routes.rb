@@ -14,7 +14,17 @@ Rails.application.routes.draw do
   resources :arrival_units, except: :show
   resources :daily_price_arrival_reports, path: "reports", except: :show
   resources :cotton_bulletins do
-    resources :cotton_market_observations, except: %i[index show]
+    member do
+      get :export
+      post :import
+    end
+
+    resources :cotton_market_observations, except: %i[index show] do
+      collection do
+        get :grid
+        patch :save_grid
+      end
+    end
     resources :cotton_seed_rates, except: %i[index show]
     resources :candy_rates, except: %i[index show]
     resources :cotton_regional_comparisons, except: %i[index show]

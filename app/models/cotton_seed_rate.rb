@@ -1,4 +1,6 @@
 class CottonSeedRate < ApplicationRecord
+  include AttachableRecord
+
   belongs_to :cotton_bulletin
 
   normalizes :particular, :madhya_pradesh_rate, :odisha_rate, :maharashtra_rate, :reference,

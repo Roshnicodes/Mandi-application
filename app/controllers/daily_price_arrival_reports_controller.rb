@@ -73,7 +73,8 @@ class DailyPriceArrivalReportsController < ApplicationController
     end
 
     def daily_price_arrival_report_params
-      params.require(:daily_price_arrival_report).permit(
+      permit_with_attachments(
+        :daily_price_arrival_report,
         :state_id,
         :district_id,
         :market_id,

@@ -142,6 +142,55 @@
     });
   };
 
+  const setupObservationGrid = () => {
+    const resetGridInputs = (row) => {
+      if (!row || row.dataset.resetOnOpen !== "true") return;
+
+      row.querySelectorAll("input[type='number']").forEach((input) => {
+        input.value = "";
+      });
+
+      row.querySelectorAll("input[type='file']").forEach((input) => {
+        input.value = "";
+      });
+    };
+
+    document.querySelectorAll("[data-grid-scope] [data-grid-row].is-open").forEach((row) => {
+      resetGridInputs(row);
+      row.hidden = false;
+    });
+
+    document.querySelectorAll("[data-grid-toggle]").forEach((button) => {
+      if (button.dataset.gridBound === "true") return;
+
+      button.dataset.gridBound = "true";
+      button.addEventListener("click", () => {
+        const targetId = button.dataset.gridToggle;
+        const targetRow = document.getElementById(targetId);
+        const scope = button.closest("[data-grid-scope]") || targetRow?.closest("[data-grid-scope]");
+        if (!targetRow || !scope) return;
+
+        const willOpen = targetRow.hidden;
+
+        scope.querySelectorAll("[data-grid-row]").forEach((row) => {
+          row.hidden = true;
+          row.classList.remove("is-open");
+        });
+
+        scope.querySelectorAll("[data-grid-toggle]").forEach((toggle) => {
+          toggle.setAttribute("aria-expanded", "false");
+        });
+
+        if (willOpen) {
+          targetRow.hidden = false;
+          targetRow.classList.add("is-open");
+          resetGridInputs(targetRow);
+          button.setAttribute("aria-expanded", "true");
+        }
+      });
+    });
+  };
+
   const setupResponsiveSidebar = () => {
     const sidebar = document.querySelector("[data-app-sidebar]");
     const overlay = document.querySelector("[data-sidebar-overlay]");
@@ -288,6 +337,7 @@
     setupGradeForm();
     setupReportForm();
     setupDeleteConfirm();
+    setupObservationGrid();
     setupResponsiveSidebar();
     setupLiveClock();
   };

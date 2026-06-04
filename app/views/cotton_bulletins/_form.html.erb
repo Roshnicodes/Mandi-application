@@ -19,6 +19,8 @@
     <%= form.text_area :notes %>
   </div>
 
+  <%= render "shared/attachments_fields", form: form, record: cotton_bulletin %>
+
   <div class="inline-actions">
     <%= form.submit cotton_bulletin.persisted? ? "Update Bulletin" : "Create Bulletin", class: "button button-primary" %>
     <%= link_to "Back", cotton_bulletins_path, class: "button button-ghost" %>

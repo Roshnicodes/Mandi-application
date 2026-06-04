@@ -37,7 +37,8 @@ class CottonSeedRatesController < CottonBulletinNestedController
     end
 
     def cotton_seed_rate_params
-      params.require(:cotton_seed_rate).permit(
+      permit_with_attachments(
+        :cotton_seed_rate,
         :particular,
         :madhya_pradesh_rate,
         :odisha_rate,

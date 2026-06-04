@@ -37,7 +37,8 @@ class CandyRatesController < CottonBulletinNestedController
     end
 
     def candy_rate_params
-      params.require(:candy_rate).permit(
+      permit_with_attachments(
+        :candy_rate,
         :category,
         :parameter,
         :madhya_pradesh_rate,

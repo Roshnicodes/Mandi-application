@@ -38,6 +38,8 @@
     </div>
   </div>
 
+  <%= render "shared/attachments_fields", form: form, record: cotton_call_performance %>
+
   <div class="inline-actions">
     <%= form.submit cotton_call_performance.persisted? ? "Update Call Row" : "Save Call Row", class: "button button-primary" %>
     <%= link_to "Back", cotton_bulletin_path(cotton_bulletin), class: "button button-ghost" %>

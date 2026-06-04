@@ -48,6 +48,8 @@
     </div>
   </div>
 
+  <%= render "shared/attachments_fields", form: form, record: candy_rate %>
+
   <div class="inline-actions">
     <%= form.submit candy_rate.persisted? ? "Update Candy Rate" : "Save Candy Rate", class: "button button-primary" %>
     <%= link_to "Back", cotton_bulletin_path(cotton_bulletin), class: "button button-ghost" %>

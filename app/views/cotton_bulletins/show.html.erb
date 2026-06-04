@@ -13,6 +13,12 @@
       </p>
     </div>
     <div class="page-actions">
+      <%= link_to "View Excel", export_cotton_bulletin_path(@cotton_bulletin, preview: true), class: "button button-secondary", target: "_blank", rel: "noopener" %>
+      <%= link_to "Download Excel", export_cotton_bulletin_path(@cotton_bulletin), class: "button button-primary" %>
+      <%= form_with url: import_cotton_bulletin_path(@cotton_bulletin), multipart: true, class: "import-inline-form" do %>
+        <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
+        <%= submit_tag "Import Excel", class: "button button-secondary" %>
+      <% end %>
       <%= link_to "Edit Bulletin", edit_cotton_bulletin_path(@cotton_bulletin), class: "button button-secondary" %>
       <%= link_to "Back to Bulletins", cotton_bulletins_path, class: "button button-ghost" %>
     </div>

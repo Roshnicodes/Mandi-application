@@ -1,0 +1,22 @@
+<div class="attachment-card">
+  <div class="attachment-card-copy">
+    <%= form.label :attachments, "Attachments" %>
+  </div>
+
+  <div class="field-group">
+    <%= form.file_field :attachments,
+                        multiple: true,
+                        accept: ".csv,.pdf,.xls,.xlsx,.jpg,.jpeg,.png,.webp,.doc,.docx,.txt,.zip,image/*,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" %>
+  </div>
+
+  <% if record.persisted? && record.attachments.attached? %>
+    <div class="attachment-list">
+      <% record.attachments.each do |attachment| %>
+        <%= link_to rails_blob_path(attachment, disposition: "attachment"), class: "attachment-chip" do %>
+          <strong><%= attachment.filename.to_s %></strong>
+          <span><%= number_to_human_size(attachment.byte_size) %></span>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

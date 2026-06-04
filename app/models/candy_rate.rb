@@ -1,4 +1,6 @@
 class CandyRate < ApplicationRecord
+  include AttachableRecord
+
   CATEGORIES = {
     "mch" => "Candy Rate (MCH)",
     "dch" => "Candy Rate (DCH)"

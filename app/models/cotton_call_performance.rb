@@ -1,4 +1,6 @@
 class CottonCallPerformance < ApplicationRecord
+  include AttachableRecord
+
   belongs_to :cotton_bulletin
 
   before_validation :derive_satisfaction_percent

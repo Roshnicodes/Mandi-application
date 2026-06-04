@@ -37,7 +37,8 @@ class CottonCallPerformancesController < CottonBulletinNestedController
     end
 
     def cotton_call_performance_params
-      params.require(:cotton_call_performance).permit(
+      permit_with_attachments(
+        :cotton_call_performance,
         :total_calls,
         :fully_satisfied,
         :satisfaction_percent,

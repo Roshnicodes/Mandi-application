@@ -9,6 +9,9 @@
     </div>
     <div class="page-actions">
       <%= link_to "Add Cotton Bulletin", new_cotton_bulletin_path, class: "button button-primary" %>
+      <% if @cotton_bulletins.first.present? %>
+        <%= link_to "Download Latest Excel", export_cotton_bulletin_path(@cotton_bulletins.first), class: "button button-secondary" %>
+      <% end %>
     </div>
   </div>
 
@@ -48,6 +51,11 @@
                 <td>
                   <div class="inline-actions">
                     <%= link_to "Open", cotton_bulletin_path(bulletin), class: "button button-primary" %>
+                    <%= link_to "Excel", export_cotton_bulletin_path(bulletin), class: "button button-secondary" %>
+                    <%= form_with url: import_cotton_bulletin_path(bulletin), multipart: true, class: "import-inline-form" do %>
+                      <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
+                      <%= submit_tag "Import", class: "button button-secondary" %>
+                    <% end %>
                     <%= link_to "Edit", edit_cotton_bulletin_path(bulletin), class: "button button-secondary" %>
                     <%= button_to "Delete", cotton_bulletin_path(bulletin), method: :delete, class: "button button-danger", form: { data: { turbo_confirm: "Delete this cotton bulletin?" }, class: "button-to-inline" } %>
                   </div>

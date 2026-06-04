@@ -86,6 +86,8 @@
       <%= form.text_area :remarks %>
     </div>
 
+    <%= render "shared/attachments_fields", form: form, record: daily_price_arrival_report %>
+
     <div class="inline-actions">
       <%= form.submit daily_price_arrival_report.persisted? ? "Update Report" : "Save Report", class: "button button-primary" %>
       <%= link_to "Back", daily_price_arrival_reports_path, class: "button button-ghost" %>

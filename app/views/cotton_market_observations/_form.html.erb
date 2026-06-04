@@ -91,6 +91,8 @@
     <%= form.text_area :remarks %>
   </div>
 
+  <%= render "shared/attachments_fields", form: form, record: cotton_market_observation %>
+
   <div class="inline-actions">
     <%= form.submit cotton_market_observation.persisted? ? "Update Observation" : "Save Observation", class: "button button-primary" %>
     <%= link_to "Back", cotton_bulletin_path(cotton_bulletin), class: "button button-ghost" %>

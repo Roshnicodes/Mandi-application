@@ -37,7 +37,8 @@ class CottonRegionalComparisonsController < CottonBulletinNestedController
     end
 
     def cotton_regional_comparison_params
-      params.require(:cotton_regional_comparison).permit(
+      permit_with_attachments(
+        :cotton_regional_comparison,
         :line_item,
         :raipur_value,
         :ojhar_value,

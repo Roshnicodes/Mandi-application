@@ -58,6 +58,8 @@
     </div>
   </div>
 
+  <%= render "shared/attachments_fields", form: form, record: cotton_regional_comparison %>
+
   <div class="inline-actions">
     <%= form.submit cotton_regional_comparison.persisted? ? "Update Comparison Line" : "Save Comparison Line", class: "button button-primary" %>
     <%= link_to "Back", cotton_bulletin_path(cotton_bulletin), class: "button button-ghost" %>
