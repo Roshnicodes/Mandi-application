@@ -9,6 +9,10 @@
         color: #000;
       }
 
+      body.preview-mode {
+        padding-top: 58px;
+      }
+
       table {
         border-collapse: collapse;
       }
@@ -94,15 +98,94 @@
       .thick-bottom th {
         border-bottom: 2px solid #000;
       }
+
+      .preview-toolbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 10px 14px;
+        background: #ffffff;
+        border-bottom: 1px solid #c8c8c8;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+
+      .preview-toolbar-title {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .preview-toolbar-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .preview-button {
+        appearance: none;
+        border: 1px solid #9ca3af;
+        border-radius: 6px;
+        background: #f8fafc;
+        color: #111827;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1;
+        padding: 9px 12px;
+        text-decoration: none;
+      }
+
+      .preview-button.primary {
+        background: #1d4ed8;
+        border-color: #1d4ed8;
+        color: #fff;
+      }
+
+      .preview-button:hover {
+        background: #e5e7eb;
+      }
+
+      .preview-button.primary:hover {
+        background: #1e40af;
+      }
+
+      @media print {
+        body.preview-mode {
+          padding-top: 0;
+        }
+
+        .preview-toolbar {
+          display: none;
+        }
+      }
     </style>
   </head>
-  <body>
+  <body class="<%= "preview-mode" if params[:preview].present? %>">
     <% report_date = @cotton_bulletin.report_date.strftime("%d %b - %Y") %>
     <% dash = ->(value) { value.present? ? value : "-" } %>
     <% number = ->(value) { value.present? ? number_with_precision(value, precision: 0, strip_insignificant_zeros: true) : "-" } %>
     <% percent = ->(value) { value.present? ? "#{number_with_precision(value, precision: 0, strip_insignificant_zeros: true)}%" : "-" } %>
     <% right_raw_rows = @gin_rows + @tdn_rows %>
     <% rows_count = [@mandi_rows.size + @cci_rows.size, right_raw_rows.size].max %>
+
+    <% if params[:preview].present? %>
+      <div class="preview-toolbar">
+        <div class="preview-toolbar-title">Cotton Excel Preview - <%= report_date %></div>
+        <div class="preview-toolbar-actions">
+          <button type="button" class="preview-button" data-action="close-preview">Close Excel</button>
+          <button type="button" class="preview-button" data-action="share-preview">Share Screenshot</button>
+          <button type="button" class="preview-button" onclick="window.print()">Print</button>
+          <%= link_to "Export Excel", export_cotton_bulletin_path(@cotton_bulletin), class: "preview-button primary" %>
+        </div>
+      </div>
+    <% end %>
 
     <table class="sheet">
       <colgroup>
@@ -314,27 +397,12 @@
         <tr class="thick-top">
           <td colspan="7" class="section-cell">Candy Rate (DCH)</td>
           <td class="no-border"></td>
-          <td colspan="2" class="no-border"></td>
-          <td class="header-cell">Total Call</td>
-          <td class="header-cell">Fully Satisfied</td>
-          <td class="header-cell">Satisfaction %</td>
-          <td class="header-cell">Call Again</td>
-          <td class="header-cell">Wrong Call</td>
-          <td class="header-cell">Invalid / Exist</td>
-          <td colspan="2" class="no-border"></td>
+          <td colspan="10" class="no-border"></td>
         </tr>
         <tr>
           <td colspan="7" class="section-cell">MM Service Wise</td>
           <td class="no-border"></td>
-          <% first_call = @call_rows.first %>
-          <td colspan="2" class="no-border"></td>
-          <td class="number-cell"><%= first_call&.total_calls %></td>
-          <td class="number-cell"><%= first_call&.fully_satisfied %></td>
-          <td class="number-cell"><%= first_call ? percent.call(first_call.satisfaction_percent) : "" %></td>
-          <td class="number-cell"><%= first_call&.call_again %></td>
-          <td class="number-cell"><%= first_call&.wrong_call %></td>
-          <td class="number-cell"><%= first_call&.invalid_exist %></td>
-          <td colspan="2" class="no-border"></td>
+          <td colspan="10" class="no-border"></td>
         </tr>
         <tr class="header-row">
           <th class="header-cell">S. No</th>
@@ -345,16 +413,7 @@
           <th class="header-cell"></th>
           <th class="header-cell"></th>
           <td class="no-border"></td>
-          <td colspan="2" class="no-border"></td>
-          <% @call_rows.drop(1).each do |row| %>
-            <td class="number-cell"><%= row.total_calls %></td>
-            <td class="number-cell"><%= row.fully_satisfied %></td>
-            <td class="number-cell"><%= percent.call(row.satisfaction_percent) %></td>
-            <td class="number-cell"><%= row.call_again %></td>
-            <td class="number-cell"><%= row.wrong_call %></td>
-            <td class="number-cell"><%= row.invalid_exist %></td>
-            <td colspan="2" class="no-border"></td>
-          <% end %>
+          <td colspan="10" class="no-border"></td>
         </tr>
         <% @dch_rows.each_with_index do |row, index| %>
           <tr>
@@ -406,5 +465,152 @@
         <% end %>
       </tbody>
     </table>
+
+    <% if params[:preview].present? %>
+      <script>
+        document.querySelector("[data-action='close-preview']").addEventListener("click", function () {
+          if (window.opener) {
+            window.close();
+          } else {
+            window.location.href = "<%= cotton_bulletin_path(@cotton_bulletin) %>";
+          }
+        });
+
+        const downloadBlob = (blob, fileName) => {
+          const link = document.createElement("a");
+          const url = URL.createObjectURL(blob);
+
+          link.href = url;
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        };
+
+        const renderSheetToImage = (sheet) => {
+          const sheetRect = sheet.getBoundingClientRect();
+          const width = Math.ceil(sheetRect.width);
+          const height = Math.ceil(sheetRect.height);
+          const maxCanvasPixels = 12000000;
+          const maxSafeScale = Math.sqrt(maxCanvasPixels / Math.max(width * height, 1));
+          const scale = Math.min(window.devicePixelRatio || 1, 2, maxSafeScale);
+
+          return new Promise((resolve, reject) => {
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.ceil(width * scale);
+            canvas.height = Math.ceil(height * scale);
+
+            const context = canvas.getContext("2d");
+            context.scale(scale, scale);
+            context.fillStyle = "#ffffff";
+            context.fillRect(0, 0, width, height);
+
+            sheet.querySelectorAll("td, th").forEach((cell) => {
+              const rect = cell.getBoundingClientRect();
+              const style = window.getComputedStyle(cell);
+              const x = rect.left - sheetRect.left;
+              const y = rect.top - sheetRect.top;
+              const cellWidth = rect.width;
+              const cellHeight = rect.height;
+              const text = cell.textContent.trim();
+
+              context.fillStyle = style.backgroundColor && style.backgroundColor !== "rgba(0, 0, 0, 0)" ? style.backgroundColor : "#ffffff";
+              context.fillRect(x, y, cellWidth, cellHeight);
+
+              if (style.borderTopStyle !== "none" && style.borderTopWidth !== "0px") {
+                context.strokeStyle = style.borderTopColor || "#000000";
+                context.lineWidth = Math.max(parseFloat(style.borderTopWidth) || 1, 1);
+                context.strokeRect(x, y, cellWidth, cellHeight);
+              }
+
+              if (!text) return;
+
+              const fontSize = parseFloat(style.fontSize) || 16;
+              const fontFamily = style.fontFamily || "Calibri, Arial, sans-serif";
+              const fontWeight = style.fontWeight || "400";
+              const paddingLeft = parseFloat(style.paddingLeft) || 0;
+              const paddingRight = parseFloat(style.paddingRight) || 0;
+              const textAlign = style.textAlign;
+              const font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+
+              context.fillStyle = style.color || "#000000";
+              context.font = font;
+              context.textBaseline = "middle";
+
+              let textX = x + paddingLeft;
+              if (textAlign === "right") {
+                textX = x + cellWidth - paddingRight;
+                context.textAlign = "right";
+              } else if (textAlign === "center") {
+                textX = x + (cellWidth / 2);
+                context.textAlign = "center";
+              } else {
+                context.textAlign = "left";
+              }
+
+              context.fillText(text, textX, y + (cellHeight / 2), Math.max(cellWidth - paddingLeft - paddingRight, 0));
+            });
+
+            canvas.toBlob((blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error("Screenshot image could not be created."));
+              }
+            }, "image/png", 0.95);
+          });
+        };
+
+        document.querySelector("[data-action='share-preview']").addEventListener("click", async function () {
+          const button = this;
+          const defaultLabel = button.textContent;
+          const title = "Cotton Excel - <%= j report_date %>";
+          const fileName = "cotton-excel-<%= @cotton_bulletin.report_date.strftime("%Y-%m-%d") %>.png";
+          const sheet = document.querySelector(".sheet");
+
+          if (!sheet) return;
+
+          button.disabled = true;
+          button.textContent = "Preparing...";
+
+          try {
+            const blob = await renderSheetToImage(sheet);
+            const file = new File([blob], fileName, { type: "image/png" });
+
+            if (navigator.canShare?.({ files: [file] }) && navigator.share) {
+              try {
+                await navigator.share({ title, files: [file] });
+                button.textContent = "Shared";
+                return;
+              } catch (shareError) {
+                console.error(shareError);
+              }
+            }
+
+            if (navigator.clipboard?.write && window.ClipboardItem) {
+              try {
+                await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+                button.textContent = "Image Copied";
+                return;
+              } catch (clipboardError) {
+                console.error(clipboardError);
+              }
+            }
+
+            downloadBlob(blob, fileName);
+            button.textContent = "Downloaded";
+          } catch (error) {
+            console.error(error);
+            button.textContent = "Try Again";
+          } finally {
+            window.setTimeout(() => {
+              button.disabled = false;
+              button.textContent = defaultLabel;
+            }, 1800);
+          }
+        });
+      </script>
+    <% end %>
   </body>
 </html>

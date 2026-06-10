@@ -102,7 +102,6 @@ class CottonBulletinsController < ApplicationController
       @mch_rows = @cotton_bulletin.candy_rates_for("mch")
       @dch_rows = @cotton_bulletin.candy_rates_for("dch")
       @regional_rows = @cotton_bulletin.cotton_regional_comparisons.ordered
-      @call_rows = @cotton_bulletin.cotton_call_performances.ordered
     end
 
     def market_export_rows(category)
