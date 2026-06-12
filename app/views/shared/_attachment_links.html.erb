@@ -1,0 +1,19 @@
+<% attachments = local_assigns.fetch(:record).attachments %>
+<% wrapper_class = local_assigns[:wrapper_class].presence || "attachment-list sheet-inline-attachments" %>
+
+<% if attachments.attached? %>
+  <div class="<%= wrapper_class %>">
+    <% attachments.each do |attachment| %>
+      <% inline_path = rails_blob_path(attachment, disposition: "inline") %>
+      <%= link_to inline_path, class: "attachment-chip sheet-inline-attachment-chip", target: "_blank", rel: "noopener" do %>
+        <% if attachment.content_type.to_s.start_with?("image/") %>
+          <%= image_tag inline_path, class: "attachment-thumb", alt: attachment.filename.to_s %>
+        <% end %>
+        <strong><%= attachment.filename.to_s %></strong>
+        <span>View - <%= number_to_human_size(attachment.byte_size) %></span>
+      <% end %>
+    <% end %>
+  </div>
+<% else %>
+  <span>-</span>
+<% end %>

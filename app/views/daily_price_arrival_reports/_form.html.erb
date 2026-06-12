@@ -9,6 +9,13 @@
   data-grades="<%= json_escape(@grades_data.to_json) %>"
 >
   <%= form_with model: daily_price_arrival_report, class: "form-layout", html: { autocomplete: "off" } do |form| %>
+    <% if params[:return_to_entry].present? %>
+      <%= hidden_field_tag :return_to_entry, true %>
+      <%= hidden_field_tag :state_id, params[:state_id].presence || daily_price_arrival_report.state_id %>
+      <%= hidden_field_tag :district_id, params[:district_id] %>
+      <%= hidden_field_tag :market_id, params[:market_id].presence || daily_price_arrival_report.market_id %>
+    <% end %>
+
     <div class="form-grid-three">
       <div class="field-group">
         <%= form.label :state_id, "State" %>
@@ -17,66 +24,76 @@
 
       <div class="field-group">
         <%= form.label :district_id, "District" %>
-        <%= form.collection_select :district_id, District.none, :id, :name, { prompt: "Select district" }, { data: { district_select: true } } %>
+        <%= form.collection_select :district_id, District.none, :id, :name, { prompt: "Select district" }, { data: { district_select: true, selected: daily_price_arrival_report.district_id } } %>
       </div>
 
       <div class="field-group">
         <%= form.label :market_id, "Market / APMC" %>
-        <%= form.collection_select :market_id, Market.none, :id, :name, { prompt: "Select market" }, { data: { market_select: true } } %>
-      </div>
-
-      <div class="field-group">
-        <%= form.label :commodity_group_id, "Commodity group" %>
-        <%= form.collection_select :commodity_group_id, @commodity_groups, :id, :name, { prompt: "Select group" }, { data: { commodity_group_select: true } } %>
-      </div>
-
-      <div class="field-group">
-        <%= form.label :commodity_id, "Commodity" %>
-        <%= form.collection_select :commodity_id, Commodity.none, :id, :name, { prompt: "Select commodity" }, { data: { commodity_select: true } } %>
-      </div>
-
-      <div class="field-group">
-        <%= form.label :variety_id, "Variety" %>
-        <%= form.collection_select :variety_id, Variety.none, :id, :name, { prompt: "Select variety" }, { data: { variety_select: true } } %>
-      </div>
-
-      <div class="field-group">
-        <%= form.label :grade_id, "Grade" %>
-        <%= form.collection_select :grade_id, Grade.none, :id, :name, { prompt: "Select grade" }, { data: { grade_select: true } } %>
-      </div>
-
-      <div class="field-group">
-        <%= form.label :price_unit_id, "Price unit" %>
-        <%= form.collection_select :price_unit_id, @price_units, :id, :name, { prompt: "Select price unit" } %>
-      </div>
-
-      <div class="field-group">
-        <%= form.label :arrival_unit_id, "Arrival unit" %>
-        <%= form.collection_select :arrival_unit_id, @arrival_units, :id, :name, { prompt: "Select arrival unit" } %>
+        <%= form.collection_select :market_id, Market.none, :id, :name, { prompt: "Select market" }, { data: { market_select: true, selected: daily_price_arrival_report.market_id } } %>
       </div>
 
       <div class="field-group">
         <%= form.label :arrival_date, "Arrival date" %>
         <%= form.date_field :arrival_date %>
       </div>
+    </div>
 
+    <div class="daily-entry-defaults">
+      <div>
+        <p class="eyebrow">Report Details</p>
+        <h3 class="daily-entry-defaults-title">Commodity aur unit details</h3>
+      </div>
+      <div class="form-grid-three">
+        <div class="field-group">
+          <%= form.label :commodity_group_id, "Commodity group" %>
+          <%= form.collection_select :commodity_group_id, @commodity_groups, :id, :name, { prompt: "Select group" }, { data: { commodity_group_select: true } } %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :commodity_id, "Commodity" %>
+          <%= form.collection_select :commodity_id, Commodity.none, :id, :name, { prompt: "Select commodity" }, { data: { commodity_select: true, selected: daily_price_arrival_report.commodity_id } } %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :variety_id, "Variety" %>
+          <%= form.collection_select :variety_id, Variety.none, :id, :name, { prompt: "Select variety" }, { data: { variety_select: true, selected: daily_price_arrival_report.variety_id } } %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :grade_id, "Grade" %>
+          <%= form.collection_select :grade_id, Grade.none, :id, :name, { prompt: "Select grade" }, { data: { grade_select: true, selected: daily_price_arrival_report.grade_id } } %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :price_unit_id, "Price unit" %>
+          <%= form.collection_select :price_unit_id, @price_units, :id, :name, { prompt: "Select price unit" } %>
+        </div>
+
+        <div class="field-group">
+          <%= form.label :arrival_unit_id, "Arrival unit" %>
+          <%= form.collection_select :arrival_unit_id, @arrival_units, :id, :name, { prompt: "Select arrival unit" } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-grid-four">
       <div class="field-group">
-        <%= form.label :min_price, "Minimum price" %>
+        <%= form.label :min_price, "Min" %>
         <%= form.number_field :min_price, step: :any %>
       </div>
 
       <div class="field-group">
-        <%= form.label :max_price, "Maximum price" %>
+        <%= form.label :max_price, "Max" %>
         <%= form.number_field :max_price, step: :any %>
       </div>
 
       <div class="field-group">
-        <%= form.label :modal_price, "Modal price" %>
+        <%= form.label :modal_price, "Modal" %>
         <%= form.number_field :modal_price, step: :any %>
       </div>
 
       <div class="field-group">
-        <%= form.label :arrival_quantity, "Arrival quantity" %>
+        <%= form.label :arrival_quantity, "Arrival Qty" %>
         <%= form.number_field :arrival_quantity, step: :any %>
       </div>
     </div>
@@ -90,7 +107,11 @@
 
     <div class="inline-actions">
       <%= form.submit daily_price_arrival_report.persisted? ? "Update Report" : "Save Report", class: "button button-primary" %>
-      <%= link_to "Back", daily_price_arrival_reports_path, class: "button button-ghost" %>
+      <% if params[:return_to_entry].present? %>
+        <%= link_to "Back", new_daily_price_arrival_report_path(state_id: params[:state_id].presence || daily_price_arrival_report.state_id, district_id: params[:district_id].presence, market_id: params[:market_id].presence || daily_price_arrival_report.market_id), class: "button button-ghost" %>
+      <% else %>
+        <%= link_to "Back", daily_price_arrival_reports_path, class: "button button-ghost" %>
+      <% end %>
     </div>
   <% end %>
 </div>

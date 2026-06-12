@@ -13,7 +13,7 @@
   const renderSelectOptions = (select, items, placeholder, selectedValue = null) => {
     if (!select) return;
 
-    const currentValue = selectedValue ?? select.dataset.selected ?? select.value;
+    const currentValue = selectedValue ?? (select.value || select.dataset.selected);
     select.innerHTML = "";
 
     const placeholderOption = document.createElement("option");
@@ -28,6 +28,8 @@
       option.selected = String(item.id) === String(currentValue);
       select.appendChild(option);
     });
+
+    delete select.dataset.selected;
   };
 
   const setupMarketForm = () => {
@@ -88,9 +90,30 @@
       };
 
       const refreshMarkets = () => {
+        const selectedStateId = stateSelect?.value;
         const selectedDistrictId = districtSelect?.value;
-        const filteredMarkets = selectedDistrictId ? markets.filter((market) => String(market.district_id) === String(selectedDistrictId)) : markets;
+        const filteredMarkets =
+          selectedDistrictId ? markets.filter((market) => String(market.district_id) === String(selectedDistrictId)) :
+          selectedStateId ? markets.filter((market) => String(market.state_id) === String(selectedStateId)) :
+          markets;
         renderSelectOptions(marketSelect, filteredMarkets, "Select market");
+      };
+
+      const syncLocationFromMarket = () => {
+        const selectedMarket = markets.find((market) => String(market.id) === String(marketSelect?.value));
+        if (!selectedMarket) return;
+
+        if (stateSelect && String(stateSelect.value) !== String(selectedMarket.state_id)) {
+          stateSelect.value = selectedMarket.state_id;
+          renderSelectOptions(
+            districtSelect,
+            districts.filter((district) => String(district.state_id) === String(selectedMarket.state_id)),
+            "Select district",
+            selectedMarket.district_id
+          );
+        }
+
+        if (districtSelect) districtSelect.value = selectedMarket.district_id;
       };
 
       const refreshCommodities = () => {
@@ -120,6 +143,7 @@
 
       stateSelect?.addEventListener("change", refreshDistricts);
       districtSelect?.addEventListener("change", refreshMarkets);
+      marketSelect?.addEventListener("change", syncLocationFromMarket);
       groupSelect?.addEventListener("change", refreshCommodities);
       commoditySelect?.addEventListener("change", refreshVarieties);
       varietySelect?.addEventListener("change", refreshGrades);
@@ -188,6 +212,107 @@
           button.setAttribute("aria-expanded", "true");
         }
       });
+    });
+  };
+
+  const setupDailyEntryDateSync = () => {
+    document.querySelectorAll("[data-daily-entry-date]").forEach((dateInput) => {
+      if (dateInput.dataset.dateSyncBound === "true") return;
+
+      dateInput.dataset.dateSyncBound = "true";
+      const syncDate = () => {
+        document.querySelectorAll("[data-daily-entry-date-target]").forEach((target) => {
+          target.value = dateInput.value;
+        });
+      };
+
+      dateInput.addEventListener("change", syncDate);
+      syncDate();
+    });
+  };
+
+  const setupDailyEntryDefaults = () => {
+    document.querySelectorAll("[data-daily-entry-defaults]").forEach((root) => {
+      if (root.dataset.defaultsBound === "true") return;
+
+      root.dataset.defaultsBound = "true";
+      const groupSelect = root.querySelector("[data-daily-default-group]");
+      const commoditySelect = root.querySelector("[data-daily-default-commodity]");
+      const varietySelect = root.querySelector("[data-daily-default-variety]");
+      const gradeSelect = root.querySelector("[data-daily-default-grade]");
+      const priceUnitSelect = root.querySelector("[data-daily-default-price-unit]");
+      const arrivalUnitSelect = root.querySelector("[data-daily-default-arrival-unit]");
+
+      const commodities = parsePayload(root, "commodities");
+      const varieties = parsePayload(root, "varieties");
+      const grades = parsePayload(root, "grades");
+
+      const syncTargets = () => {
+        const values = {
+          commodity_group_id: groupSelect?.value || "",
+          commodity_id: commoditySelect?.value || "",
+          variety_id: varietySelect?.value || "",
+          grade_id: gradeSelect?.value || "",
+          price_unit_id: priceUnitSelect?.value || "",
+          arrival_unit_id: arrivalUnitSelect?.value || ""
+        };
+
+        document.querySelectorAll("[data-daily-default-target]").forEach((target) => {
+          target.value = values[target.dataset.dailyDefaultTarget] || "";
+        });
+      };
+
+      const syncRowGradeSelects = () => {
+        document.querySelectorAll("[data-daily-row-grade-select]").forEach((select) => {
+          const selectedValue = select.value || select.dataset.selected || gradeSelect?.value;
+          select.innerHTML = gradeSelect?.innerHTML || "";
+          select.value = selectedValue;
+          if (!select.value && gradeSelect?.value) select.value = gradeSelect.value;
+          delete select.dataset.selected;
+        });
+      };
+
+      const refreshGradesForDefaults = () => {
+        const selectedCommodityId = commoditySelect?.value;
+        const selectedVarietyId = varietySelect?.value;
+        const filteredGrades = grades.filter((grade) => {
+          const commodityMatches = selectedCommodityId ? String(grade.commodity_id) === String(selectedCommodityId) : true;
+          const varietyMatches = !grade.variety_id || !selectedVarietyId || String(grade.variety_id) === String(selectedVarietyId);
+          return commodityMatches && varietyMatches;
+        });
+
+        renderSelectOptions(gradeSelect, filteredGrades, "Select grade");
+        syncRowGradeSelects();
+        syncTargets();
+      };
+
+      const refreshVarietiesForDefaults = () => {
+        const selectedCommodityId = commoditySelect?.value;
+        const filteredVarieties = selectedCommodityId ? varieties.filter((variety) => String(variety.commodity_id) === String(selectedCommodityId)) : varieties;
+        renderSelectOptions(varietySelect, filteredVarieties, "Select variety");
+        refreshGradesForDefaults();
+      };
+
+      const refreshCommoditiesForDefaults = () => {
+        const selectedGroupId = groupSelect?.value;
+        const filteredCommodities = selectedGroupId ? commodities.filter((commodity) => String(commodity.commodity_group_id) === String(selectedGroupId)) : commodities;
+        renderSelectOptions(commoditySelect, filteredCommodities, "Select commodity");
+        refreshVarietiesForDefaults();
+      };
+
+      groupSelect?.addEventListener("change", refreshCommoditiesForDefaults);
+      commoditySelect?.addEventListener("change", refreshVarietiesForDefaults);
+      varietySelect?.addEventListener("change", refreshGradesForDefaults);
+      gradeSelect?.addEventListener("change", () => {
+        syncRowGradeSelects();
+        syncTargets();
+      });
+      priceUnitSelect?.addEventListener("change", syncTargets);
+      arrivalUnitSelect?.addEventListener("change", syncTargets);
+
+      refreshCommoditiesForDefaults();
+      syncRowGradeSelects();
+      syncTargets();
     });
   };
 
@@ -338,6 +463,8 @@
     setupReportForm();
     setupDeleteConfirm();
     setupObservationGrid();
+    setupDailyEntryDateSync();
+    setupDailyEntryDefaults();
     setupResponsiveSidebar();
     setupLiveClock();
   };

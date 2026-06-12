@@ -1,6 +1,12 @@
 class DailyPriceArrivalReport < ApplicationRecord
   include AttachableRecord
 
+  DEFAULT_COMMODITY_NAME = "Arhar(Tur/Red Gram)(Whole)"
+  DEFAULT_VARIETY_NAME = "Other"
+  DEFAULT_GRADE_NAME = "Non-FAQ"
+  DEFAULT_PRICE_UNIT_NAME = "Rs./Quintal"
+  DEFAULT_ARRIVAL_UNIT_SHORT_NAME = "MT"
+
   belongs_to :state
   belongs_to :district
   belongs_to :market
@@ -11,6 +17,7 @@ class DailyPriceArrivalReport < ApplicationRecord
   belongs_to :price_unit
   belongs_to :arrival_unit
 
+  before_validation :apply_entry_defaults
   before_validation :align_hierarchy
 
   validates :arrival_date, presence: true
@@ -27,6 +34,22 @@ class DailyPriceArrivalReport < ApplicationRecord
     with_attached_attachments.includes(:state, :district, :market, :commodity_group, :commodity, :variety, :grade, :price_unit, :arrival_unit)
       .order(arrival_date: :desc, created_at: :desc)
   }
+
+  def self.default_entry_attributes
+    commodity = Commodity.find_by("LOWER(name) = ?", DEFAULT_COMMODITY_NAME.downcase)
+    variety = commodity&.varieties&.find_by("LOWER(name) = ?", DEFAULT_VARIETY_NAME.downcase) || commodity&.varieties&.ordered&.first
+    grade = commodity&.grades&.find_by("LOWER(name) = ?", DEFAULT_GRADE_NAME.downcase) || commodity&.grades&.ordered&.first
+
+    {
+      arrival_date: Date.current,
+      commodity_group: commodity&.commodity_group,
+      commodity: commodity,
+      variety: variety,
+      grade: grade,
+      price_unit: PriceUnit.find_by("LOWER(name) = ?", DEFAULT_PRICE_UNIT_NAME.downcase) || PriceUnit.ordered.first,
+      arrival_unit: ArrivalUnit.find_by("LOWER(short_name) = ?", DEFAULT_ARRIVAL_UNIT_SHORT_NAME.downcase) || ArrivalUnit.ordered.first
+    }.compact
+  end
 
   def self.filtered(filters)
     reports = recent_first
@@ -53,6 +76,17 @@ class DailyPriceArrivalReport < ApplicationRecord
       self.district = market&.district || district
       self.state = district&.state || market&.district&.state || state
       self.commodity_group = commodity&.commodity_group || commodity_group
+    end
+
+    def apply_entry_defaults
+      defaults = self.class.default_entry_attributes
+
+      self.arrival_date ||= defaults[:arrival_date]
+      self.commodity ||= defaults[:commodity]
+      self.variety ||= defaults[:variety]
+      self.grade ||= defaults[:grade]
+      self.price_unit ||= defaults[:price_unit]
+      self.arrival_unit ||= defaults[:arrival_unit]
     end
 
     def price_range_is_valid

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_23_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_11_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -117,6 +117,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_23_090000) do
     t.decimal "cci_percentage", precision: 8, scale: 2
     t.bigint "cotton_bulletin_id", null: false
     t.datetime "created_at", null: false
+    t.bigint "district_id"
+    t.bigint "market_id"
     t.decimal "maximum_price", precision: 12, scale: 2
     t.decimal "minimum_price", precision: 12, scale: 2
     t.decimal "modal_price", precision: 12, scale: 2
@@ -125,13 +127,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_23_090000) do
     t.date "observation_date"
     t.integer "position"
     t.text "remarks"
+    t.bigint "state_id"
     t.decimal "total_arrival", precision: 12, scale: 2
     t.decimal "traders_buy", precision: 12, scale: 2
     t.decimal "traders_percentage", precision: 8, scale: 2
     t.datetime "updated_at", null: false
     t.index ["cotton_bulletin_id", "category"], name: "index_cotton_observations_on_bulletin_and_category"
     t.index ["cotton_bulletin_id"], name: "index_cotton_market_observations_on_cotton_bulletin_id"
+    t.index ["district_id"], name: "index_cotton_market_observations_on_district_id"
+    t.index ["market_id"], name: "index_cotton_market_observations_on_market_id"
     t.index ["observation_date"], name: "index_cotton_market_observations_on_observation_date"
+    t.index ["state_id"], name: "index_cotton_market_observations_on_state_id"
   end
 
   create_table "cotton_regional_comparisons", force: :cascade do |t|
@@ -278,6 +284,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_23_090000) do
   add_foreign_key "commodities", "commodity_groups"
   add_foreign_key "cotton_call_performances", "cotton_bulletins"
   add_foreign_key "cotton_market_observations", "cotton_bulletins"
+  add_foreign_key "cotton_market_observations", "districts"
+  add_foreign_key "cotton_market_observations", "markets"
+  add_foreign_key "cotton_market_observations", "states"
   add_foreign_key "cotton_regional_comparisons", "cotton_bulletins"
   add_foreign_key "cotton_seed_rates", "cotton_bulletins"
   add_foreign_key "daily_price_arrival_reports", "arrival_units"

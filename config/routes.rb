@@ -12,7 +12,12 @@ Rails.application.routes.draw do
   resources :grades, except: :show
   resources :price_units, except: :show
   resources :arrival_units, except: :show
-  resources :daily_price_arrival_reports, path: "reports", except: :show
+  resources :daily_price_arrival_reports, path: "reports", except: :show do
+    collection do
+      get :export
+      post :import
+    end
+  end
   resources :cotton_bulletins do
     member do
       get :export

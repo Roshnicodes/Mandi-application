@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Daily Price Arrival Reports Excel</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #1d2b24; margin: 0; padding: 18px; background: #ffffff; }
+    .preview-toolbar { display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin-bottom: 14px; position: sticky; top: 0; background: #ffffff; padding: 10px 0; }
+    .preview-button { display: inline-block; padding: 9px 13px; border-radius: 8px; background: #eef5ef; color: #1f5535; text-decoration: none; font-weight: 700; border: 1px solid #c9ddcf; }
+    .preview-button.primary { background: #2e6a43; color: #ffffff; border-color: #2e6a43; }
+    h1 { margin: 0 0 4px; font-size: 22px; }
+    .subtitle { margin: 0 0 18px; color: #53635b; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { background: #e8f2eb; color: #1d2b24; font-weight: 700; }
+    th, td { border: 1px solid #9fb5a7; padding: 7px 8px; text-align: left; vertical-align: top; mso-number-format: "\@"; }
+    .numeric-cell { text-align: right; }
+    .empty { padding: 22px; border: 1px dashed #9fb5a7; color: #53635b; }
+    @media print { .preview-toolbar { display: none; } }
+  </style>
+</head>
+<body>
+  <% if params[:preview].present? %>
+    <div class="preview-toolbar">
+      <a href="#" onclick="window.close(); return false;" class="preview-button">Close</a>
+      <a href="#" onclick="window.print(); return false;" class="preview-button">Print</a>
+      <%= link_to "Export Excel", export_daily_price_arrival_reports_path(request.query_parameters.except(:preview)), class: "preview-button primary" %>
+    </div>
+  <% end %>
+
+  <h1>Daily Price Arrival Reports</h1>
+  <p class="subtitle">
+    Exported on <%= Time.current.strftime("%d %b %Y, %I:%M %p") %>
+    <% if @filters.values.any?(&:present?) %>| Filtered report<% else %>| All saved data<% end %>
+  </p>
+
+  <% if @reports.any? %>
+    <table>
+      <thead>
+        <tr>
+          <th>Created On</th>
+          <th>Arrival Date</th>
+          <th>State</th>
+          <th>District</th>
+          <th>Market</th>
+          <th>Commodity Group</th>
+          <th>Commodity</th>
+          <th>Variety</th>
+          <th>Grade</th>
+          <th>Min</th>
+          <th>Max</th>
+          <th>Modal</th>
+          <th>Arrival Qty</th>
+          <th>Price Unit</th>
+          <th>Arrival Unit</th>
+          <th>Reference / Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @reports.each do |report| %>
+          <tr>
+            <td><%= report.created_at.strftime("%d %b %Y, %I:%M %p") %></td>
+            <td><%= report.arrival_date.strftime("%d %b %Y") %></td>
+            <td><%= report.state.name %></td>
+            <td><%= report.district.name %></td>
+            <td><%= report.market.name %></td>
+            <td><%= report.commodity_group.name %></td>
+            <td><%= report.commodity.name %></td>
+            <td><%= report.variety.name %></td>
+            <td><%= report.grade.name %></td>
+            <td class="numeric-cell"><%= number_with_precision(report.min_price, precision: 2, strip_insignificant_zeros: false) %></td>
+            <td class="numeric-cell"><%= number_with_precision(report.max_price, precision: 2, strip_insignificant_zeros: false) %></td>
+            <td class="numeric-cell"><%= number_with_precision(report.modal_price, precision: 2, strip_insignificant_zeros: false) %></td>
+            <td class="numeric-cell"><%= number_with_precision(report.arrival_quantity, precision: 2, strip_insignificant_zeros: false) %></td>
+            <td><%= report.price_unit.short_name.presence || report.price_unit.name %></td>
+            <td><%= report.arrival_unit.short_name.presence || report.arrival_unit.name %></td>
+            <td><%= report.remarks %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <div class="empty">Selected filters ke liye koi daily report nahi mila.</div>
+  <% end %>
+</body>
+</html>

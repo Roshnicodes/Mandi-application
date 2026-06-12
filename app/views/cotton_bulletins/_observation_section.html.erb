@@ -50,6 +50,7 @@
               <th>Maximum Price</th>
               <th>Modal Price</th>
               <th>Reference / Remark</th>
+              <th>Attachments</th>
               <th>Actions</th>
             </tr>
           <% when "gin_wise", "tdn_moisture" %>
@@ -60,6 +61,7 @@
               <th>Moisture</th>
               <th>Arrival Price</th>
               <th>Remark</th>
+              <th>Attachments</th>
               <th>Actions</th>
             </tr>
           <% when "comparison_sheet" %>
@@ -71,6 +73,7 @@
               <th>CCI Buying</th>
               <th>CCI %</th>
               <th>Remark</th>
+              <th>Attachments</th>
               <th>Actions</th>
             </tr>
           <% end %>
@@ -81,12 +84,18 @@
               <% case category %>
               <% when "mandi_wise", "cci_mandi" %>
                 <td><%= record.position.presence || index + 1 %></td>
-                <td><%= record.name %></td>
+                <td>
+                  <%= record.name %>
+                  <% if record.market.present? %>
+                    <span class="sheet-inline-hint"><%= [record.state&.name, record.district&.name, record.market.name].compact.join(" / ") %></span>
+                  <% end %>
+                </td>
                 <td class="numeric-cell"><%= number_with_precision(record.arrival_quantity, precision: 2, strip_insignificant_zeros: false) %></td>
                 <td class="numeric-cell"><%= number_with_precision(record.minimum_price, precision: 2, strip_insignificant_zeros: false) %></td>
                 <td class="numeric-cell"><%= number_with_precision(record.maximum_price, precision: 2, strip_insignificant_zeros: false) %></td>
                 <td class="numeric-cell"><%= number_with_precision(record.modal_price, precision: 2, strip_insignificant_zeros: false) %></td>
                 <td><%= record.remarks.presence || "-" %></td>
+                <td><%= render "shared/attachment_links", record: record %></td>
               <% when "gin_wise", "tdn_moisture" %>
                 <td><%= record.position.presence || index + 1 %></td>
                 <td><%= record.name %></td>
@@ -94,6 +103,7 @@
                 <td><%= record.moisture.presence || "-" %></td>
                 <td><%= record.arrival_price.presence || "-" %></td>
                 <td><%= record.remarks.presence || "-" %></td>
+                <td><%= render "shared/attachment_links", record: record %></td>
               <% when "comparison_sheet" %>
                 <td><%= (record.observation_date || bulletin.report_date).strftime("%d-%b-%y") %></td>
                 <td class="numeric-cell"><%= record.total_arrival.present? ? number_with_precision(record.total_arrival, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
@@ -102,6 +112,7 @@
                 <td class="numeric-cell"><%= record.cci_buy.present? ? number_with_precision(record.cci_buy, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
                 <td class="numeric-cell"><%= record.effective_cci_percentage.present? ? number_with_precision(record.effective_cci_percentage, precision: 2) : "-" %></td>
                 <td><%= record.remarks.presence || "-" %></td>
+                <td><%= render "shared/attachment_links", record: record %></td>
               <% end %>
               <td>
                 <div class="inline-actions">
@@ -121,6 +132,7 @@
               <td class="numeric-cell"><%= number_with_precision(avg_traders_percentage, precision: 2) %></td>
               <td class="numeric-cell"><%= number_with_precision(avg_cci_buy, precision: 2) %></td>
               <td class="numeric-cell"><%= number_with_precision(avg_cci_percentage, precision: 2) %></td>
+              <td>-</td>
               <td>-</td>
               <td>-</td>
             </tr>

@@ -12,6 +12,7 @@ class CottonMarketObservationsController < CottonBulletinNestedController
     :attachments,
     :records,
     :custom,
+    :market,
     keyword_init: true
   ) do
     def all_values_blank?
@@ -190,7 +191,8 @@ class CottonMarketObservationsController < CottonBulletinNestedController
           modal_price: input.fetch("modal_price", record&.modal_price),
           attachments: extract_attachments(input),
           records: records,
-          custom: false
+          custom: false,
+          market: record&.market
         )
       end
 
@@ -214,7 +216,8 @@ class CottonMarketObservationsController < CottonBulletinNestedController
           modal_price: input.fetch("modal_price", record&.modal_price),
           attachments: extract_attachments(input),
           records: records,
-          custom: true
+          custom: true,
+          market: record&.market
         )
       end
 
@@ -247,6 +250,9 @@ class CottonMarketObservationsController < CottonBulletinNestedController
         :cotton_market_observation,
         :category,
         :name,
+        :state_id,
+        :district_id,
+        :market_id,
         :observation_date,
         :arrival_quantity,
         :minimum_price,

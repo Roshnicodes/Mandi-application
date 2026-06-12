@@ -23,6 +23,7 @@
             <th>Odisha 29 MM</th>
             <th>Odisha 30 MM</th>
             <th>Reference</th>
+            <th>Attachments</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -37,6 +38,7 @@
               <td><%= record.odisha_29mm_rate.presence || "-" %></td>
               <td><%= record.odisha_30mm_rate.presence || "-" %></td>
               <td><%= record.reference.presence || "-" %></td>
+              <td><%= render "shared/attachment_links", record: record %></td>
               <td>
                 <div class="inline-actions">
                   <%= link_to "Edit", edit_cotton_bulletin_candy_rate_path(bulletin, record), class: "button button-secondary" %>

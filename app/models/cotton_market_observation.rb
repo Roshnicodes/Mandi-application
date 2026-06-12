@@ -25,9 +25,15 @@ class CottonMarketObservation < ApplicationRecord
   }.freeze
 
   belongs_to :cotton_bulletin
+  belongs_to :state, optional: true
+  belongs_to :district, optional: true
+  belongs_to :market, optional: true
 
   normalizes :category, with: ->(value) { value.to_s }
   normalizes :name, :moisture, :arrival_price, :remarks, with: ->(value) { value.to_s.squish.presence }
+
+  before_validation :align_location_from_market
+  before_validation :infer_market_from_name
 
   validates :category, presence: true, inclusion: { in: CATEGORIES.keys }
   validates :name, presence: true, unless: :comparison_sheet?
@@ -55,4 +61,39 @@ class CottonMarketObservation < ApplicationRecord
   def self.template_rows_for(category)
     TEMPLATE_ROW_PRESETS.fetch(category.to_s, []).map(&:dup)
   end
+
+  def market_label
+    market&.name || name
+  end
+
+  def location_label
+    [ state&.name, district&.name ].compact.join(" / ")
+  end
+
+  private
+    def align_location_from_market
+      self.district = market&.district || district
+      self.state = district&.state || market&.district&.state || state
+    end
+
+    def infer_market_from_name
+      return if market.present? || name.blank?
+      return unless %w[mandi_wise cci_mandi].include?(category)
+
+      canonical_name = name
+        .to_s
+        .sub(/\s*-\s*DCH\z/i, "")
+        .sub(/\s+CCI\z/i, "")
+        .squish
+
+      self.market = Market
+        .includes(district: :state)
+        .where("LOWER(markets.name) IN (?)", [
+          canonical_name.downcase,
+          "#{canonical_name} APMC".downcase
+        ])
+        .first
+
+      align_location_from_market
+    end
 end

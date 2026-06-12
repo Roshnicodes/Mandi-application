@@ -111,6 +111,9 @@
               <td><%= current_serial %></td>
               <td class="sheet-entry-fixed">
                 <strong><%= row.name %></strong>
+                <% if row.market.present? %>
+                  <span class="sheet-inline-hint"><%= [row.market.state&.name, row.market.district&.name, row.market.name].compact.join(" / ") %></span>
+                <% end %>
                 <% if current_record.present? %>
                   <span class="sheet-inline-hint">Saved <%= l(current_record.created_at.in_time_zone, format: :long) %></span>
                 <% end %>

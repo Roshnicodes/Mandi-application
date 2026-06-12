@@ -30,14 +30,8 @@
 
       <div class="page-actions dashboard-actions">
         <%= link_to "Add Daily Report", new_daily_price_arrival_report_path, class: "button button-primary" %>
-        <% if @latest_cotton_bulletin.present? %>
-          <%= link_to "View Cotton Excel", export_cotton_bulletin_path(@latest_cotton_bulletin, preview: true), class: "button button-secondary", target: "_blank", rel: "noopener" %>
-          <%= link_to "Download Cotton Excel", export_cotton_bulletin_path(@latest_cotton_bulletin), class: "button button-secondary" %>
-          <%= form_with url: import_cotton_bulletin_path(@latest_cotton_bulletin), multipart: true, class: "import-inline-form" do %>
-            <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
-            <%= submit_tag "Import Cotton Excel", class: "button button-secondary" %>
-          <% end %>
-        <% end %>
+        <%= link_to "Daily Excel Tools", daily_price_arrival_reports_path, class: "button button-secondary" %>
+        <%= link_to "Cotton Excel Tools", cotton_bulletins_path, class: "button button-secondary" %>
         <%= link_to "Manage Markets", markets_path, class: "button button-secondary" %>
       </div>
     </div>
@@ -129,6 +123,7 @@
                 <th>Grade</th>
                 <th>Modal Price</th>
                 <th>Arrival Qty</th>
+                <th>Attachments</th>
               </tr>
             </thead>
             <tbody>
@@ -141,6 +136,7 @@
                   <td><%= report.grade.name %></td>
                   <td class="numeric-cell"><%= number_to_currency(report.modal_price, unit: "", precision: 2) %> <%= report.price_unit.short_name.presence || report.price_unit.name %></td>
                   <td class="numeric-cell"><%= number_with_precision(report.arrival_quantity, precision: 2) %> <%= report.arrival_unit.short_name.presence || report.arrival_unit.name %></td>
+                  <td><%= render "shared/attachment_links", record: report %></td>
                 </tr>
               <% end %>
             </tbody>

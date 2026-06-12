@@ -52,7 +52,7 @@ module ReferenceCollections
       market_options.map do |market|
         {
           id: market.id,
-          name: market.name,
+          name: [ market.district.state.name, market.district.name, market.name ].join(" / "),
           district_id: market.district_id,
           state_id: market.district.state_id
         }

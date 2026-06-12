@@ -9,6 +9,12 @@
     </div>
     <div class="page-actions">
       <%= link_to "Add Daily Report", new_daily_price_arrival_report_path, class: "button button-primary" %>
+      <%= link_to "View Excel", export_daily_price_arrival_reports_path(request.query_parameters.merge(preview: true)), class: "button button-secondary", target: "_blank", rel: "noopener" %>
+      <%= link_to "Download Excel", export_daily_price_arrival_reports_path(request.query_parameters), class: "button button-secondary" %>
+      <%= form_with url: import_daily_price_arrival_reports_path, multipart: true, class: "import-inline-form" do %>
+        <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
+        <%= submit_tag "Import Excel", class: "button button-secondary" %>
+      <% end %>
     </div>
   </div>
 
@@ -99,6 +105,7 @@
               <th>Max</th>
               <th>Modal</th>
               <th>Arrival Qty</th>
+              <th>Attachments</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -117,6 +124,9 @@
                 <td class="numeric-cell"><%= number_with_precision(report.max_price, precision: 2) %></td>
                 <td class="numeric-cell"><%= number_with_precision(report.modal_price, precision: 2) %></td>
                 <td class="numeric-cell"><%= number_with_precision(report.arrival_quantity, precision: 2) %> <%= report.arrival_unit.short_name.presence || report.arrival_unit.name %></td>
+                <td>
+                  <%= render "shared/attachment_links", record: report %>
+                </td>
                 <td>
                   <div class="inline-actions">
                     <%= link_to "Edit", edit_daily_price_arrival_report_path(report), class: "button button-secondary" %>

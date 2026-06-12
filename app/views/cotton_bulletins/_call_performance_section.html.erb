@@ -22,6 +22,7 @@
             <th>Call Again</th>
             <th>Wrong Call</th>
             <th>Invalid / Exist</th>
+            <th>Attachments</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -35,6 +36,7 @@
               <td class="numeric-cell"><%= record.call_again %></td>
               <td class="numeric-cell"><%= record.wrong_call %></td>
               <td class="numeric-cell"><%= record.invalid_exist %></td>
+              <td><%= render "shared/attachment_links", record: record %></td>
               <td>
                 <div class="inline-actions">
                   <%= link_to "Edit", edit_cotton_bulletin_cotton_call_performance_path(bulletin, record), class: "button button-secondary" %>

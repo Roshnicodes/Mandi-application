@@ -14,6 +14,12 @@
     </div>
 
     <div class="field-group">
+      <%= form.label :market_id, "Linked Mandi / APMC" %>
+      <%= form.collection_select :market_id, Market.includes(district: :state).ordered, :id, :name, { prompt: "Auto from name or choose mandi" } %>
+      <p class="field-note">Mandi wise rows me state/district yahin se auto save honge.</p>
+    </div>
+
+    <div class="field-group">
       <%= form.label :arrival_quantity, "Arrival quantity" %>
       <%= form.number_field :arrival_quantity, step: :any %>
     </div>

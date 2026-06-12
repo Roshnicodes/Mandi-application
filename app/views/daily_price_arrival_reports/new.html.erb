@@ -1,15 +1,279 @@
 <% content_for :title, "New Daily Report" %>
+<% attachment_accept = ".csv,.pdf,.xls,.xlsx,.jpg,.jpeg,.png,.webp,.doc,.docx,.txt,.zip,image/*,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" %>
 
 <section class="responsive-stack">
   <div class="page-header">
     <div>
       <p class="eyebrow">Report Entry</p>
-      <h1>Add daily price arrival report</h1>
-      <p class="muted-text">Sheet-style mandi data ko structured form me save kariye.</p>
+      <h1>Daily mandi quick entry</h1>
+      <p class="muted-text">State aur district choose karke mandi row par + dabaiye, phir sirf Min, Max, Modal aur Arrival Qty save kariye.</p>
+    </div>
+    <div class="page-actions">
+      <%= link_to "View saved reports", daily_price_arrival_reports_path, class: "button button-secondary" %>
     </div>
   </div>
 
-  <div class="card">
-    <%= render "form", daily_price_arrival_report: @daily_price_arrival_report %>
+  <%= render "shared/form_errors", record: @daily_price_arrival_report %>
+
+  <div class="table-card report-sheet-card" data-grid-scope>
+    <div class="sheet-header">
+      <div>
+        <p class="eyebrow">Mandi Wise Entry</p>
+        <h2 class="table-title"><%= @selected_state&.name || "Select state" %></h2>
+      </div>
+      <div class="field-group daily-entry-date-field">
+        <%= label_tag :arrival_date_picker, "Arrival date" %>
+        <%= date_field_tag :arrival_date_picker, @entry_arrival_date, data: { daily_entry_date: true }, class: "sheet-entry-input" %>
+      </div>
+    </div>
+
+    <div class="sheet-toolbar daily-entry-toolbar">
+      <div class="sheet-mandi-tabs">
+        <% @entry_states.each do |state| %>
+          <%= link_to state.name, new_daily_price_arrival_report_path(state_id: state.id), class: ["sheet-tab-link", ("is-active" if @selected_state&.id == state.id && @selected_district.blank?)].compact.join(" ") %>
+        <% end %>
+      </div>
+    </div>
+
+    <% if @entry_districts.any? %>
+      <div class="sheet-toolbar daily-entry-toolbar">
+        <div class="sheet-mandi-tabs">
+          <%= link_to "All", new_daily_price_arrival_report_path(state_id: @selected_state.id), class: ["sheet-tab-link", ("is-active" if @selected_district.blank?)].compact.join(" ") %>
+          <% @entry_districts.each do |district| %>
+            <%= link_to district.name, new_daily_price_arrival_report_path(state_id: @selected_state.id, district_id: district.id), class: ["sheet-tab-link", ("is-active" if @selected_district&.id == district.id)].compact.join(" ") %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <div
+      class="daily-entry-defaults"
+      data-daily-entry-defaults
+      data-commodities="<%= json_escape(@commodities_data.to_json) %>"
+      data-varieties="<%= json_escape(@varieties_data.to_json) %>"
+      data-grades="<%= json_escape(@grades_data.to_json) %>"
+    >
+      <div>
+        <p class="eyebrow">Report Details</p>
+        <h3 class="daily-entry-defaults-title">Commodity details choose kariye</h3>
+      </div>
+
+      <div class="form-grid-six">
+        <div class="field-group">
+          <%= label_tag :entry_commodity_group_id, "Group" %>
+          <%= select_tag :entry_commodity_group_id,
+                         options_from_collection_for_select(@commodity_groups, :id, :name, @daily_price_arrival_report.commodity_group_id),
+                         prompt: "Select group",
+                         data: { daily_default_group: true } %>
+        </div>
+
+        <div class="field-group">
+          <%= label_tag :entry_commodity_id, "Commodity" %>
+          <%= select_tag :entry_commodity_id,
+                         "",
+                         data: { daily_default_commodity: true, selected: @daily_price_arrival_report.commodity_id } %>
+        </div>
+
+        <div class="field-group">
+          <%= label_tag :entry_variety_id, "Variety" %>
+          <%= select_tag :entry_variety_id,
+                         "",
+                         data: { daily_default_variety: true, selected: @daily_price_arrival_report.variety_id } %>
+        </div>
+
+        <div class="field-group">
+          <%= label_tag :entry_grade_id, "Grade" %>
+          <%= select_tag :entry_grade_id,
+                         "",
+                         data: { daily_default_grade: true, selected: @daily_price_arrival_report.grade_id } %>
+        </div>
+
+        <div class="field-group">
+          <%= label_tag :entry_price_unit_id, "Price Unit" %>
+          <%= select_tag :entry_price_unit_id,
+                         options_from_collection_for_select(@price_units, :id, :name, @daily_price_arrival_report.price_unit_id),
+                         prompt: "Price unit",
+                         data: { daily_default_price_unit: true } %>
+        </div>
+
+        <div class="field-group">
+          <%= label_tag :entry_arrival_unit_id, "Arrival Unit" %>
+          <%= select_tag :entry_arrival_unit_id,
+                         options_from_collection_for_select(@arrival_units, :id, :name, @daily_price_arrival_report.arrival_unit_id),
+                         prompt: "Arrival unit",
+                         data: { daily_default_arrival_unit: true } %>
+        </div>
+      </div>
+    </div>
+
+    <% if @entry_markets.any? %>
+      <div class="data-table-wrapper">
+        <table class="report-grid-table sheet-entry-table">
+          <thead>
+            <tr>
+              <th>S. No</th>
+              <th>Mandi / APMC</th>
+              <th>Grade</th>
+              <th>Min</th>
+              <th>Max</th>
+              <th>Modal</th>
+              <th>Arrival Qty</th>
+              <th>Reference / Attachment</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @entry_markets.each_with_index do |market, index| %>
+              <% records = @reports_by_market[market.id] || [] %>
+              <% latest_report = records.first %>
+              <% row_open = @active_market_id.to_s == market.id.to_s %>
+              <% quick_entry_params = {
+                return_to_entry: true,
+                state_id: @selected_state&.id,
+                district_id: @selected_district&.id,
+                market_id: market.id,
+                commodity_group_id: @daily_price_arrival_report.commodity_group_id,
+                commodity_id: @daily_price_arrival_report.commodity_id,
+                variety_id: @daily_price_arrival_report.variety_id,
+                grade_id: @daily_price_arrival_report.grade_id,
+                price_unit_id: @daily_price_arrival_report.price_unit_id,
+                arrival_unit_id: @daily_price_arrival_report.arrival_unit_id
+              }.compact %>
+              <tr class="sheet-grid-summary-row">
+                <td><%= index + 1 %></td>
+                <td class="sheet-entry-fixed">
+                  <strong><%= market.name %></strong>
+                  <span class="sheet-inline-hint"><%= [market.district.state.name, market.district.name].join(" / ") %></span>
+                  <% if latest_report.present? %>
+                    <span class="sheet-inline-hint">Saved <%= l(latest_report.created_at.in_time_zone, format: :long) %></span>
+                  <% end %>
+                </td>
+                <td><%= latest_report&.grade&.name || "-" %></td>
+                <td class="numeric-cell"><%= latest_report.present? ? number_with_precision(latest_report.min_price, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+                <td class="numeric-cell"><%= latest_report.present? ? number_with_precision(latest_report.max_price, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+                <td class="numeric-cell"><%= latest_report.present? ? number_with_precision(latest_report.modal_price, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
+                <td class="numeric-cell">
+                  <% if latest_report.present? %>
+                    <%= number_with_precision(latest_report.arrival_quantity, precision: 2, strip_insignificant_zeros: false) %>
+                    <%= latest_report.arrival_unit.short_name.presence || latest_report.arrival_unit.name %>
+                  <% else %>
+                    -
+                  <% end %>
+                </td>
+                <td class="sheet-entry-fixed">
+                  <%= latest_report&.remarks.presence || "-" %>
+                  <%= render "shared/attachment_links", record: latest_report if latest_report.present? %>
+                </td>
+                <td class="sheet-entry-action-cell">
+                  <div class="sheet-inline-actions">
+                    <% if latest_report.present? %>
+                      <%= link_to "✎", edit_daily_price_arrival_report_path(latest_report, quick_entry_params), class: "button button-secondary button-icon", title: "Edit record", aria: { label: "Edit record for #{market.name}" } %>
+                      <%= button_to "x", daily_price_arrival_report_path(latest_report), method: :delete, params: quick_entry_params, class: "button button-danger button-icon", title: "Delete record", form: { class: "button-to-inline" }, aria: { label: "Delete record for #{market.name}" } %>
+                    <% else %>
+                      -
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+
+              <% records.drop(1).each_with_index do |report, previous_index| %>
+                <tr class="sheet-entry-previous-row">
+                  <td><%= "#{index + 1}.#{previous_index + 2}" %></td>
+                  <td class="sheet-entry-fixed">
+                    <strong><%= market.name %></strong>
+                    <span class="sheet-inline-hint">Saved <%= l(report.created_at.in_time_zone, format: :long) %></span>
+                  </td>
+                  <td><%= report.grade.name %></td>
+                  <td class="numeric-cell"><%= number_with_precision(report.min_price, precision: 2, strip_insignificant_zeros: false) %></td>
+                  <td class="numeric-cell"><%= number_with_precision(report.max_price, precision: 2, strip_insignificant_zeros: false) %></td>
+                  <td class="numeric-cell"><%= number_with_precision(report.modal_price, precision: 2, strip_insignificant_zeros: false) %></td>
+                  <td class="numeric-cell"><%= number_with_precision(report.arrival_quantity, precision: 2, strip_insignificant_zeros: false) %> <%= report.arrival_unit.short_name.presence || report.arrival_unit.name %></td>
+                  <td class="sheet-entry-fixed">
+                    <%= report.remarks.presence || "-" %>
+                    <%= render "shared/attachment_links", record: report %>
+                  </td>
+                  <td class="sheet-entry-action-cell">
+                    <div class="sheet-inline-actions">
+                      <%= link_to "✎", edit_daily_price_arrival_report_path(report, quick_entry_params), class: "button button-secondary button-icon", title: "Edit record", aria: { label: "Edit saved record for #{market.name}" } %>
+                      <%= button_to "x", daily_price_arrival_report_path(report), method: :delete, params: quick_entry_params, class: "button button-danger button-icon", title: "Delete record", form: { class: "button-to-inline" }, aria: { label: "Delete saved record for #{market.name}" } %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+
+              <tr
+                id="daily-report-row-<%= market.id %>"
+                class="sheet-entry-inline-form-row <%= "is-open" if row_open %>"
+                data-grid-row
+                data-reset-on-open="<%= @daily_price_arrival_report.errors.blank? %>"
+                <%= "hidden" unless row_open %>
+              >
+                <% form_id = "daily_report_form_#{market.id}" %>
+                <td class="sheet-inline-flag-cell">
+                  <%= form_with model: DailyPriceArrivalReport.new(DailyPriceArrivalReport.default_entry_attributes.merge(market: market)), multipart: true, html: { id: form_id, autocomplete: "off" } do |form| %>
+                    <%= form.hidden_field :market_id, value: market.id %>
+                    <%= form.hidden_field :arrival_date, value: @entry_arrival_date, data: { daily_entry_date_target: true } %>
+                    <%= form.hidden_field :commodity_group_id, value: @daily_price_arrival_report.commodity_group_id, data: { daily_default_target: "commodity_group_id" } %>
+                    <%= form.hidden_field :commodity_id, value: @daily_price_arrival_report.commodity_id, data: { daily_default_target: "commodity_id" } %>
+                    <%= form.hidden_field :variety_id, value: @daily_price_arrival_report.variety_id, data: { daily_default_target: "variety_id" } %>
+                    <%= form.hidden_field :price_unit_id, value: @daily_price_arrival_report.price_unit_id, data: { daily_default_target: "price_unit_id" } %>
+                    <%= form.hidden_field :arrival_unit_id, value: @daily_price_arrival_report.arrival_unit_id, data: { daily_default_target: "arrival_unit_id" } %>
+                  <% end %>
+                  <span class="sheet-inline-flag"><%= records.size + 1 %></span>
+                </td>
+                <td class="sheet-entry-fixed">
+                  <strong><%= market.name %></strong>
+                  <span class="sheet-inline-hint">Add one more entry</span>
+                </td>
+                <td>
+                  <%= select_tag "daily_price_arrival_report[grade_id]",
+                                 "",
+                                 class: "sheet-entry-input",
+                                 form: form_id,
+                                 data: { daily_row_grade_select: true, selected: @daily_price_arrival_report.grade_id } %>
+                </td>
+                <td><%= number_field_tag "daily_price_arrival_report[min_price]", nil, step: :any, class: "sheet-entry-input", autocomplete: "off", form: form_id, placeholder: "Min" %></td>
+                <td><%= number_field_tag "daily_price_arrival_report[max_price]", nil, step: :any, class: "sheet-entry-input", autocomplete: "off", form: form_id, placeholder: "Max" %></td>
+                <td><%= number_field_tag "daily_price_arrival_report[modal_price]", nil, step: :any, class: "sheet-entry-input", autocomplete: "off", form: form_id, placeholder: "Modal" %></td>
+                <td><%= number_field_tag "daily_price_arrival_report[arrival_quantity]", nil, step: :any, class: "sheet-entry-input", autocomplete: "off", form: form_id, placeholder: "Arrival Qty" %></td>
+                <td class="sheet-entry-fixed">
+                  <%= text_field_tag "daily_price_arrival_report[remarks]", nil, class: "sheet-entry-input", autocomplete: "off", form: form_id, placeholder: "Reference / remark" %>
+                  <div class="sheet-inline-upload">
+                    <%= file_field_tag "daily_price_arrival_report[attachments][]", multiple: true, accept: attachment_accept, class: "sheet-entry-file-input", form: form_id %>
+                  </div>
+                </td>
+                <td class="sheet-entry-action-cell">
+                  <div class="sheet-inline-actions">
+                    <%= submit_tag "Save", class: "button button-primary button-compact", form: form_id %>
+                    <button type="button" class="button button-ghost button-icon" data-grid-toggle="daily-report-row-<%= market.id %>" aria-expanded="<%= row_open %>" title="Close add row" aria-label="Close add row">x</button>
+                  </div>
+                </td>
+              </tr>
+              <tr class="sheet-entry-launch-row">
+                <td colspan="8" class="sheet-entry-launch-copy">
+                  <span>Add FAQ / Non FAQ entry for <strong><%= market.name %></strong></span>
+                </td>
+                <td class="sheet-entry-action-cell">
+                  <div class="sheet-inline-actions">
+                    <button
+                      type="button"
+                      class="button button-primary button-icon sheet-row-toggle-button"
+                      data-grid-toggle="daily-report-row-<%= market.id %>"
+                      aria-expanded="<%= row_open %>"
+                      title="Add report"
+                      aria-label="Add report for <%= market.name %>"
+                    >
+                      +
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state">Is state/district ke liye abhi mandi master add nahi hai.</div>
+    <% end %>
   </div>
 </section>

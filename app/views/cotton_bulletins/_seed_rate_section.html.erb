@@ -21,6 +21,7 @@
             <th>Odisha</th>
             <th>Maharashtra</th>
             <th>Reference</th>
+            <th>Attachments</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -33,6 +34,7 @@
               <td><%= record.odisha_rate.presence || "-" %></td>
               <td><%= record.maharashtra_rate.presence || "-" %></td>
               <td><%= record.reference.presence || "-" %></td>
+              <td><%= render "shared/attachment_links", record: record %></td>
               <td>
                 <div class="inline-actions">
                   <%= link_to "Edit", edit_cotton_bulletin_cotton_seed_rate_path(bulletin, record), class: "button button-secondary" %>

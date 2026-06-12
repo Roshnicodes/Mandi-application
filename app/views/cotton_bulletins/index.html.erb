@@ -10,7 +10,12 @@
     <div class="page-actions">
       <%= link_to "Add Cotton Bulletin", new_cotton_bulletin_path, class: "button button-primary" %>
       <% if @cotton_bulletins.first.present? %>
+        <%= link_to "View Latest Excel", export_cotton_bulletin_path(@cotton_bulletins.first, preview: true), class: "button button-secondary", target: "_blank", rel: "noopener" %>
         <%= link_to "Download Latest Excel", export_cotton_bulletin_path(@cotton_bulletins.first), class: "button button-secondary" %>
+        <%= form_with url: import_cotton_bulletin_path(@cotton_bulletins.first), multipart: true, class: "import-inline-form" do %>
+          <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
+          <%= submit_tag "Import Latest Excel", class: "button button-secondary" %>
+        <% end %>
       <% end %>
     </div>
   </div>
