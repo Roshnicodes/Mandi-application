@@ -83,10 +83,6 @@ Rails.application.configure do
     "mandi.ploughmanagro.com"
   ]
 
-  config.hosts = [
-    "mandi.ploughmanagro.com"
-  ]
-
   # config.hosts = [
   #   "example.com",     # Allow requests from example.com
   #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`
