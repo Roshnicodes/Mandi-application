@@ -21,6 +21,7 @@ Rails.application.routes.draw do
   resources :cotton_bulletins do
     member do
       get :export
+      get :market_update
       post :import
     end
 

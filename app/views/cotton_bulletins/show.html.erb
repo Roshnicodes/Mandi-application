@@ -13,6 +13,7 @@
       </p>
     </div>
     <div class="page-actions">
+      <%= link_to "Market Update", market_update_cotton_bulletin_path(@cotton_bulletin), class: "button button-primary", target: "_blank", rel: "noopener" %>
       <%= link_to "View Excel", export_cotton_bulletin_path(@cotton_bulletin, preview: true), class: "button button-secondary", target: "_blank", rel: "noopener" %>
       <%= link_to "Download Excel", export_cotton_bulletin_path(@cotton_bulletin), class: "button button-primary" %>
       <%= form_with url: import_cotton_bulletin_path(@cotton_bulletin), multipart: true, class: "import-inline-form" do %>

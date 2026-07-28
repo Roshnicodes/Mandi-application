@@ -1,5 +1,5 @@
 class CottonBulletinsController < ApplicationController
-  before_action :set_cotton_bulletin, only: %i[show edit update destroy export import]
+  before_action :set_cotton_bulletin, only: %i[show edit update destroy export market_update import]
 
   def index
     @cotton_bulletins = CottonBulletin.recent_first
@@ -29,9 +29,14 @@ class CottonBulletinsController < ApplicationController
     end
   end
 
+  def market_update
+    preload_sections
+    render :market_update, layout: false
+  end
+
   def import
     if params[:excel_file].blank?
-      redirect_back fallback_location: cotton_bulletin_path(@cotton_bulletin), alert: "Import ke liye Excel file choose kariye."
+      redirect_back fallback_location: cotton_bulletin_path(@cotton_bulletin), alert: "Please choose an Excel file to import."
       return
     end
 
@@ -101,7 +106,6 @@ class CottonBulletinsController < ApplicationController
       @seed_rows = @cotton_bulletin.cotton_seed_rates.ordered
       @mch_rows = @cotton_bulletin.candy_rates_for("mch")
       @dch_rows = @cotton_bulletin.candy_rates_for("dch")
-      @regional_rows = @cotton_bulletin.cotton_regional_comparisons.ordered
     end
 
     def market_export_rows(category)

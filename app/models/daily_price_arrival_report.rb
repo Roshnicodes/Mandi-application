@@ -79,6 +79,8 @@ class DailyPriceArrivalReport < ApplicationRecord
     end
 
     def apply_entry_defaults
+      return if arrival_date.present? && commodity.present? && variety.present? && grade.present? && price_unit.present? && arrival_unit.present?
+
       defaults = self.class.default_entry_attributes
 
       self.arrival_date ||= defaults[:arrival_date]

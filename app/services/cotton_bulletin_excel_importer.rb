@@ -24,7 +24,7 @@ class CottonBulletinExcelImporter
 
   def import
     rows = parse_rows
-    return result_with_error("Excel file me readable rows nahi mili.") if rows.blank?
+    return result_with_error("No readable rows were found in the Excel file.") if rows.blank?
 
     ActiveRecord::Base.transaction do
       import_market_rows(rows)
@@ -38,10 +38,10 @@ class CottonBulletinExcelImporter
 
     Result.new(created: @created, updated: @updated, skipped: @skipped, errors: @errors)
   rescue Zip::Error
-    result_with_error("XLSX file open nahi ho payi. File corrupt ya unsupported format me ho sakti hai.")
+    result_with_error("The XLSX file could not be opened. It may be corrupt or use an unsupported format.")
   rescue => error
     Rails.logger.error("Cotton bulletin import failed: #{error.class}: #{error.message}")
-    result_with_error("Import nahi ho paya: #{error.message}")
+    result_with_error("The import failed: #{error.message}")
   ensure
     @upload&.tempfile&.rewind if @upload&.respond_to?(:tempfile)
   end

@@ -2,20 +2,31 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Daily Price Arrival Reports Excel</title>
+  <title>Date Wise Daily Prices</title>
   <style>
-    body { font-family: Arial, sans-serif; color: #1d2b24; margin: 0; padding: 18px; background: #ffffff; }
-    .preview-toolbar { display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin-bottom: 14px; position: sticky; top: 0; background: #ffffff; padding: 10px 0; }
+    body { font-family: Arial, sans-serif; color: #111111; margin: 0; padding: 18px; background: #ffffff; }
+    .preview-toolbar { display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin-bottom: 14px; position: sticky; top: 0; z-index: 2; background: #ffffff; padding: 10px 0; }
     .preview-button { display: inline-block; padding: 9px 13px; border-radius: 8px; background: #eef5ef; color: #1f5535; text-decoration: none; font-weight: 700; border: 1px solid #c9ddcf; }
     .preview-button.primary { background: #2e6a43; color: #ffffff; border-color: #2e6a43; }
-    h1 { margin: 0 0 4px; font-size: 22px; }
-    .subtitle { margin: 0 0 18px; color: #53635b; font-size: 13px; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    th { background: #e8f2eb; color: #1d2b24; font-weight: 700; }
-    th, td { border: 1px solid #9fb5a7; padding: 7px 8px; text-align: left; vertical-align: top; mso-number-format: "\@"; }
-    .numeric-cell { text-align: right; }
-    .empty { padding: 22px; border: 1px dashed #9fb5a7; color: #53635b; }
-    @media print { .preview-toolbar { display: none; } }
+    .report-section { margin: 0 0 30px; page-break-after: always; }
+    .report-section:last-child { page-break-after: auto; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 16px; }
+    th, td { border: 1px solid #333333; padding: 5px 7px; vertical-align: middle; mso-number-format: "\@"; }
+    .report-title { font-size: 24px; line-height: 1.35; font-weight: 700; text-align: center; border-bottom: 0; }
+    .section-title { font-size: 18px; line-height: 1.3; font-weight: 700; text-align: center; }
+    .column-heading { height: 62px; font-size: 17px; line-height: 1.35; font-weight: 700; text-align: center; background: #ffffff; }
+    .market-heading { font-size: 17px; font-weight: 700; text-align: left; background: #f6f6f6; }
+    .date-cell { width: 18%; white-space: nowrap; text-align: left; }
+    .arrival-cell { width: 18%; text-align: right; }
+    .variety-cell { width: 13%; white-space: nowrap; text-align: left; }
+    .price-cell { width: 17%; text-align: right; }
+    .latest-row td { background: #f8cbad; font-weight: 700; }
+    .empty { padding: 22px; border: 1px dashed #777777; color: #555555; }
+    @media print {
+      body { padding: 0; }
+      .preview-toolbar { display: none; }
+      .report-section { margin-bottom: 0; }
+    }
   </style>
 </head>
 <body>
@@ -27,57 +38,68 @@
     </div>
   <% end %>
 
-  <h1>Daily Price Arrival Reports</h1>
-  <p class="subtitle">
-    Exported on <%= Time.current.strftime("%d %b %Y, %I:%M %p") %>
-    <% if @filters.values.any?(&:present?) %>| Filtered report<% else %>| All saved data<% end %>
-  </p>
-
   <% if @reports.any? %>
-    <table>
-      <thead>
-        <tr>
-          <th>Created On</th>
-          <th>Arrival Date</th>
-          <th>State</th>
-          <th>District</th>
-          <th>Market</th>
-          <th>Commodity Group</th>
-          <th>Commodity</th>
-          <th>Variety</th>
-          <th>Grade</th>
-          <th>Min</th>
-          <th>Max</th>
-          <th>Modal</th>
-          <th>Arrival Qty</th>
-          <th>Price Unit</th>
-          <th>Arrival Unit</th>
-          <th>Reference / Remarks</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @reports.each do |report| %>
-          <tr>
-            <td><%= report.created_at.strftime("%d %b %Y, %I:%M %p") %></td>
-            <td><%= report.arrival_date.strftime("%d %b %Y") %></td>
-            <td><%= report.state.name %></td>
-            <td><%= report.district.name %></td>
-            <td><%= report.market.name %></td>
-            <td><%= report.commodity_group.name %></td>
-            <td><%= report.commodity.name %></td>
-            <td><%= report.variety.name %></td>
-            <td><%= report.grade.name %></td>
-            <td class="numeric-cell"><%= number_with_precision(report.min_price, precision: 2, strip_insignificant_zeros: false) %></td>
-            <td class="numeric-cell"><%= number_with_precision(report.max_price, precision: 2, strip_insignificant_zeros: false) %></td>
-            <td class="numeric-cell"><%= number_with_precision(report.modal_price, precision: 2, strip_insignificant_zeros: false) %></td>
-            <td class="numeric-cell"><%= number_with_precision(report.arrival_quantity, precision: 2, strip_insignificant_zeros: false) %></td>
-            <td><%= report.price_unit.short_name.presence || report.price_unit.name %></td>
-            <td><%= report.arrival_unit.short_name.presence || report.arrival_unit.name %></td>
-            <td><%= report.remarks %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+    <% report_sections = @reports.to_a.group_by { |report| [report.commodity_id, report.state_id] } %>
+    <% report_sections.sort_by { |(_ids, reports)| [reports.first.commodity.name.downcase, reports.first.state.name.downcase] }.each do |_ids, section_reports| %>
+      <% section_reports = section_reports.sort_by { |report| [report.market.name.downcase, report.arrival_date, report.created_at] } %>
+      <% first_report = section_reports.first %>
+      <% commodity_name = first_report.commodity.name %>
+      <% state_name = first_report.state.name %>
+      <% dates = section_reports.map(&:arrival_date) %>
+      <% latest_date = dates.max %>
+      <% period_label = if dates.min.beginning_of_month == dates.max.beginning_of_month
+                          dates.min.strftime("%B, %Y")
+                        else
+                          "#{dates.min.strftime('%d %B, %Y')} to #{dates.max.strftime('%d %B, %Y')}"
+                        end %>
+      <% arrival_units = section_reports.map { |report| report.arrival_unit.name.presence || report.arrival_unit.short_name }.uniq %>
+      <% price_units = section_reports.map { |report| report.price_unit.short_name.presence || report.price_unit.name }.uniq %>
+      <% arrival_unit_label = arrival_units.one? ? arrival_units.first : "Reported Unit" %>
+      <% price_unit_label = price_units.one? ? price_units.first : "Reported Unit" %>
+
+      <div class="report-section">
+        <table>
+          <thead>
+            <tr>
+              <th colspan="6" class="report-title">
+                Date Wise Prices for Specified Commodity on <%= period_label %><br>
+                for Commodity : <%= commodity_name %>, State : <%= state_name %>
+              </th>
+            </tr>
+            <tr>
+              <th colspan="6" class="section-title">Commodity : <%= commodity_name %>, State : <%= state_name %></th>
+            </tr>
+            <tr>
+              <th class="column-heading">Arrival Date</th>
+              <th class="column-heading">Arrivals (<%= arrival_unit_label %>)</th>
+              <th class="column-heading">Variety</th>
+              <th class="column-heading">Minimum Price<br>(<%= price_unit_label %>)</th>
+              <th class="column-heading">Maximum Price<br>(<%= price_unit_label %>)</th>
+              <th class="column-heading">Modal Price<br>(<%= price_unit_label %>)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% section_reports.group_by(&:market).sort_by { |market, _reports| market.name.downcase }.each do |market, market_reports| %>
+              <tr>
+                <td colspan="6" class="market-heading">Market Name : <%= market.name %></td>
+              </tr>
+              <% previous_date = nil %>
+              <% market_reports.each do |report| %>
+                <tr class="<%= 'latest-row' if report.arrival_date == latest_date %>">
+                  <td class="date-cell"><%= report.arrival_date.strftime("%d/%m/%Y") unless report.arrival_date == previous_date %></td>
+                  <td class="arrival-cell"><%= number_with_precision(report.arrival_quantity, precision: 2, strip_insignificant_zeros: false, delimiter: ",") %></td>
+                  <td class="variety-cell"><%= report.grade.name %></td>
+                  <td class="price-cell"><%= number_with_precision(report.min_price, precision: 2, strip_insignificant_zeros: false, delimiter: ",") %></td>
+                  <td class="price-cell"><%= number_with_precision(report.max_price, precision: 2, strip_insignificant_zeros: false, delimiter: ",") %></td>
+                  <td class="price-cell"><%= number_with_precision(report.modal_price, precision: 2, strip_insignificant_zeros: false, delimiter: ",") %></td>
+                </tr>
+                <% previous_date = report.arrival_date %>
+              <% end %>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
   <% else %>
     <div class="empty">Selected filters ke liye koi daily report nahi mila.</div>
   <% end %>

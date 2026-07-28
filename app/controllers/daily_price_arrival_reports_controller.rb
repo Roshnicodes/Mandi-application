@@ -30,7 +30,7 @@ class DailyPriceArrivalReportsController < ApplicationController
 
   def import
     if params[:excel_file].blank?
-      redirect_back fallback_location: daily_price_arrival_reports_path, alert: "Import ke liye Excel file choose kariye."
+      redirect_back fallback_location: daily_price_arrival_reports_path, alert: "Please choose an Excel file to import."
       return
     end
 

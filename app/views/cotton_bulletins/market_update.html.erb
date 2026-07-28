@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= @cotton_bulletin.title %> - Market Update</title>
+    <style>
+      :root {
+        --navy: #092d61;
+        --blue: #124f92;
+        --green: #0b632e;
+        --green-dark: #064722;
+        --green-soft: #edf7ef;
+        --orange: #e87524;
+        --orange-soft: #fff1e7;
+        --red: #b61f24;
+        --ink: #17202a;
+        --muted: #5f6b76;
+        --line: #c8d2db;
+        --paper: #fffef9;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        padding: 78px 18px 28px;
+        background: #dfe5e8;
+        color: var(--ink);
+        font-family: Arial, "Segoe UI", sans-serif;
+      }
+
+      .market-toolbar {
+        position: fixed;
+        inset: 0 0 auto;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 12px 18px;
+        background: rgba(255, 255, 255, 0.96);
+        border-bottom: 1px solid #cfd7dc;
+        box-shadow: 0 3px 14px rgba(20, 42, 57, 0.12);
+      }
+
+      .market-toolbar strong { color: var(--green-dark); }
+      .market-toolbar-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+      .toolbar-button {
+        appearance: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 8px 13px;
+        border: 1px solid #c4ced4;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #22313b;
+        cursor: pointer;
+        font: 700 13px/1 Arial, sans-serif;
+        text-decoration: none;
+      }
+
+      .toolbar-button.primary { border-color: var(--green); background: var(--green); color: #ffffff; }
+
+      .market-sheet {
+        width: min(100%, 980px);
+        margin: 0 auto;
+        overflow: hidden;
+        border: 1px solid #7e8d98;
+        background: var(--paper);
+        box-shadow: 0 18px 46px rgba(22, 43, 57, 0.18);
+      }
+
+      .market-hero {
+        position: relative;
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 230px;
+        min-height: 185px;
+        padding: 22px 24px 18px;
+        background:
+          radial-gradient(circle at 84% 25%, rgba(255, 255, 255, 0.94) 0 3px, transparent 4px),
+          radial-gradient(circle at 76% 60%, rgba(255, 255, 255, 0.82) 0 4px, transparent 5px),
+          linear-gradient(135deg, #ffffff 0%, #f6fbff 60%, #e7f0f5 100%);
+        border-bottom: 5px solid var(--green-dark);
+      }
+
+      .tricolour {
+        display: flex;
+        width: 132px;
+        height: 8px;
+        margin-bottom: 10px;
+        overflow: hidden;
+        border-radius: 99px;
+      }
+
+      .tricolour span { flex: 1; }
+      .tricolour span:nth-child(1) { background: #ef7d24; }
+      .tricolour span:nth-child(2) { background: #ffffff; border-block: 1px solid #d9d9d9; }
+      .tricolour span:nth-child(3) { background: #168347; }
+
+      .market-hero h1 {
+        max-width: 690px;
+        margin: 0;
+        font-size: clamp(30px, 5vw, 55px);
+        line-height: 0.92;
+        letter-spacing: -0.04em;
+        text-transform: uppercase;
+      }
+
+      .market-hero h1 span { display: block; color: var(--red); }
+      .market-hero h1 em { display: block; color: var(--green); font-style: normal; font-size: 0.68em; }
+
+      .market-update-label {
+        display: inline-flex;
+        margin-top: 12px;
+        padding: 6px 18px;
+        border-radius: 4px;
+        background: var(--navy);
+        color: #ffffff;
+        font-size: 18px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .report-date {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .report-date strong { color: var(--red); font-size: 15px; }
+
+      .cotton-art {
+        position: relative;
+        align-self: stretch;
+        min-height: 145px;
+      }
+
+      .cotton-bale {
+        position: absolute;
+        right: 18px;
+        top: 26px;
+        width: 150px;
+        height: 96px;
+        border: 4px solid #b9a788;
+        border-radius: 18px;
+        background:
+          linear-gradient(90deg, transparent 30%, rgba(143, 122, 88, 0.25) 31% 33%, transparent 34% 65%, rgba(143, 122, 88, 0.25) 66% 68%, transparent 69%),
+          linear-gradient(180deg, #fffdf3, #eee5d3);
+        box-shadow: 0 14px 20px rgba(70, 55, 34, 0.18);
+        transform: rotate(3deg);
+      }
+
+      .cotton-bale::before,
+      .cotton-bale::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        background: #fffef7;
+        box-shadow: 23px 8px 0 #f7f2e6, 46px -2px 0 #fffef7, 69px 9px 0 #f5eedf, 91px 0 0 #fffdf5;
+      }
+
+      .cotton-bale::before { left: -44px; bottom: -31px; width: 32px; height: 32px; }
+      .cotton-bale::after { left: 26px; bottom: -35px; width: 28px; height: 28px; }
+
+      .overview-strip {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1px;
+        padding: 9px;
+        background: #d7ded7;
+      }
+
+      .overview-item {
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr);
+        align-items: center;
+        gap: 9px;
+        min-height: 68px;
+        padding: 8px 10px;
+        background: #ffffff;
+      }
+
+      .overview-icon {
+        display: grid;
+        width: 40px;
+        height: 40px;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--green-soft);
+        color: var(--green-dark);
+        font-size: 22px;
+      }
+
+      .overview-item span { display: block; color: var(--muted); font-size: 10px; text-transform: uppercase; }
+      .overview-item strong { display: block; margin-top: 3px; color: var(--green-dark); font-size: 15px; line-height: 1.1; }
+
+      .sheet-content { display: grid; gap: 9px; padding: 9px; }
+
+      .section-banner {
+        padding: 7px 12px;
+        border-radius: 7px 7px 2px 2px;
+        background: linear-gradient(90deg, var(--green-dark), var(--green));
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 900;
+        letter-spacing: 0.05em;
+        text-align: center;
+        text-transform: uppercase;
+      }
+
+      .cards-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+
+      .market-card {
+        overflow: hidden;
+        border: 1px solid var(--blue);
+        border-radius: 7px;
+        background: #ffffff;
+      }
+
+      .market-card.orange { border-color: var(--orange); }
+
+      .card-heading {
+        padding: 7px 10px;
+        background: var(--blue);
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 900;
+        text-align: center;
+        text-transform: uppercase;
+      }
+
+      .market-card.orange .card-heading { background: var(--orange); }
+
+      .rate-list { display: grid; padding: 5px 9px; }
+
+      .rate-row {
+        display: grid;
+        grid-template-columns: minmax(95px, 1.1fr) minmax(80px, 0.85fr) minmax(105px, 1fr);
+        gap: 7px;
+        padding: 6px 2px;
+        border-bottom: 1px dashed #ccd4d9;
+        font-size: 11px;
+        line-height: 1.25;
+      }
+
+      .rate-row:last-child { border-bottom: 0; }
+      .rate-row strong { color: var(--navy); }
+      .rate-price { text-align: right; font-weight: 800; }
+      .rate-quantity { color: var(--muted); text-align: right; }
+
+      .market-tone {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 30px;
+        padding: 5px 9px;
+        border-top: 1px solid #cbd5dc;
+        background: #f8fbfc;
+        color: var(--green-dark);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .seed-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+
+      .seed-card {
+        display: grid;
+        gap: 5px;
+        min-height: 82px;
+        padding: 10px;
+        border: 1px solid #91b69d;
+        border-radius: 7px;
+        background: linear-gradient(180deg, #ffffff, var(--green-soft));
+        text-align: center;
+      }
+
+      .seed-card strong { color: var(--green-dark); font-size: 12px; }
+      .seed-values { display: grid; gap: 3px; color: var(--ink); font-size: 11px; }
+      .seed-values b { color: var(--red); }
+
+      .overall-tone {
+        display: grid;
+        grid-template-columns: 150px minmax(0, 1fr);
+        align-items: center;
+        gap: 15px;
+        padding: 13px 18px;
+        border: 2px solid var(--green-dark);
+        border-radius: 8px;
+        background: linear-gradient(90deg, #ffffff, var(--green-soft));
+      }
+
+      .overall-tone span { color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; }
+      .overall-tone strong { color: var(--green-dark); font-size: clamp(18px, 3vw, 27px); text-transform: uppercase; }
+
+      .sheet-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 12px 18px;
+        border-top: 4px solid var(--green);
+        background: #f8f6ec;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .sheet-footer strong { color: var(--green-dark); font-size: 13px; }
+
+      .empty-section {
+        padding: 18px;
+        border: 1px dashed #aebbc4;
+        border-radius: 7px;
+        color: var(--muted);
+        font-size: 12px;
+        text-align: center;
+      }
+
+      @media (max-width: 760px) {
+        body { padding: 68px 8px 16px; }
+        .market-toolbar { padding: 9px; }
+        .market-toolbar > strong { display: none; }
+        .market-toolbar-actions { width: 100%; justify-content: center; }
+        .market-hero { grid-template-columns: 1fr; min-height: 0; padding: 18px; }
+        .cotton-art { display: none; }
+        .overview-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .cards-grid { grid-template-columns: 1fr; }
+        .seed-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .rate-row { grid-template-columns: minmax(90px, 1fr) minmax(110px, 1fr); }
+        .rate-quantity { grid-column: 1 / -1; text-align: left; }
+        .overall-tone { grid-template-columns: 1fr; gap: 5px; text-align: center; }
+      }
+
+      @media (max-width: 460px) {
+        .overview-strip, .seed-grid { grid-template-columns: 1fr; }
+        .market-hero h1 { font-size: 29px; }
+        .market-update-label { font-size: 14px; }
+        .sheet-footer { align-items: flex-start; flex-direction: column; }
+      }
+
+      @media print {
+        @page { size: A4 portrait; margin: 7mm; }
+        body { padding: 0; background: #ffffff; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+        .market-toolbar { display: none; }
+        .market-sheet { width: 100%; border: 0; box-shadow: none; }
+        .market-hero { min-height: 150px; }
+        .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .seed-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .market-card, .seed-card, .overall-tone { break-inside: avoid; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <%
+      all_market_rows = (@mandi_observations.to_a + @cci_observations.to_a)
+      market_groups = all_market_rows.group_by { |row| row.state&.name.presence || "Mandi Market" }
+      total_arrival = all_market_rows.sum { |row| row.arrival_quantity.to_d }
+      price_values = all_market_rows.flat_map { |row| [row.minimum_price, row.maximum_price, row.modal_price] }.compact
+      minimum_price = price_values.min
+      maximum_price = price_values.max
+      market_note = @cotton_bulletin.notes.presence || "Market data updated"
+      money = ->(value) { value.present? ? "₹#{number_with_precision(value, precision: 0, delimiter: ',', strip_insignificant_zeros: true)}" : "—" }
+      value_or_dash = ->(value) { value.present? ? value : "—" }
+    %>
+
+    <div class="market-toolbar">
+      <strong>Cotton Market Update · <%= @cotton_bulletin.report_date.strftime("%d %b %Y") %></strong>
+      <div class="market-toolbar-actions">
+        <button type="button" class="toolbar-button" onclick="window.close()">Close</button>
+        <button type="button" class="toolbar-button" data-share-market-update>Share</button>
+        <button type="button" class="toolbar-button" onclick="window.print()">Print / PDF</button>
+        <%= link_to "View Excel", export_cotton_bulletin_path(@cotton_bulletin, preview: true), class: "toolbar-button primary" %>
+      </div>
+    </div>
+
+    <main class="market-sheet" data-market-update>
+      <header class="market-hero">
+        <div>
+          <div class="tricolour" aria-hidden="true"><span></span><span></span><span></span></div>
+          <h1>
+            All India
+            <span>Raw Cotton & Kapas</span>
+            <em>Market Intelligence Bulletin</em>
+          </h1>
+          <div class="market-update-label">Market Update</div>
+          <div class="report-date">▣ Date: <strong><%= @cotton_bulletin.report_date.strftime("%d %B %Y") %></strong></div>
+        </div>
+        <div class="cotton-art" aria-hidden="true"><div class="cotton-bale"></div></div>
+      </header>
+
+      <section class="overview-strip" aria-label="Market overview">
+        <article class="overview-item">
+          <div class="overview-icon">◎</div>
+          <div><span>Markets Reported</span><strong><%= all_market_rows.size %></strong></div>
+        </article>
+        <article class="overview-item">
+          <div class="overview-icon">↗</div>
+          <div><span>Observed Price Range</span><strong><%= minimum_price ? "#{money.call(minimum_price)}–#{money.call(maximum_price)}" : "Not reported" %></strong></div>
+        </article>
+        <article class="overview-item">
+          <div class="overview-icon">▤</div>
+          <div><span>Total Arrival</span><strong><%= number_with_precision(total_arrival, precision: 2, delimiter: ",", strip_insignificant_zeros: true) %> Qtl</strong></div>
+        </article>
+        <article class="overview-item">
+          <div class="overview-icon">◉</div>
+          <div><span>Seed / Candy Updates</span><strong><%= @seed_rates.size + @mch_rates.size + @dch_rates.size %></strong></div>
+        </article>
+      </section>
+
+      <div class="sheet-content">
+        <% if all_market_rows.any? %>
+          <section>
+            <div class="section-banner">Kapas & Raw Cotton Market</div>
+            <div class="cards-grid">
+              <% market_groups.sort_by { |state_name, _rows| state_name }.each_with_index do |(state_name, rows), group_index| %>
+                <article class="market-card <%= 'orange' if group_index.odd? %>">
+                  <div class="card-heading"><%= state_name %></div>
+                  <div class="rate-list">
+                    <% rows.each do |row| %>
+                      <div class="rate-row">
+                        <strong><%= row.market_label %></strong>
+                        <span><%= row.minimum_price.present? || row.maximum_price.present? ? "#{money.call(row.minimum_price)}–#{money.call(row.maximum_price)} / Qtl" : value_or_dash.call(row.arrival_price) %></span>
+                        <span class="rate-quantity"><%= row.arrival_quantity.present? ? "#{number_with_precision(row.arrival_quantity, precision: 2, strip_insignificant_zeros: true)} Qtl arrival" : value_or_dash.call(row.moisture) %></span>
+                      </div>
+                    <% end %>
+                  </div>
+                  <div class="market-tone">↗ <%= rows.filter_map(&:remarks).first.presence || "Latest market rate recorded" %></div>
+                </article>
+              <% end %>
+            </div>
+          </section>
+        <% end %>
+
+        <% if @seed_rates.any? %>
+          <section>
+            <div class="section-banner">Cotton Seed Market</div>
+            <div class="seed-grid">
+              <% @seed_rates.each do |row| %>
+                <article class="seed-card">
+                  <strong>◉ <%= row.particular %></strong>
+                  <div class="seed-values">
+                    <% if row.madhya_pradesh_rate.present? %><span>Madhya Pradesh: <b><%= row.madhya_pradesh_rate %></b></span><% end %>
+                    <% if row.maharashtra_rate.present? %><span>Maharashtra: <b><%= row.maharashtra_rate %></b></span><% end %>
+                    <% if row.odisha_rate.present? %><span>Odisha: <b><%= row.odisha_rate %></b></span><% end %>
+                    <% if row.reference.present? %><span><%= row.reference %></span><% end %>
+                  </div>
+                </article>
+              <% end %>
+            </div>
+          </section>
+        <% end %>
+
+        <% if @mch_rates.any? || @dch_rates.any? %>
+          <section>
+            <div class="section-banner">Cotton Candy Rate</div>
+            <div class="cards-grid">
+              <% [["MCH Cotton", @mch_rates], ["DCH / Extra Long Staple", @dch_rates]].each_with_index do |(heading, rows), index| %>
+                <% next if rows.empty? %>
+                <article class="market-card <%= 'orange' if index.odd? %>">
+                  <div class="card-heading"><%= heading %></div>
+                  <div class="rate-list">
+                    <% rows.each do |row| %>
+                      <% rates = [
+                        ["Madhya Pradesh", row.madhya_pradesh_rate], ["Maharashtra 29mm", row.maharashtra_29mm_rate],
+                        ["Maharashtra 31mm", row.maharashtra_31mm_rate], ["Odisha 29mm", row.odisha_29mm_rate],
+                        ["Odisha 30mm", row.odisha_30mm_rate]
+                      ].select { |_label, rate| rate.present? } %>
+                      <div class="rate-row">
+                        <strong><%= row.parameter %></strong>
+                        <span><%= rates.first ? "#{rates.first[0]}: #{rates.first[1]}" : "—" %></span>
+                        <span class="rate-quantity"><%= rates.drop(1).map { |label, rate| "#{label}: #{rate}" }.join(" · ").presence || row.reference.presence || "Per candy" %></span>
+                      </div>
+                    <% end %>
+                  </div>
+                  <div class="market-tone">↗ Latest candy rates as reported</div>
+                </article>
+              <% end %>
+            </div>
+          </section>
+        <% end %>
+
+        <% if @gin_observations.any? || @tdn_observations.any? %>
+          <section>
+            <div class="section-banner">Gin & Moisture Market</div>
+            <div class="cards-grid">
+              <% [["Gin Wise", @gin_observations], ["TDN / Moisture", @tdn_observations]].each_with_index do |(heading, rows), index| %>
+                <% next if rows.empty? %>
+                <article class="market-card <%= 'orange' if index.odd? %>">
+                  <div class="card-heading"><%= heading %></div>
+                  <div class="rate-list">
+                    <% rows.each do |row| %>
+                      <div class="rate-row">
+                        <strong><%= row.name %></strong>
+                        <span><%= value_or_dash.call(row.arrival_price) %></span>
+                        <span class="rate-quantity"><%= row.moisture.present? ? "Moisture: #{row.moisture}" : (row.arrival_quantity.present? ? "#{row.arrival_quantity} Qtl" : "—") %></span>
+                      </div>
+                    <% end %>
+                  </div>
+                </article>
+              <% end %>
+            </div>
+          </section>
+        <% end %>
+
+        <% if all_market_rows.empty? && @seed_rates.empty? && @mch_rates.empty? && @dch_rates.empty? && @gin_observations.empty? && @tdn_observations.empty? %>
+          <div class="empty-section">Is bulletin mein infographic ke liye market data abhi available nahi hai.</div>
+        <% end %>
+
+        <section class="overall-tone">
+          <span>Overall Market Note</span>
+          <strong><%= market_note %></strong>
+        </section>
+      </div>
+
+      <footer class="sheet-footer">
+        <div><strong>Mandi Pro · Cotton Market Intelligence</strong><br>Rates are based on saved bulletin entries and market observations.</div>
+        <div><%= @cotton_bulletin.title %> · <%= @cotton_bulletin.report_date.strftime("%d %b %Y") %></div>
+      </footer>
+    </main>
+
+    <script>
+      document.querySelector("[data-share-market-update]")?.addEventListener("click", async function () {
+        const shareData = {
+          title: <%= @cotton_bulletin.title.to_json.html_safe %>,
+          text: <%= "Cotton Market Update - #{@cotton_bulletin.report_date.strftime('%d %B %Y')}".to_json.html_safe %>,
+          url: window.location.href
+        };
+
+        if (navigator.share) {
+          try { await navigator.share(shareData); } catch (error) { if (error.name !== "AbortError") window.alert("Share nahi ho paya."); }
+        } else {
+          await navigator.clipboard.writeText(window.location.href);
+          window.alert("Market update link copy ho gaya.");
+        }
+      });
+    </script>
+  </body>
+</html>

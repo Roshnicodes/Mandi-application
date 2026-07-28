@@ -150,7 +150,7 @@ class CottonMarketObservationsController < CottonBulletinNestedController
       @category = params[:category].to_s
       return if CottonMarketObservation.template_grid_supported?(@category)
 
-      redirect_to cotton_bulletin_path(@cotton_bulletin), alert: "Is section ke liye grid view available nahi hai."
+      redirect_to cotton_bulletin_path(@cotton_bulletin), alert: "Grid view is not available for this section."
     end
 
     def redirect_template_categories_to_grid

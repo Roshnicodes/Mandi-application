@@ -1,214 +1,168 @@
 <% content_for :title, "Dashboard" %>
 
 <%
-  greeting_name = current_user.name.to_s.split.first.presence || "Team"
   top_state_count = @state_summaries.values.max.to_i
   top_state_count = 1 if top_state_count.zero?
 %>
 
-<section class="responsive-stack dashboard-shell">
-  <div class="dashboard-hero">
-    <div class="dashboard-hero-copy">
-      <p class="eyebrow">Control Center</p>
-      <h1>Mandi reporting at a glance</h1>
-      <p class="dashboard-lead">Welcome back, <%= greeting_name %>. Track arrivals, keep master data clean and move faster into daily mandi rate updates from one focused workspace.</p>
+<section class="portal-dashboard">
+  <nav class="portal-breadcrumb" aria-label="Breadcrumb">
+    <%= link_to "Home", root_path %>
+    <span>›</span>
+    <strong>Dashboard</strong>
+    <span class="portal-required-note">Data updated from saved mandi reports</span>
+  </nav>
 
-      <div class="dashboard-pill-row">
-        <div class="dashboard-pill">
-          <span class="dashboard-pill-label">Latest reporting day</span>
-          <strong><%= @latest_report_date&.strftime("%d %b %Y") || "No data" %></strong>
-        </div>
-        <div class="dashboard-pill">
-          <span class="dashboard-pill-label">Commodities active</span>
-          <strong><%= number_with_delimiter(@commodities_covered) %></strong>
-        </div>
-        <div class="dashboard-pill">
-          <span class="dashboard-pill-label">States reporting</span>
-          <strong><%= number_with_delimiter(@state_summaries.size) %></strong>
-        </div>
+  <div class="portal-module-panel">
+    <div class="portal-panel-title">
+      <div>
+        <span class="portal-title-kicker">Mandi Reporting Workspace</span>
+        <h1>Dashboard</h1>
       </div>
-
-      <div class="page-actions dashboard-actions">
-        <%= link_to "Add Daily Report", new_daily_price_arrival_report_path, class: "button button-primary" %>
-        <%= link_to "Daily Excel Tools", daily_price_arrival_reports_path, class: "button button-secondary" %>
-        <%= link_to "Cotton Excel Tools", cotton_bulletins_path, class: "button button-secondary" %>
-        <%= link_to "Manage Markets", markets_path, class: "button button-secondary" %>
-      </div>
+      <span class="portal-help" title="Dashboard Help">?</span>
     </div>
 
-    <aside class="live-clock-card" data-live-clock data-timezone="Asia/Kolkata">
-      <div class="live-clock-face">
-        <span class="clock-orbit-line"></span>
-        <span class="clock-hover-sweep"></span>
-        <span class="clock-ring clock-ring-outer"></span>
-        <span class="clock-ring clock-ring-inner"></span>
-        <span class="clock-axis clock-axis-vertical"></span>
-        <span class="clock-axis clock-axis-horizontal"></span>
-        <span class="clock-number clock-number-12">12</span>
-        <span class="clock-number clock-number-3">3</span>
-        <span class="clock-number clock-number-6">6</span>
-        <span class="clock-number clock-number-9">9</span>
-        <span class="clock-hand clock-hand-hour" data-clock-hour></span>
-        <span class="clock-hand clock-hand-minute" data-clock-minute></span>
-        <span class="clock-hand clock-hand-second" data-clock-second></span>
-        <span class="clock-center-dot"></span>
-      </div>
-
-      <div class="live-clock-meta">
-        <span class="live-clock-badge">Live mandi watch</span>
-        <strong class="live-clock-time" data-clock-time>--:--:--</strong>
-        <span class="live-clock-date" data-clock-date>--</span>
-        <span class="live-clock-zone" data-clock-context>Asia/Kolkata</span>
-      </div>
-
-      <div class="live-clock-signal">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-    </aside>
+    <div class="portal-module-tabs">
+      <%= link_to "Dashboard", root_path, class: "active" %>
+      <%= link_to "Daily Reports", daily_price_arrival_reports_path %>
+      <%= link_to "Arrival Summary", daily_arrival_summaries_path %>
+      <%= link_to "Cotton Bulletins", cotton_bulletins_path %>
+      <%= link_to "Cotton Overview", cotton_market_overviews_path %>
+      <%= link_to "Market / APMC", markets_path %>
+      <%= link_to "Commodity Master", commodities_path %>
+      <%= link_to "State Master", states_path %>
+    </div>
   </div>
 
-  <div class="dashboard-summary-grid">
-    <article class="stat-card dashboard-stat-card dashboard-stat-highlight">
-      <span class="dashboard-stat-kicker">Latest arrival date</span>
-      <strong><%= @latest_report_date&.strftime("%d %b %Y") || "No data" %></strong>
-      <p class="dashboard-stat-note">Most recent mandi reporting day captured in the system.</p>
+  <div class="portal-summary-grid">
+    <article>
+      <span>Latest Reporting Date</span>
+      <strong><%= @latest_report_date&.strftime("%d/%m/%Y") || "No data" %></strong>
     </article>
-
-    <article class="stat-card dashboard-stat-card">
-      <span class="dashboard-stat-kicker">Total reports</span>
+    <article>
+      <span>Total Daily Reports</span>
       <strong><%= number_with_delimiter(@total_reports) %></strong>
-      <p class="dashboard-stat-note">All saved daily arrival and rate entries.</p>
     </article>
-
-    <article class="stat-card dashboard-stat-card">
-      <span class="dashboard-stat-kicker">Markets covered</span>
+    <article>
+      <span>Markets Covered</span>
       <strong><%= number_with_delimiter(@markets_covered) %></strong>
-      <p class="dashboard-stat-note">Distinct mandis actively represented in reporting.</p>
     </article>
-
-    <article class="stat-card dashboard-stat-card">
-      <span class="dashboard-stat-kicker">Commodities covered</span>
+    <article>
+      <span>Commodities Covered</span>
       <strong><%= number_with_delimiter(@commodities_covered) %></strong>
-      <p class="dashboard-stat-note">Commodity lines currently flowing into rate records.</p>
     </article>
-
-    <article class="stat-card dashboard-stat-card">
-      <span class="dashboard-stat-kicker">Arrival qty on latest date</span>
+    <article>
+      <span>Latest Arrival Quantity</span>
       <strong><%= number_with_precision(@today_arrival_quantity, precision: 2, delimiter: ",") %></strong>
-      <p class="dashboard-stat-note">Latest reporting-day quantity received across markets.</p>
     </article>
   </div>
 
-  <div class="dashboard-content-grid">
-    <div class="table-card dashboard-table-card">
-      <div class="table-card-header">
+  <div class="portal-work-grid">
+    <section class="portal-table-panel">
+      <div class="portal-section-heading">
+        <span class="portal-collapse-mark">−</span>
         <div>
-          <h2 class="table-title">Recent daily reports</h2>
-          <p class="table-subtitle">Latest prices from mandi-level market updates.</p>
+          <h2>Latest Daily Reports</h2>
+          <p>Recently entered market arrival and commodity price records</p>
         </div>
-        <%= link_to "View all", daily_price_arrival_reports_path, class: "button button-ghost" %>
+        <%= link_to "Add Daily Report", new_daily_price_arrival_report_path, class: "portal-primary-action" %>
+      </div>
+
+      <div class="portal-report-tabs">
+        <%= link_to daily_price_arrival_reports_path do %>
+          Latest <strong><%= @recent_reports.size %></strong>
+        <% end %>
+        <%= link_to daily_price_arrival_reports_path, class: "completed" do %>
+          All Reports <strong><%= @total_reports %></strong>
+        <% end %>
       </div>
 
       <% if @recent_reports.any? %>
-        <div class="data-table-wrapper">
-          <table>
+        <div class="portal-table-scroll">
+          <table class="portal-report-table">
             <thead>
               <tr>
-                <th>Created On</th>
                 <th>Arrival Date</th>
-                <th>Market</th>
+                <th>Market / APMC</th>
+                <th>State</th>
                 <th>Commodity</th>
-                <th>Grade</th>
+                <th>Variety</th>
                 <th>Modal Price</th>
-                <th>Arrival Qty</th>
-                <th>Attachments</th>
+                <th>Arrival Qty.</th>
+                <th>Status</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               <% @recent_reports.each do |report| %>
                 <tr>
-                  <td><%= report.created_at.strftime("%d %b %Y, %I:%M %p") %></td>
-                  <td><%= report.arrival_date.strftime("%d %b %Y") %></td>
+                  <td><strong><%= report.arrival_date.strftime("%d/%m/%Y") %></strong></td>
                   <td><%= report.market.name %></td>
+                  <td><%= report.state.name %></td>
                   <td><%= report.commodity.name %></td>
                   <td><%= report.grade.name %></td>
-                  <td class="numeric-cell"><%= number_to_currency(report.modal_price, unit: "", precision: 2) %> <%= report.price_unit.short_name.presence || report.price_unit.name %></td>
-                  <td class="numeric-cell"><%= number_with_precision(report.arrival_quantity, precision: 2) %> <%= report.arrival_unit.short_name.presence || report.arrival_unit.name %></td>
-                  <td><%= render "shared/attachment_links", record: report %></td>
+                  <td class="numeric-cell"><%= number_with_precision(report.modal_price, precision: 2, delimiter: ",") %><br><small><%= report.price_unit.short_name.presence || report.price_unit.name %></small></td>
+                  <td class="numeric-cell"><%= number_with_precision(report.arrival_quantity, precision: 2, delimiter: ",") %><br><small><%= report.arrival_unit.short_name.presence || report.arrival_unit.name %></small></td>
+                  <td><span class="portal-status">UPDATED</span></td>
+                  <td>
+                    <%= link_to "Edit", edit_daily_price_arrival_report_path(report), class: "portal-row-action" %>
+                  </td>
                 </tr>
               <% end %>
             </tbody>
           </table>
         </div>
+
+        <div class="portal-table-footer">
+          <span>Showing <strong>1</strong> to <strong><%= @recent_reports.size %></strong> of <strong><%= @total_reports %></strong> entries</span>
+          <%= link_to "View all reports ›", daily_price_arrival_reports_path %>
+        </div>
       <% else %>
-        <div class="empty-state">
-          Daily report abhi add nahi hua hai. Pehla market update create karke dashboard ko live data se fill kariye.
-        </div>
+        <div class="portal-empty-state">Daily report abhi add nahi hua hai. Pehla market update create karke dashboard ko live data se fill kariye.</div>
       <% end %>
-    </div>
+    </section>
 
-    <div class="dashboard-side-stack">
-      <div class="card dashboard-coverage-card">
-        <div class="card-header">
-          <div>
-            <h2 class="table-title">State coverage</h2>
-            <p class="table-subtitle">Top states by number of saved reports.</p>
-          </div>
+    <aside class="portal-side-column">
+      <section class="portal-side-card">
+        <div class="portal-side-title">
+          <span class="portal-collapse-mark">−</span>
+          <h2>State Coverage</h2>
         </div>
-
         <% if @state_summaries.any? %>
-          <div class="coverage-list">
+          <div class="portal-state-list">
             <% @state_summaries.each do |state_name, count| %>
-              <div class="coverage-row">
-                <div class="coverage-row-header">
-                  <span><%= state_name %></span>
-                  <strong><%= count %></strong>
-                </div>
-                <div class="coverage-bar">
-                  <span style="width: <%= [((count.to_f / top_state_count) * 100).round(1), 12].max %>%"></span>
-                </div>
+              <div class="portal-state-row">
+                <div><span><%= state_name %></span><strong><%= count %></strong></div>
+                <div class="portal-progress"><span style="width: <%= ((count.to_f / top_state_count) * 100).round(1) %>%"></span></div>
               </div>
             <% end %>
           </div>
         <% else %>
-          <div class="empty-state">
-            State coverage yahan tab dikhna shuru hoga jab reports save honge.
-          </div>
+          <div class="portal-empty-state compact">Reports save hone ke baad state coverage dikhega.</div>
         <% end %>
-      </div>
+      </section>
 
-      <div class="card dashboard-quick-card">
-        <div class="card-header">
-          <div>
-            <h2 class="table-title">Quick workflow</h2>
-            <p class="table-subtitle">Jump straight into the most-used mandi tasks.</p>
-          </div>
+      <section class="portal-side-card">
+        <div class="portal-side-title">
+          <span class="portal-collapse-mark">−</span>
+          <h2>Quick Tasks</h2>
         </div>
-
-        <div class="dashboard-shortcuts">
-          <%= link_to new_daily_price_arrival_report_path, class: "dashboard-shortcut" do %>
-            <strong>Add today&apos;s report</strong>
-            <span>Capture min, max, modal and arrival quantity in one flow.</span>
-          <% end %>
-
-          <%= link_to daily_arrival_summaries_path, class: "dashboard-shortcut" do %>
-            <strong>Build arrival summary</strong>
-            <span>Generate grouped district-wise report blocks .</span>
-          <% end %>
-
-          <%= link_to cotton_bulletins_path, class: "dashboard-shortcut" do %>
-            <strong>Open cotton bulletins</strong>
-            <span>Fill mandi wise, gin wise, candy and comparison sections in one place.</span>
-          <% end %>
-
-          <%= link_to markets_path, class: "dashboard-shortcut" do %>
-            <strong>Review markets</strong>
-            <span>Check mandi and APMC masters before uploading new rates.</span>
-          <% end %>
+        <div class="portal-task-list">
+          <%= link_to new_daily_price_arrival_report_path do %><span>+</span> Add Daily Report<% end %>
+          <%= link_to daily_price_arrival_reports_path do %><span>▣</span> Excel Tools<% end %>
+          <%= link_to daily_arrival_summaries_path do %><span>≡</span> Arrival Summary<% end %>
+          <%= link_to cotton_bulletins_path do %><span>◉</span> Cotton Bulletin<% end %>
+          <%= link_to markets_path do %><span>⌂</span> Manage Markets<% end %>
         </div>
-      </div>
-    </div>
+      </section>
+    </aside>
   </div>
+
+  <footer class="portal-footer">
+    <span>Screen Reader</span>
+    <span>Website Policies</span>
+    <span>Help</span>
+    <span>Mandi Information Portal</span>
+    <strong>Copyright © <%= Date.current.year %></strong>
+  </footer>
 </section>
