@@ -1,6 +1,7 @@
 class VarietiesController < ApplicationController
   include ReferenceCollections
 
+  before_action :require_admin
   before_action :set_variety, only: %i[edit update destroy]
   before_action :load_commodity_options, only: %i[new create edit update]
 

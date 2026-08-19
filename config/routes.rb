@@ -22,6 +22,7 @@ Rails.application.routes.draw do
     member do
       get :export
       get :market_update
+      get :comparison_sheet
       post :import
     end
 

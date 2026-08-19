@@ -65,10 +65,12 @@ module ApplicationHelper
   end
 
   def master_navigation
+    return [] unless admin_user?
+
     [
       [ "State Master", states_path ],
       [ "District Master", districts_path ],
-      [ "Market / APMC", markets_path ],
+      [ "Mandi / APMC", markets_path ],
       [ "Commodity Group", commodity_groups_path ],
       [ "Commodity", commodities_path ],
       [ "Variety", varieties_path ],
@@ -85,6 +87,6 @@ module ApplicationHelper
   end
 
   def masters_section_active?
-    MASTER_CONTROLLERS.include?(controller_name)
+    admin_user? && MASTER_CONTROLLERS.include?(controller_name)
   end
 end

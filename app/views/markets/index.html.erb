@@ -1,14 +1,15 @@
-<% content_for :title, "Market Master" %>
+<% content_for :title, "Mandi Master" %>
 
 <section class="responsive-stack">
   <div class="page-header">
     <div>
       <p class="eyebrow">Master Setup</p>
-      <h1>Market / APMC master</h1>
-      <p class="muted-text">Maintain mandi locations with proper district and state linkage.</p>
+      <h1>Mandi / APMC master</h1>
+      <p class="muted-text">Daily Report ke dropdown me wahi mandis dikhenge jo yahan district ke saath mapped hain.</p>
     </div>
     <div class="page-actions">
-      <%= link_to "Add Market", new_market_path, class: "button button-primary" %>
+      <%= link_to "District Master", districts_path, class: "button button-secondary" %>
+      <%= link_to "Add Mandi", new_market_path, class: "button button-primary" %>
     </div>
   </div>
 
@@ -18,7 +19,7 @@
         <table>
           <thead>
             <tr>
-              <th>Market</th>
+              <th>Mandi</th>
               <th>District</th>
               <th>State</th>
               <th>Actions</th>
@@ -42,7 +43,7 @@
         </table>
       </div>
     <% else %>
-      <div class="empty-state">Abhi tak koi market or APMC create nahi hua hai.</div>
+      <div class="empty-state">Abhi tak koi mandi or APMC create nahi hua hai.</div>
     <% end %>
   </div>
 </section>

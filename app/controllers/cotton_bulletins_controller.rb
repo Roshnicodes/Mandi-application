@@ -1,5 +1,6 @@
 class CottonBulletinsController < ApplicationController
-  before_action :set_cotton_bulletin, only: %i[show edit update destroy export market_update import]
+  before_action :require_admin, except: %i[index show market_update comparison_sheet]
+  before_action :set_cotton_bulletin, only: %i[show edit update destroy export market_update comparison_sheet import]
 
   def index
     @cotton_bulletins = CottonBulletin.recent_first
@@ -7,6 +8,10 @@ class CottonBulletinsController < ApplicationController
 
   def show
     preload_sections
+  end
+
+  def comparison_sheet
+    @comparison_observations = @cotton_bulletin.observations_for("comparison_sheet")
   end
 
   def export

@@ -380,7 +380,9 @@
         <button type="button" class="toolbar-button" onclick="window.close()">Close</button>
         <button type="button" class="toolbar-button" data-share-market-update>Share</button>
         <button type="button" class="toolbar-button" onclick="window.print()">Print / PDF</button>
-        <%= link_to "View Excel", export_cotton_bulletin_path(@cotton_bulletin, preview: true), class: "toolbar-button primary" %>
+        <% if admin_user? %>
+          <%= link_to "View Excel", export_cotton_bulletin_path(@cotton_bulletin, preview: true), class: "toolbar-button primary" %>
+        <% end %>
       </div>
     </div>
 

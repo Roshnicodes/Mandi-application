@@ -23,7 +23,9 @@
             <th>Wrong Call</th>
             <th>Invalid / Exist</th>
             <th>Attachments</th>
-            <th>Actions</th>
+            <% if admin_user? %>
+              <th>Actions</th>
+            <% end %>
           </tr>
         </thead>
         <tbody>
@@ -37,12 +39,14 @@
               <td class="numeric-cell"><%= record.wrong_call %></td>
               <td class="numeric-cell"><%= record.invalid_exist %></td>
               <td><%= render "shared/attachment_links", record: record %></td>
-              <td>
-                <div class="inline-actions">
-                  <%= link_to "Edit", edit_cotton_bulletin_cotton_call_performance_path(bulletin, record), class: "button button-secondary" %>
-                  <%= button_to "Delete", cotton_bulletin_cotton_call_performance_path(bulletin, record), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
-                </div>
-              </td>
+              <% if admin_user? %>
+                <td>
+                  <div class="inline-actions">
+                    <%= link_to "Edit", edit_cotton_bulletin_cotton_call_performance_path(bulletin, record), class: "button button-secondary" %>
+                    <%= button_to "Delete", cotton_bulletin_cotton_call_performance_path(bulletin, record), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
+                  </div>
+                </td>
+              <% end %>
             </tr>
           <% end %>
         </tbody>

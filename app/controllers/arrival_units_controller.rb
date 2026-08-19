@@ -1,4 +1,5 @@
 class ArrivalUnitsController < ApplicationController
+  before_action :require_admin
   before_action :set_arrival_unit, only: %i[edit update destroy]
 
   def index

@@ -33,22 +33,71 @@
 
     <div class="sheet-toolbar">
       <div class="sheet-mandi-tabs">
+        <%= link_to "All",
+          grid_cotton_bulletin_cotton_market_observations_path(@cotton_bulletin, category: @category, state_id: @selected_state_id, district_id: @selected_district_id),
+          class: ["sheet-tab-link", ("is-active" if @mandi_filter.blank?)].compact.join(" ") %>
         <% @mandi_names.each do |mandi_name| %>
-          <%= link_to mandi_name, grid_cotton_bulletin_cotton_market_observations_path(@cotton_bulletin, category: @category, mandi: mandi_name), class: ["sheet-tab-link", ("is-active" if @mandi_filter == mandi_name)].compact.join(" ") %>
+          <%= link_to mandi_name,
+            grid_cotton_bulletin_cotton_market_observations_path(@cotton_bulletin, category: @category, mandi: mandi_name, state_id: @selected_state_id, district_id: @selected_district_id),
+            class: ["sheet-tab-link", ("is-active" if @mandi_filter == mandi_name)].compact.join(" ") %>
         <% end %>
       </div>
 
       <div class="inline-actions">
-        <button
-          type="button"
-          class="button button-secondary button-compact"
-          data-grid-toggle="custom-observation-row"
-          aria-expanded="<%= @show_custom_row %>"
-        >
-          + New Mandi
-        </button>
+        <% if admin_user? %>
+          <button
+            type="button"
+            class="button button-secondary button-compact"
+            data-grid-toggle="custom-observation-row"
+            aria-expanded="<%= @show_custom_row %>"
+          >
+            + New Mandi
+          </button>
+        <% end %>
       </div>
     </div>
+
+    <% if admin_user? && @category == "mandi_wise" %>
+      <div class="sheet-master-panel">
+        <div>
+          <p class="eyebrow">Mandi Master</p>
+          <h3>Manage list</h3>
+        </div>
+
+        <%= form_with url: grid_cotton_bulletin_cotton_market_observations_path(@cotton_bulletin), method: :get, class: "sheet-filter-form", data: { market_form: true, districts: json_escape(@districts_data.to_json) } do %>
+          <%= hidden_field_tag :category, @category %>
+          <div class="field-group">
+            <%= label_tag :state_id, "State" %>
+            <%= select_tag :state_id, options_from_collection_for_select(@states, :id, :name, @selected_state_id), include_blank: "All states", data: { state_select: true } %>
+          </div>
+          <div class="field-group">
+            <%= label_tag :district_id, "District" %>
+            <%= select_tag :district_id, options_for_select([], @selected_district_id), include_blank: "All districts", data: { district_select: true, selected: @selected_district_id } %>
+          </div>
+          <div class="inline-actions">
+            <%= submit_tag "Apply", class: "button button-secondary button-compact" %>
+          </div>
+        <% end %>
+
+        <%= form_with model: Market.new, url: markets_path, class: "sheet-filter-form", data: { market_form: true, districts: json_escape(@districts_data.to_json) }, html: { autocomplete: "off" } do |form| %>
+          <%= hidden_field_tag :return_to_cotton_grid, true %>
+          <%= hidden_field_tag :cotton_bulletin_id, @cotton_bulletin.id %>
+          <%= hidden_field_tag :category, @category %>
+          <%= hidden_field_tag :selected_state_id, @selected_state_id, data: { state_select: true } %>
+          <div class="field-group">
+            <%= form.label :district_id, "District" %>
+            <%= form.collection_select :district_id, District.none, :id, :name, { prompt: "Select district" }, { data: { district_select: true, selected: @selected_district_id } } %>
+          </div>
+          <div class="field-group">
+            <%= form.label :name, "New mandi name" %>
+            <%= form.text_field :name, placeholder: "Example: Alirajpur APMC" %>
+          </div>
+          <div class="inline-actions">
+            <%= form.submit "Add Mandi", class: "button button-primary button-compact" %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
 
     <div class="data-table-wrapper">
       <table class="report-grid-table sheet-entry-table">
@@ -65,12 +114,15 @@
           </tr>
         </thead>
         <tbody>
+          <% if admin_user? %>
           <tr id="custom-observation-row" class="sheet-entry-inline-form-row <%= "is-open" if @show_custom_row %>" data-grid-row data-reset-on-open="<%= @custom_mandi_observation.errors.blank? %>" <%= "hidden" unless @show_custom_row %>>
             <% custom_form_id = "custom_observation_form" %>
             <td class="sheet-inline-flag-cell">
               <%= form_with model: [@cotton_bulletin, @custom_mandi_observation], multipart: true, html: { id: custom_form_id, autocomplete: "off" } do |form| %>
-                <%= hidden_field_tag :return_to_grid, true %>
-                <%= form.hidden_field :category, value: @category %>
+              <%= hidden_field_tag :return_to_grid, true %>
+              <%= form.hidden_field :category, value: @category %>
+              <%= form.hidden_field :state_id, value: @selected_state_id if @selected_state_id.present? %>
+              <%= form.hidden_field :district_id, value: @selected_district_id if @selected_district_id.present? %>
               <% end %>
               <span class="sheet-inline-flag">New</span>
             </td>
@@ -102,6 +154,7 @@
               </div>
             </td>
           </tr>
+          <% end %>
 
           <% @grid_rows.each do |row| %>
             <% row_open = @active_row_name == row.name || @active_row_index.to_s == row.grid_index.to_s %>
@@ -139,8 +192,8 @@
                 <% end %>
               </td>
               <td class="sheet-entry-action-cell">
-                <% if current_record.present? %>
-                  <%= button_to "x", cotton_bulletin_cotton_market_observation_path(@cotton_bulletin, current_record), method: :delete, params: { return_to_grid: true, category: @category, mandi: row.name }, class: "button button-danger button-icon", title: "Remove latest record", form: { class: "button-to-inline" } %>
+                <% if admin_user? && current_record.present? %>
+                  <%= button_to "x", cotton_bulletin_cotton_market_observation_path(@cotton_bulletin, current_record), method: :delete, params: { return_to_grid: true, category: @category, mandi: row.name, state_id: @selected_state_id, district_id: @selected_district_id }, class: "button button-danger button-icon", title: "Remove latest record", form: { class: "button-to-inline" } %>
                 <% end %>
               </td>
             </tr>
@@ -170,7 +223,9 @@
                   <% end %>
                 </td>
                 <td class="sheet-entry-action-cell">
-                  <%= button_to "x", cotton_bulletin_cotton_market_observation_path(@cotton_bulletin, record), method: :delete, params: { return_to_grid: true, category: @category, mandi: row.name }, class: "button button-danger button-icon", title: "Remove saved record", form: { class: "button-to-inline" } %>
+                  <% if admin_user? %>
+                    <%= button_to "x", cotton_bulletin_cotton_market_observation_path(@cotton_bulletin, record), method: :delete, params: { return_to_grid: true, category: @category, mandi: row.name, state_id: @selected_state_id, district_id: @selected_district_id }, class: "button button-danger button-icon", title: "Remove saved record", form: { class: "button-to-inline" } %>
+                  <% end %>
                 </td>
               </tr>
             <% end %>
@@ -187,6 +242,8 @@
                 <%= form_with url: save_grid_cotton_bulletin_cotton_market_observations_path(@cotton_bulletin, category: @category), method: :patch, multipart: true, html: { id: form_id, autocomplete: "off" } do %>
                   <%= hidden_field_tag :active_row_index, row.grid_index %>
                   <%= hidden_field_tag :mandi, @mandi_filter if @mandi_filter.present? %>
+                  <%= hidden_field_tag :state_id, @selected_state_id if @selected_state_id.present? %>
+                  <%= hidden_field_tag :district_id, @selected_district_id if @selected_district_id.present? %>
                 <% end %>
                 <span class="sheet-inline-flag"><%= row.records.size + 1 %></span>
               </td>

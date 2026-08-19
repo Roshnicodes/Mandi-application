@@ -1,4 +1,5 @@
 class StatesController < ApplicationController
+  before_action :require_admin
   before_action :set_state, only: %i[edit update destroy]
 
   def index

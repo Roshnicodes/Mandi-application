@@ -1,4 +1,5 @@
 class CommodityGroupsController < ApplicationController
+  before_action :require_admin
   before_action :set_commodity_group, only: %i[edit update destroy]
 
   def index

@@ -28,8 +28,8 @@
       </div>
 
       <div class="field-group">
-        <%= form.label :market_id, "Market / APMC" %>
-        <%= form.collection_select :market_id, Market.none, :id, :name, { prompt: "Select market" }, { data: { market_select: true, selected: daily_price_arrival_report.market_id } } %>
+        <%= form.label :market_id, "Mandi / APMC" %>
+        <%= form.collection_select :market_id, Market.none, :id, :name, { prompt: "Select mandi" }, { data: { market_select: true, selected: daily_price_arrival_report.market_id } } %>
       </div>
 
       <div class="field-group">

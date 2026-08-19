@@ -21,7 +21,7 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   </head>
 
-  <body class="<%= authenticated? ? "app-shell-body" : "auth-shell-body" %>">
+  <body class="<%= authenticated? ? "app-shell-body" : "auth-shell-body" %><%= " dashboard-unified-page" if content_for?(:dashboard_unified) %>">
     <% if authenticated? %>
       <div class="app-shell">
         <aside class="sidebar" id="app-sidebar" data-app-sidebar>
@@ -36,22 +36,10 @@
           <div class="brand-card">
             <div class="brand-top">
               <div class="brand-mark">MP</div>
-              <span class="brand-status">
-                <span class="brand-status-dot"></span>
-                Live workspace
-              </span>
             </div>
 
             <div class="brand-copy">
-              <p class="eyebrow">Agriculture reporting suite</p>
               <h1>Mandi Pro</h1>
-              <p class="brand-copy-text">Manage mandi masters, daily arrivals and pricing reports from one focused control room.</p>
-            </div>
-
-            <div class="brand-tags">
-              <span class="brand-tag">Masters</span>
-              <span class="brand-tag">Reports</span>
-              <span class="brand-tag">Markets</span>
             </div>
           </div>
 
@@ -63,53 +51,123 @@
               <% end %>
             </div>
 
-            <div class="nav-group">
-              <p class="nav-label">Masters</p>
-              <% master_navigation.each do |item| %>
-                <%= link_to item[:label], item[:path], class: ["nav-link", item[:active] ? "active" : nil] %>
-              <% end %>
-            </div>
+            <% if master_navigation.any? %>
+              <div class="nav-group">
+                <p class="nav-label">Masters</p>
+                <% master_navigation.each do |item| %>
+                  <%= link_to item[:label], item[:path], class: ["nav-link", item[:active] ? "active" : nil] %>
+                <% end %>
+              </div>
+            <% end %>
           </nav>
         </aside>
 
         <button type="button" class="sidebar-overlay" data-sidebar-overlay aria-hidden="true" tabindex="-1"></button>
 
         <main class="app-main">
-          <header class="topbar">
-            <div class="topbar-leading">
-              <button
-                type="button"
-                class="mobile-nav-button"
-                data-sidebar-toggle
-                aria-expanded="false"
-                aria-controls="app-sidebar"
-              >
-                <span></span>
-                <span></span>
-                <span></span>
-                <em>Menu</em>
-              </button>
+          <% if content_for?(:dashboard_unified) %>
+            <div class="workspace-shell">
+              <header class="topbar topbar-integrated">
+                <div class="topbar-leading">
+                  <button
+                    type="button"
+                    class="mobile-nav-button"
+                    data-sidebar-toggle
+                    aria-expanded="false"
+                    aria-controls="app-sidebar"
+                  >
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <em>Menu</em>
+                  </button>
+                  <button
+                    type="button"
+                    class="desktop-sidebar-toggle"
+                    data-sidebar-toggle
+                    aria-expanded="true"
+                    aria-controls="app-sidebar"
+                    title="Toggle menu"
+                    aria-label="Toggle menu"
+                  >
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </button>
 
-              <div class="topbar-copy">
-                <p class="eyebrow">Operational Control</p>
-                <h2>Market Rate Management</h2>
-                <p class="topbar-subtitle">Keep mandi masters clean, update daily arrivals faster and manage reporting from one workspace.</p>
+                  <div class="topbar-copy">
+                    <h2><%= content_for?(:title) ? yield(:title) : "Mandi Pro" %></h2>
+                  </div>
+
+                  <% if content_for?(:topbar_tools) %>
+                    <%= yield :topbar_tools %>
+                  <% end %>
+                </div>
+
+                <div class="topbar-actions">
+                  <div class="user-pill">
+                    <span class="user-pill-name"><%= current_user.name %></span>
+                    <span class="user-pill-meta"><%= Date.current.strftime("%d %b %Y") %></span>
+                  </div>
+                  <%= button_to "Logout", session_path, method: :delete, class: "button button-ghost" %>
+                </div>
+              </header>
+
+              <div class="page-frame page-frame-integrated">
+                <%= render "shared/flash" %>
+                <%= yield %>
               </div>
             </div>
+          <% else %>
+            <header class="topbar">
+              <div class="topbar-leading">
+                <button
+                  type="button"
+                  class="mobile-nav-button"
+                  data-sidebar-toggle
+                  aria-expanded="false"
+                  aria-controls="app-sidebar"
+                >
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <em>Menu</em>
+                </button>
+                <button
+                  type="button"
+                  class="desktop-sidebar-toggle"
+                  data-sidebar-toggle
+                  aria-expanded="true"
+                  aria-controls="app-sidebar"
+                  title="Toggle menu"
+                  aria-label="Toggle menu"
+                >
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </button>
 
-            <div class="topbar-actions">
-              <div class="user-pill">
-                <span class="user-pill-name"><%= current_user.name %></span>
-                <span class="user-pill-meta"><%= Date.current.strftime("%d %b %Y") %></span>
+                <% unless content_for?(:suppress_topbar_title) %>
+                  <div class="topbar-copy">
+                    <h2><%= content_for?(:title) ? yield(:title) : "Mandi Pro" %></h2>
+                  </div>
+                <% end %>
               </div>
-              <%= button_to "Logout", session_path, method: :delete, class: "button button-ghost" %>
-            </div>
-          </header>
 
-          <div class="page-frame">
-            <%= render "shared/flash" %>
-            <%= yield %>
-          </div>
+              <div class="topbar-actions">
+                <div class="user-pill">
+                  <span class="user-pill-name"><%= current_user.name %></span>
+                  <span class="user-pill-meta"><%= Date.current.strftime("%d %b %Y") %></span>
+                </div>
+                <%= button_to "Logout", session_path, method: :delete, class: "button button-ghost" %>
+              </div>
+            </header>
+
+            <div class="page-frame">
+              <%= render "shared/flash" %>
+              <%= yield %>
+            </div>
+          <% end %>
         </main>
       </div>
     <% else %>

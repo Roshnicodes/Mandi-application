@@ -14,13 +14,13 @@
       </div>
 
       <div class="field-group">
-        <%= form.label :name, "Market / APMC name" %>
-        <%= form.text_field :name %>
+        <%= form.label :name, "Mandi / APMC name" %>
+        <%= form.text_field :name, placeholder: "Example: Bhopal APMC" %>
       </div>
     </div>
 
     <div class="inline-actions">
-      <%= form.submit market.persisted? ? "Update Market" : "Create Market", class: "button button-primary" %>
+      <%= form.submit market.persisted? ? "Update Mandi" : "Create Mandi", class: "button button-primary" %>
       <%= link_to "Back", markets_path, class: "button button-ghost" %>
     </div>
   <% end %>

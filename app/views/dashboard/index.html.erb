@@ -1,168 +1,121 @@
 <% content_for :title, "Dashboard" %>
+<% content_for :dashboard_unified, true %>
 
-<%
-  top_state_count = @state_summaries.values.max.to_i
-  top_state_count = 1 if top_state_count.zero?
-%>
-
-<section class="portal-dashboard">
-  <nav class="portal-breadcrumb" aria-label="Breadcrumb">
-    <%= link_to "Home", root_path %>
-    <span>›</span>
-    <strong>Dashboard</strong>
-    <span class="portal-required-note">Data updated from saved mandi reports</span>
-  </nav>
-
-  <div class="portal-module-panel">
-    <div class="portal-panel-title">
-      <div>
-        <span class="portal-title-kicker">Mandi Reporting Workspace</span>
-        <h1>Dashboard</h1>
-      </div>
-      <span class="portal-help" title="Dashboard Help">?</span>
-    </div>
-
-    <div class="portal-module-tabs">
-      <%= link_to "Dashboard", root_path, class: "active" %>
-      <%= link_to "Daily Reports", daily_price_arrival_reports_path %>
-      <%= link_to "Arrival Summary", daily_arrival_summaries_path %>
-      <%= link_to "Cotton Bulletins", cotton_bulletins_path %>
-      <%= link_to "Cotton Overview", cotton_market_overviews_path %>
-      <%= link_to "Market / APMC", markets_path %>
-      <%= link_to "Commodity Master", commodities_path %>
-      <%= link_to "State Master", states_path %>
-    </div>
+<% content_for :topbar_tools do %>
+  <div class="dashboard-card-actions">
+    <%= link_to "Add Daily Report", new_daily_price_arrival_report_path, class: "portal-primary-action" %>
+    <%= link_to "View all reports", daily_price_arrival_reports_path, class: "portal-secondary-action" %>
   </div>
+<% end %>
 
-  <div class="portal-summary-grid">
-    <article>
-      <span>Latest Reporting Date</span>
-      <strong><%= @latest_report_date&.strftime("%d/%m/%Y") || "No data" %></strong>
+<section class="portal-dashboard portal-dashboard-integrated">
+  <div class="dashboard-overview-grid">
+    <article class="dashboard-overview-card dashboard-overview-card-strong">
+      <span>Latest report date</span>
+      <strong><%= @latest_arrival_date.present? ? @latest_arrival_date.strftime("%d %b %Y") : "No data" %></strong>
+      <p>Latest mandi snapshot</p>
     </article>
-    <article>
-      <span>Total Daily Reports</span>
+    <article class="dashboard-overview-card">
+      <span>Total reports</span>
       <strong><%= number_with_delimiter(@total_reports) %></strong>
+      <p>Saved entries</p>
     </article>
-    <article>
-      <span>Markets Covered</span>
-      <strong><%= number_with_delimiter(@markets_covered) %></strong>
+    <article class="dashboard-overview-card">
+      <span>Today entries</span>
+      <strong><%= number_with_delimiter(@today_reports) %></strong>
+      <p><%= Date.current.strftime("%d %b %Y") %></p>
     </article>
-    <article>
-      <span>Commodities Covered</span>
-      <strong><%= number_with_delimiter(@commodities_covered) %></strong>
+    <article class="dashboard-overview-card">
+      <span>Covered mandis</span>
+      <strong><%= number_with_delimiter(@covered_mandis) %></strong>
+      <p>Active coverage</p>
     </article>
-    <article>
-      <span>Latest Arrival Quantity</span>
-      <strong><%= number_with_precision(@today_arrival_quantity, precision: 2, delimiter: ",") %></strong>
+    <article class="dashboard-overview-card dashboard-clock-card">
+      <div class="dashboard-clock-face" aria-hidden="true">
+        <span class="dashboard-clock-hand dashboard-clock-hour"></span>
+        <span class="dashboard-clock-hand dashboard-clock-minute"></span>
+        <span class="dashboard-clock-dot"></span>
+      </div>
+      <div>
+        <span>Live time</span>
+        <strong><%= @dashboard_time.strftime("%I:%M %p") %></strong>
+        <p><%= @dashboard_time.strftime("%d %b %Y") %></p>
+      </div>
     </article>
   </div>
 
-  <div class="portal-work-grid">
-    <section class="portal-table-panel">
-      <div class="portal-section-heading">
-        <span class="portal-collapse-mark">−</span>
+  <% if @recent_reports.any? %>
+    <div class="dashboard-latest-panel">
+      <div class="dashboard-latest-header">
         <div>
-          <h2>Latest Daily Reports</h2>
-          <p>Recently entered market arrival and commodity price records</p>
+          <p class="eyebrow">Latest Reports</p>
+          <h2>Recent mandi activity</h2>
         </div>
-        <%= link_to "Add Daily Report", new_daily_price_arrival_report_path, class: "portal-primary-action" %>
+        <div class="dashboard-latest-meta">
+          <span><%= @recent_reports.size %> latest</span>
+          <strong><%= number_with_precision(@latest_arrival_total, precision: 2, strip_insignificant_zeros: true) %> latest qty</strong>
+        </div>
       </div>
 
-      <div class="portal-report-tabs">
-        <%= link_to daily_price_arrival_reports_path do %>
-          Latest <strong><%= @recent_reports.size %></strong>
-        <% end %>
-        <%= link_to daily_price_arrival_reports_path, class: "completed" do %>
-          All Reports <strong><%= @total_reports %></strong>
-        <% end %>
-      </div>
-
-      <% if @recent_reports.any? %>
-        <div class="portal-table-scroll">
-          <table class="portal-report-table">
-            <thead>
+      <div class="portal-table-scroll">
+        <table class="portal-report-table dashboard-report-table" data-unit-table>
+          <thead>
+            <tr>
+              <th>Arrival Date</th>
+              <th>Mandi</th>
+              <th>Commodity</th>
+              <th>Variety</th>
+              <th>Grade</th>
+              <th>
+                <span class="unit-heading">
+                  Modal
+                  <select class="unit-select" data-unit-control="price" aria-label="Modal price unit">
+                    <option value="qtl">Qtl</option>
+                    <option value="kg">Kg</option>
+                    <option value="mt">MT</option>
+                  </select>
+                </span>
+              </th>
+              <th>
+                <span class="unit-heading">
+                  Arrival
+                  <select class="unit-select" data-unit-control="arrival" aria-label="Arrival quantity unit">
+                    <option value="qtl">Qtl</option>
+                    <option value="kg">Kg</option>
+                    <option value="mt">MT</option>
+                  </select>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @recent_reports.each do |report| %>
               <tr>
-                <th>Arrival Date</th>
-                <th>Market / APMC</th>
-                <th>State</th>
-                <th>Commodity</th>
-                <th>Variety</th>
-                <th>Modal Price</th>
-                <th>Arrival Qty.</th>
-                <th>Status</th>
-                <th>Action</th>
+                <td><strong><%= report.arrival_date.strftime("%d/%m/%Y") %></strong></td>
+                <td>
+                  <%= report.market.name %>
+                  <span class="sheet-inline-hint"><%= [report.state.name, report.district.name].join(" / ") %></span>
+                </td>
+                <td><%= report.commodity.name %></td>
+                <td><%= report.variety.name %></td>
+                <td><%= report.grade.name %></td>
+                <td class="numeric-cell" data-unit-value data-unit-kind="price" data-source-value="<%= report.modal_price %>" data-source-unit="<%= report.price_unit.short_name.presence || report.price_unit.name %>"><%= number_with_precision(report.modal_price, precision: 2, delimiter: ",") %></td>
+                <td class="numeric-cell" data-unit-value data-unit-kind="arrival" data-source-value="<%= report.arrival_quantity %>" data-source-unit="<%= report.arrival_unit.short_name.presence || report.arrival_unit.name %>"><%= number_with_precision(report.arrival_quantity, precision: 2, delimiter: ",") %></td>
               </tr>
-            </thead>
-            <tbody>
-              <% @recent_reports.each do |report| %>
-                <tr>
-                  <td><strong><%= report.arrival_date.strftime("%d/%m/%Y") %></strong></td>
-                  <td><%= report.market.name %></td>
-                  <td><%= report.state.name %></td>
-                  <td><%= report.commodity.name %></td>
-                  <td><%= report.grade.name %></td>
-                  <td class="numeric-cell"><%= number_with_precision(report.modal_price, precision: 2, delimiter: ",") %><br><small><%= report.price_unit.short_name.presence || report.price_unit.name %></small></td>
-                  <td class="numeric-cell"><%= number_with_precision(report.arrival_quantity, precision: 2, delimiter: ",") %><br><small><%= report.arrival_unit.short_name.presence || report.arrival_unit.name %></small></td>
-                  <td><span class="portal-status">UPDATED</span></td>
-                  <td>
-                    <%= link_to "Edit", edit_daily_price_arrival_report_path(report), class: "portal-row-action" %>
-                  </td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="portal-table-footer">
-          <span>Showing <strong>1</strong> to <strong><%= @recent_reports.size %></strong> of <strong><%= @total_reports %></strong> entries</span>
-          <%= link_to "View all reports ›", daily_price_arrival_reports_path %>
-        </div>
-      <% else %>
-        <div class="portal-empty-state">Daily report abhi add nahi hua hai. Pehla market update create karke dashboard ko live data se fill kariye.</div>
-      <% end %>
-    </section>
-
-    <aside class="portal-side-column">
-      <section class="portal-side-card">
-        <div class="portal-side-title">
-          <span class="portal-collapse-mark">−</span>
-          <h2>State Coverage</h2>
-        </div>
-        <% if @state_summaries.any? %>
-          <div class="portal-state-list">
-            <% @state_summaries.each do |state_name, count| %>
-              <div class="portal-state-row">
-                <div><span><%= state_name %></span><strong><%= count %></strong></div>
-                <div class="portal-progress"><span style="width: <%= ((count.to_f / top_state_count) * 100).round(1) %>%"></span></div>
-              </div>
             <% end %>
-          </div>
-        <% else %>
-          <div class="portal-empty-state compact">Reports save hone ke baad state coverage dikhega.</div>
-        <% end %>
-      </section>
+          </tbody>
+        </table>
+      </div>
 
-      <section class="portal-side-card">
-        <div class="portal-side-title">
-          <span class="portal-collapse-mark">−</span>
-          <h2>Quick Tasks</h2>
-        </div>
-        <div class="portal-task-list">
-          <%= link_to new_daily_price_arrival_report_path do %><span>+</span> Add Daily Report<% end %>
-          <%= link_to daily_price_arrival_reports_path do %><span>▣</span> Excel Tools<% end %>
-          <%= link_to daily_arrival_summaries_path do %><span>≡</span> Arrival Summary<% end %>
-          <%= link_to cotton_bulletins_path do %><span>◉</span> Cotton Bulletin<% end %>
-          <%= link_to markets_path do %><span>⌂</span> Manage Markets<% end %>
-        </div>
-      </section>
-    </aside>
-  </div>
-
-  <footer class="portal-footer">
-    <span>Screen Reader</span>
-    <span>Website Policies</span>
-    <span>Help</span>
-    <span>Mandi Information Portal</span>
-    <strong>Copyright © <%= Date.current.year %></strong>
-  </footer>
+      <div class="portal-table-footer">
+        <span>Showing <strong>1</strong> to <strong><%= @recent_reports.size %></strong> of <strong><%= number_with_delimiter(@total_reports) %></strong> entries</span>
+        <%= link_to "View all reports", daily_price_arrival_reports_path %>
+      </div>
+    </div>
+  <% else %>
+    <div class="portal-empty-state">
+      No daily reports yet.
+      <%= link_to "Add Daily Report", new_daily_price_arrival_report_path, class: "portal-primary-action dashboard-empty-action" %>
+    </div>
+  <% end %>
 </section>

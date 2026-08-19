@@ -1,6 +1,7 @@
 class GradesController < ApplicationController
   include ReferenceCollections
 
+  before_action :require_admin
   before_action :set_grade, only: %i[edit update destroy]
   before_action :load_form_collections, only: %i[new create edit update]
 

@@ -26,7 +26,9 @@
             <th>Extra 1</th>
             <th>Extra 2</th>
             <th>Attachments</th>
-            <th>Actions</th>
+            <% if admin_user? %>
+              <th>Actions</th>
+            <% end %>
           </tr>
         </thead>
         <tbody>
@@ -43,12 +45,14 @@
               <td><%= record.extra_value_one.presence || "-" %></td>
               <td><%= record.extra_value_two.presence || "-" %></td>
               <td><%= render "shared/attachment_links", record: record %></td>
-              <td>
-                <div class="inline-actions">
-                  <%= link_to "Edit", edit_cotton_bulletin_cotton_regional_comparison_path(bulletin, record), class: "button button-secondary" %>
-                  <%= button_to "Delete", cotton_bulletin_cotton_regional_comparison_path(bulletin, record), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
-                </div>
-              </td>
+              <% if admin_user? %>
+                <td>
+                  <div class="inline-actions">
+                    <%= link_to "Edit", edit_cotton_bulletin_cotton_regional_comparison_path(bulletin, record), class: "button button-secondary" %>
+                    <%= button_to "Delete", cotton_bulletin_cotton_regional_comparison_path(bulletin, record), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
+                  </div>
+                </td>
+              <% end %>
             </tr>
           <% end %>
         </tbody>

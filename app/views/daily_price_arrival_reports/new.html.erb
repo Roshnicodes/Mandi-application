@@ -6,7 +6,6 @@
     <div>
       <p class="eyebrow">Report Entry</p>
       <h1>Daily mandi quick entry</h1>
-      <p class="muted-text">State aur district choose karke mandi row par + dabaiye, phir sirf Min, Max, Modal aur Arrival Qty save kariye.</p>
     </div>
     <div class="page-actions">
       <%= link_to "View saved reports", daily_price_arrival_reports_path, class: "button button-secondary" %>
@@ -112,7 +111,7 @@
           <thead>
             <tr>
               <th>S. No</th>
-              <th>Mandi / APMC</th>
+              <th>Mandi</th>
               <th>Grade</th>
               <th>Min</th>
               <th>Max</th>
@@ -166,7 +165,7 @@
                 </td>
                 <td class="sheet-entry-action-cell">
                   <div class="sheet-inline-actions">
-                    <% if latest_report.present? %>
+                    <% if admin_user? && latest_report.present? %>
                       <%= link_to "✎", edit_daily_price_arrival_report_path(latest_report, quick_entry_params), class: "button button-secondary button-icon", title: "Edit record", aria: { label: "Edit record for #{market.name}" } %>
                       <%= button_to "x", daily_price_arrival_report_path(latest_report), method: :delete, params: quick_entry_params, class: "button button-danger button-icon", title: "Delete record", form: { class: "button-to-inline" }, aria: { label: "Delete record for #{market.name}" } %>
                     <% else %>
@@ -194,8 +193,12 @@
                   </td>
                   <td class="sheet-entry-action-cell">
                     <div class="sheet-inline-actions">
-                      <%= link_to "✎", edit_daily_price_arrival_report_path(report, quick_entry_params), class: "button button-secondary button-icon", title: "Edit record", aria: { label: "Edit saved record for #{market.name}" } %>
-                      <%= button_to "x", daily_price_arrival_report_path(report), method: :delete, params: quick_entry_params, class: "button button-danger button-icon", title: "Delete record", form: { class: "button-to-inline" }, aria: { label: "Delete saved record for #{market.name}" } %>
+                      <% if admin_user? %>
+                        <%= link_to "✎", edit_daily_price_arrival_report_path(report, quick_entry_params), class: "button button-secondary button-icon", title: "Edit record", aria: { label: "Edit saved record for #{market.name}" } %>
+                        <%= button_to "x", daily_price_arrival_report_path(report), method: :delete, params: quick_entry_params, class: "button button-danger button-icon", title: "Delete record", form: { class: "button-to-inline" }, aria: { label: "Delete saved record for #{market.name}" } %>
+                      <% else %>
+                        -
+                      <% end %>
                   </div>
                 </td>
               </tr>
@@ -273,7 +276,7 @@
         </table>
       </div>
     <% else %>
-      <div class="empty-state">Is state/district ke liye abhi mandi master add nahi hai.</div>
+      <div class="empty-state">No mandis available.</div>
     <% end %>
   </div>
 </section>

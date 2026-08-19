@@ -15,16 +15,23 @@
       <table class="report-grid-table">
         <thead>
           <tr>
-            <th>S. No</th>
-            <th>Parameter</th>
-            <th>Madhya Pradesh</th>
-            <th>Maharashtra 29 MM</th>
-            <th>Maharashtra 31 MM</th>
-            <th>Odisha 29 MM</th>
-            <th>Odisha 30 MM</th>
-            <th>Reference</th>
-            <th>Attachments</th>
-            <th>Actions</th>
+            <th rowspan="2">S. No</th>
+            <th rowspan="2">Parameter</th>
+            <th colspan="1">Madhya Pradesh</th>
+            <th colspan="2">Maharashtra</th>
+            <th colspan="2">Odisha</th>
+            <th rowspan="2">Reference</th>
+            <th rowspan="2">Attachments</th>
+            <% if admin_user? %>
+              <th rowspan="2">Actions</th>
+            <% end %>
+          </tr>
+          <tr>
+            <th>Rate</th>
+            <th>29 MM</th>
+            <th>31 MM</th>
+            <th>29 MM</th>
+            <th>30 MM</th>
           </tr>
         </thead>
         <tbody>
@@ -39,12 +46,14 @@
               <td><%= record.odisha_30mm_rate.presence || "-" %></td>
               <td><%= record.reference.presence || "-" %></td>
               <td><%= render "shared/attachment_links", record: record %></td>
-              <td>
-                <div class="inline-actions">
-                  <%= link_to "Edit", edit_cotton_bulletin_candy_rate_path(bulletin, record), class: "button button-secondary" %>
-                  <%= button_to "Delete", cotton_bulletin_candy_rate_path(bulletin, record), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
-                </div>
-              </td>
+              <% if admin_user? %>
+                <td>
+                  <div class="inline-actions">
+                    <%= link_to "Edit", edit_cotton_bulletin_candy_rate_path(bulletin, record), class: "button button-secondary" %>
+                    <%= button_to "Delete", cotton_bulletin_candy_rate_path(bulletin, record), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
+                  </div>
+                </td>
+              <% end %>
             </tr>
           <% end %>
         </tbody>

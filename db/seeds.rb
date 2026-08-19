@@ -2,6 +2,18 @@
 # development, test). The code here should be idempotent so that it can be executed at any point in every environment.
 # The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
 #
+def upsert_user(name, email_address, role)
+  User.find_or_create_by!(email_address: email_address) do |user|
+    user.name = name
+    user.role = role
+    user.password = "password"
+    user.password_confirmation = "password"
+  end
+end
+
+upsert_user("Admin", "admin@example.com", "admin")
+upsert_user("Mandi User", "user@example.com", "user")
+
 def upsert_state(name)
   State.find_or_create_by!(name: name) do |state|
     state.code = name.to_s.parameterize(separator: " ").split.map { |token| token[0] }.join.first(3).upcase

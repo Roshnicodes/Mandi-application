@@ -14,13 +14,15 @@
     </div>
     <div class="page-actions">
       <%= link_to "Market Update", market_update_cotton_bulletin_path(@cotton_bulletin), class: "button button-primary", target: "_blank", rel: "noopener" %>
-      <%= link_to "View Excel", export_cotton_bulletin_path(@cotton_bulletin, preview: true), class: "button button-secondary", target: "_blank", rel: "noopener" %>
-      <%= link_to "Download Excel", export_cotton_bulletin_path(@cotton_bulletin), class: "button button-primary" %>
-      <%= form_with url: import_cotton_bulletin_path(@cotton_bulletin), multipart: true, class: "import-inline-form" do %>
-        <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
-        <%= submit_tag "Import Excel", class: "button button-secondary" %>
+      <% if admin_user? %>
+        <%= link_to "View Excel", export_cotton_bulletin_path(@cotton_bulletin, preview: true), class: "button button-secondary", target: "_blank", rel: "noopener" %>
+        <%= link_to "Download Excel", export_cotton_bulletin_path(@cotton_bulletin), class: "button button-primary" %>
+        <%= form_with url: import_cotton_bulletin_path(@cotton_bulletin), multipart: true, class: "import-inline-form" do %>
+          <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
+          <%= submit_tag "Import Excel", class: "button button-secondary" %>
+        <% end %>
+        <%= link_to "Edit Bulletin", edit_cotton_bulletin_path(@cotton_bulletin), class: "button button-secondary" %>
       <% end %>
-      <%= link_to "Edit Bulletin", edit_cotton_bulletin_path(@cotton_bulletin), class: "button button-secondary" %>
       <%= link_to "Back to Bulletins", cotton_bulletins_path, class: "button button-ghost" %>
     </div>
   </div>
@@ -45,21 +47,32 @@
     <%= render "observation_section", bulletin: @cotton_bulletin, records: @gin_observations, category: "gin_wise", title: "Raw Cotton Rate - Gin Wise" %>
   </div>
 
-  <div class="report-sheet-grid report-sheet-grid-three">
+  <div class="report-sheet-grid report-sheet-grid-two">
     <%= render "observation_section", bulletin: @cotton_bulletin, records: @cci_observations, category: "cci_mandi", title: "CCI Mandi Rates" %>
-    <%= render "observation_section", bulletin: @cotton_bulletin, records: @tdn_observations, category: "tdn_moisture", title: "TDN Rates With Moisture" %>
-    <%= render "observation_section", bulletin: @cotton_bulletin, records: @comparison_observations, category: "comparison_sheet", title: "Comparison Sheet (In Qtl)" %>
+    <div class="table-card report-sheet-card comparison-launch-card" id="observation-section-comparison_sheet">
+      <div class="sheet-header">
+        <div>
+          <p class="eyebrow">Excel Section</p>
+          <h2 class="table-title">Comparison Sheet (In Qtl)</h2>
+          <p class="table-subtitle">Comparison sheet ko alag page par clean grid me dekhiye aur update kariye.</p>
+        </div>
+        <div class="inline-actions">
+          <%= link_to "Open Comparison Sheet", comparison_sheet_cotton_bulletin_path(@cotton_bulletin), class: "button button-primary" %>
+        </div>
+      </div>
+      <div class="comparison-launch-summary">
+        <span>Rows saved</span>
+        <strong><%= @comparison_observations.size %></strong>
+      </div>
+    </div>
   </div>
 
   <div class="report-sheet-grid report-sheet-grid-two">
     <%= render "seed_rate_section", bulletin: @cotton_bulletin, records: @seed_rates %>
-    <%= render "regional_comparison_section", bulletin: @cotton_bulletin, records: @regional_comparisons %>
   </div>
 
   <div class="report-sheet-grid report-sheet-grid-two">
     <%= render "candy_rate_section", bulletin: @cotton_bulletin, records: @mch_rates, category: "mch", title: "Candy Rate (MCH)" %>
     <%= render "candy_rate_section", bulletin: @cotton_bulletin, records: @dch_rates, category: "dch", title: "Candy Rate (DCH)" %>
   </div>
-
-  <%= render "call_performance_section", bulletin: @cotton_bulletin, records: @call_performances %>
 </section>

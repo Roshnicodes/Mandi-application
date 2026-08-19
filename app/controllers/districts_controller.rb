@@ -1,6 +1,7 @@
 class DistrictsController < ApplicationController
   include ReferenceCollections
 
+  before_action :require_admin
   before_action :set_district, only: %i[edit update destroy]
   before_action :load_state_options, only: %i[new create edit update]
 
@@ -16,8 +17,13 @@ class DistrictsController < ApplicationController
     @district = District.new(district_params)
 
     if @district.save
-      redirect_to districts_path, notice: "District created successfully."
+      redirect_to after_quick_entry_create_path(@district), notice: "District created successfully."
     else
+      if quick_entry_request?
+        redirect_back fallback_location: new_daily_price_arrival_report_path(state_id: @district.state_id), alert: @district.errors.full_messages.to_sentence
+        return
+      end
+
       render :new, status: :unprocessable_entity
     end
   end
@@ -52,5 +58,15 @@ class DistrictsController < ApplicationController
 
     def district_params
       params.require(:district).permit(:state_id, :name)
+    end
+
+    def quick_entry_request?
+      params[:return_to_entry].present?
+    end
+
+    def after_quick_entry_create_path(district)
+      return districts_path unless quick_entry_request?
+
+      new_daily_price_arrival_report_path(state_id: district.state_id, district_id: district.id)
     end
 end

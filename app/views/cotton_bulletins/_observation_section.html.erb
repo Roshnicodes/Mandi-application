@@ -51,7 +51,9 @@
               <th>Modal Price</th>
               <th>Reference / Remark</th>
               <th>Attachments</th>
-              <th>Actions</th>
+              <% if admin_user? %>
+                <th>Actions</th>
+              <% end %>
             </tr>
           <% when "gin_wise", "tdn_moisture" %>
             <tr>
@@ -62,7 +64,9 @@
               <th>Arrival Price</th>
               <th>Remark</th>
               <th>Attachments</th>
-              <th>Actions</th>
+              <% if admin_user? %>
+                <th>Actions</th>
+              <% end %>
             </tr>
           <% when "comparison_sheet" %>
             <tr>
@@ -74,7 +78,9 @@
               <th>CCI %</th>
               <th>Remark</th>
               <th>Attachments</th>
-              <th>Actions</th>
+              <% if admin_user? %>
+                <th>Actions</th>
+              <% end %>
             </tr>
           <% end %>
         </thead>
@@ -114,12 +120,14 @@
                 <td><%= record.remarks.presence || "-" %></td>
                 <td><%= render "shared/attachment_links", record: record %></td>
               <% end %>
-              <td>
-                <div class="inline-actions">
-                  <%= link_to "Edit", edit_cotton_bulletin_cotton_market_observation_path(bulletin, record), class: "button button-secondary" %>
-                  <%= button_to "Delete", cotton_bulletin_cotton_market_observation_path(bulletin, record), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
-                </div>
-              </td>
+              <% if admin_user? %>
+                <td>
+                  <div class="inline-actions">
+                    <%= link_to "Edit", edit_cotton_bulletin_cotton_market_observation_path(bulletin, record), class: "button button-secondary" %>
+                    <%= button_to "Delete", cotton_bulletin_cotton_market_observation_path(bulletin, record), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
+                  </div>
+                </td>
+              <% end %>
             </tr>
           <% end %>
         </tbody>
@@ -134,7 +142,9 @@
               <td class="numeric-cell"><%= number_with_precision(avg_cci_percentage, precision: 2) %></td>
               <td>-</td>
               <td>-</td>
-              <td>-</td>
+              <% if admin_user? %>
+                <td>-</td>
+              <% end %>
             </tr>
           </tfoot>
         <% end %>

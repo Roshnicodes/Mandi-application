@@ -1,4 +1,6 @@
 class CottonMarketObservationsController < CottonBulletinNestedController
+  include ReferenceCollections
+
   GridRow = Struct.new(
     :id,
     :grid_index,
@@ -46,10 +48,15 @@ class CottonMarketObservationsController < CottonBulletinNestedController
 
   def save_grid
     @active_row_index = params[:active_row_index].to_s.presence
+    @selected_state_id = params[:state_id].to_s.presence
+    @selected_district_id = params[:district_id].to_s.presence
+    @mandi_filter = params[:mandi].to_s.presence
     all_grid_rows = build_grid_rows(@category, grid_rows_params)
     @active_row_name = all_grid_rows.find { |row| row.grid_index.to_s == @active_row_index.to_s }&.name
     @grid_rows = filter_grid_rows(all_grid_rows)
     @mandi_names = all_grid_rows.map(&:name)
+    @states = state_options
+    @districts_data = districts_payload
     @custom_mandi_observation = @cotton_bulletin.cotton_market_observations.new(category: @category)
     @grid_errors = []
     success = true
@@ -65,6 +72,9 @@ class CottonMarketObservationsController < CottonBulletinNestedController
         observation.assign_attributes(
           category: @category,
           name: row.name,
+          market: row.market,
+          district: row.market&.district,
+          state: row.market&.state,
           position: row.position,
           remarks: row.remarks,
           arrival_quantity: row.arrival_quantity,
@@ -84,7 +94,13 @@ class CottonMarketObservationsController < CottonBulletinNestedController
     end
 
     if success
-      redirect_to grid_cotton_bulletin_cotton_market_observations_path(@cotton_bulletin, category: @category, mandi: @active_row_name.presence || params[:mandi].presence), notice: "#{CottonMarketObservation::CATEGORIES.fetch(@category)} row added successfully."
+      redirect_to grid_cotton_bulletin_cotton_market_observations_path(
+        @cotton_bulletin,
+        category: @category,
+        mandi: @active_row_name.presence || params[:mandi].presence,
+        state_id: @selected_state_id,
+        district_id: @selected_district_id
+      ), notice: "#{CottonMarketObservation::CATEGORIES.fetch(@category)} row added successfully."
     else
       flash.now[:alert] = "Grid save nahi ho payi. Niche row-wise errors dekh lijiye."
       render :grid, status: :unprocessable_entity
@@ -129,7 +145,13 @@ class CottonMarketObservationsController < CottonBulletinNestedController
     mandi_name = @cotton_market_observation.name
     @cotton_market_observation.destroy
     if return_to_grid? && CottonMarketObservation.template_grid_supported?(category)
-      redirect_to grid_cotton_bulletin_cotton_market_observations_path(@cotton_bulletin, category: category, mandi: params[:mandi].presence || mandi_name), notice: "Cotton observation removed successfully."
+      redirect_to grid_cotton_bulletin_cotton_market_observations_path(
+        @cotton_bulletin,
+        category: category,
+        mandi: params[:mandi].presence || mandi_name,
+        state_id: params[:state_id].presence,
+        district_id: params[:district_id].presence
+      ), notice: "Cotton observation removed successfully."
     else
       redirect_to cotton_bulletin_path(@cotton_bulletin), notice: "Cotton observation removed successfully."
     end
@@ -139,9 +161,13 @@ class CottonMarketObservationsController < CottonBulletinNestedController
     def prepare_grid_state(category)
       @active_row_name = params[:active_mandi].to_s.presence
       @show_custom_row = params[:open].to_s == "custom"
+      @states = state_options
+      @districts_data = districts_payload
+      @selected_state_id = params[:state_id].to_s.presence
+      @selected_district_id = params[:district_id].to_s.presence
       all_grid_rows = build_grid_rows(category)
       @mandi_names = all_grid_rows.map(&:name)
-      @mandi_filter = params[:mandi].to_s.presence || @mandi_names.first
+      @mandi_filter = params[:mandi].to_s.presence
       @grid_rows = filter_grid_rows(all_grid_rows)
       @custom_mandi_observation ||= @cotton_bulletin.cotton_market_observations.new(category: category)
     end
@@ -196,19 +222,48 @@ class CottonMarketObservationsController < CottonBulletinNestedController
         )
       end
 
-      custom_names = rows_index.keys.reject { |name| template_names.include?(name) }.sort
+      master_market_rows = []
+      master_markets_for_grid(category).each do |market|
+        market_name = market.name
+        next if template_names.include?(market_name)
+
+        records = rows_index[market_name] || []
+        record = records.first
+        offset = master_market_rows.size
+        input_index = template_rows.size + offset
+        input = rows_input[input_index.to_s] || rows_input[input_index] || {}
+
+        master_market_rows << GridRow.new(
+          id: input["id"].presence || record&.id,
+          grid_index: input_index,
+          name: market_name,
+          position: record&.position.presence || (template_rows.size + offset + 1),
+          remarks: input["remarks"].presence || record&.remarks.presence || market_label_for_grid(market),
+          arrival_quantity: input.fetch("arrival_quantity", record&.arrival_quantity),
+          minimum_price: input.fetch("minimum_price", record&.minimum_price),
+          maximum_price: input.fetch("maximum_price", record&.maximum_price),
+          modal_price: input.fetch("modal_price", record&.modal_price),
+          attachments: extract_attachments(input),
+          records: records,
+          custom: false,
+          market: market
+        )
+      end
+
+      known_names = (template_names + master_market_rows.map(&:name)).uniq
+      custom_names = rows_index.keys.reject { |name| known_names.include?(name) }.sort
 
       custom_rows = custom_names.each_with_index.map do |name, offset|
         records = rows_index[name] || []
         record = records.first
-        input_index = template_rows.size + offset
+        input_index = template_rows.size + master_market_rows.size + offset
         input = rows_input[input_index.to_s] || rows_input[input_index] || {}
 
         GridRow.new(
           id: input["id"].presence || record&.id,
           grid_index: input_index,
           name: input["name"].presence || record&.name,
-          position: record&.position.presence || (template_rows.size + offset + 1),
+          position: record&.position.presence || (template_rows.size + master_market_rows.size + offset + 1),
           remarks: input["remarks"].presence || record&.remarks,
           arrival_quantity: input.fetch("arrival_quantity", record&.arrival_quantity),
           minimum_price: input.fetch("minimum_price", record&.minimum_price),
@@ -221,7 +276,21 @@ class CottonMarketObservationsController < CottonBulletinNestedController
         )
       end
 
-      grid_rows + custom_rows
+      (grid_rows + master_market_rows + custom_rows).sort_by { |row| [ row.position || 999_999, row.name.to_s ] }
+    end
+
+    def master_markets_for_grid(category)
+      return Market.none unless category == "mandi_wise"
+      return Market.none if @selected_state_id.blank? && @selected_district_id.blank?
+
+      scope = Market.includes(district: :state).ordered
+      scope = scope.where(district_id: @selected_district_id) if @selected_district_id.present?
+      scope = scope.joins(:district).where(districts: { state_id: @selected_state_id }) if @selected_state_id.present?
+      scope
+    end
+
+    def market_label_for_grid(market)
+      [ market.state&.name, market.district&.name, market.name ].compact.join(" / ")
     end
 
     def grid_rows_params

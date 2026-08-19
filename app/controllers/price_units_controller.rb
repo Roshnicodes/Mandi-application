@@ -1,4 +1,5 @@
 class PriceUnitsController < ApplicationController
+  before_action :require_admin
   before_action :set_price_unit, only: %i[edit update destroy]
 
   def index

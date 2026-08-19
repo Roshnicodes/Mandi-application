@@ -96,7 +96,7 @@
           selectedDistrictId ? markets.filter((market) => String(market.district_id) === String(selectedDistrictId)) :
           selectedStateId ? markets.filter((market) => String(market.state_id) === String(selectedStateId)) :
           markets;
-        renderSelectOptions(marketSelect, filteredMarkets, "Select market");
+        renderSelectOptions(marketSelect, filteredMarkets, "Select mandi");
       };
 
       const syncLocationFromMarket = () => {
@@ -336,20 +336,30 @@
 
     const openSidebar = () => {
       document.body.classList.add("sidebar-open");
+      document.body.classList.remove("sidebar-collapsed");
       setExpanded(true);
+    };
+
+    const toggleSidebar = () => {
+      if (window.innerWidth <= 980) {
+        if (document.body.classList.contains("sidebar-open")) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
+        return;
+      }
+
+      document.body.classList.toggle("sidebar-collapsed");
+      document.body.classList.remove("sidebar-open");
+      setExpanded(!document.body.classList.contains("sidebar-collapsed"));
     };
 
     toggleButtons.forEach((button) => {
       if (button.dataset.sidebarBound === "true") return;
 
       button.dataset.sidebarBound = "true";
-      button.addEventListener("click", () => {
-        if (document.body.classList.contains("sidebar-open")) {
-          closeSidebar();
-        } else {
-          openSidebar();
-        }
-      });
+      button.addEventListener("click", toggleSidebar);
     });
 
     closeButtons.forEach((button) => {
@@ -373,7 +383,71 @@
       });
     });
 
-    if (window.innerWidth > 980) closeSidebar();
+    if (window.innerWidth <= 980) {
+      document.body.classList.remove("sidebar-collapsed");
+      closeSidebar();
+    } else {
+      document.body.classList.remove("sidebar-open");
+      setExpanded(!document.body.classList.contains("sidebar-collapsed"));
+    }
+  };
+
+  const setupUnitConverters = () => {
+    const normalizeUnit = (unit) => {
+      const value = String(unit || "").toLowerCase();
+      if (value.includes("kg") || value.includes("kilo")) return "kg";
+      if (value.includes("mt") || value.includes("metric") || value.includes("ton")) return "mt";
+      return "qtl";
+    };
+
+    const toKg = (value, unit) => {
+      if (unit === "kg") return value;
+      if (unit === "mt") return value * 1000;
+      return value * 100;
+    };
+
+    const fromKg = (value, unit) => {
+      if (unit === "kg") return value;
+      if (unit === "mt") return value / 1000;
+      return value / 100;
+    };
+
+    const priceToTarget = (value, sourceUnit, targetUnit) => {
+      const source = normalizeUnit(sourceUnit);
+      const perKg = source === "kg" ? value : source === "mt" ? value / 1000 : value / 100;
+      if (targetUnit === "kg") return perKg;
+      if (targetUnit === "mt") return perKg * 1000;
+      return perKg * 100;
+    };
+
+    const formatter = new Intl.NumberFormat("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    document.querySelectorAll("[data-unit-table]").forEach((table) => {
+      const render = (kind, targetUnit) => {
+        table.querySelectorAll(`[data-unit-value][data-unit-kind="${kind}"]`).forEach((cell) => {
+          const rawValue = Number.parseFloat(cell.dataset.sourceValue);
+          if (!Number.isFinite(rawValue)) {
+            cell.textContent = "-";
+            return;
+          }
+
+          const sourceUnit = normalizeUnit(cell.dataset.sourceUnit);
+          const nextValue = kind === "price" ? priceToTarget(rawValue, sourceUnit, targetUnit) : fromKg(toKg(rawValue, sourceUnit), targetUnit);
+          cell.textContent = formatter.format(nextValue);
+        });
+      };
+
+      table.querySelectorAll("[data-unit-control]").forEach((select) => {
+        if (select.dataset.unitBound === "true") return;
+
+        select.dataset.unitBound = "true";
+        select.addEventListener("change", () => render(select.dataset.unitControl, select.value));
+        render(select.dataset.unitControl, select.value);
+      });
+    });
   };
 
   const clearLiveClockTimers = () => {
@@ -466,6 +540,7 @@
     setupDailyEntryDateSync();
     setupDailyEntryDefaults();
     setupResponsiveSidebar();
+    setupUnitConverters();
     setupLiveClock();
   };
 

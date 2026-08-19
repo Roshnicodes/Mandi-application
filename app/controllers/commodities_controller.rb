@@ -1,6 +1,7 @@
 class CommoditiesController < ApplicationController
   include ReferenceCollections
 
+  before_action :require_admin
   before_action :set_commodity, only: %i[edit update destroy]
   before_action :load_group_options, only: %i[new create edit update]
 

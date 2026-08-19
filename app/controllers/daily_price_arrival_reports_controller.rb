@@ -1,6 +1,7 @@
 class DailyPriceArrivalReportsController < ApplicationController
   include ReferenceCollections
 
+  before_action :require_admin, only: %i[export import edit update destroy]
   before_action :set_daily_price_arrival_report, only: %i[edit update destroy]
   before_action :load_report_form_collections, only: %i[new create edit update]
   before_action :load_filter_collections, only: :index
@@ -113,10 +114,26 @@ class DailyPriceArrivalReportsController < ApplicationController
     end
 
     def prepare_report_entry_grid
-      @entry_states = State.includes(districts: :markets).ordered.select { |state| state.districts.any? { |district| district.markets.any? } }
+      @entry_states = State.joins(districts: :markets)
+        .includes(districts: :markets)
+        .distinct
+        .ordered
+        .reject { |state| invalid_entry_state_name?(state.name) }
+
       @selected_state = State.find_by(id: params[:state_id]) || @daily_price_arrival_report.state || @entry_states.first
-      @entry_districts = @selected_state&.districts&.includes(:markets)&.ordered&.select { |district| district.markets.any? } || []
+      if @selected_state.present? && (invalid_entry_state_name?(@selected_state.name) || @entry_states.exclude?(@selected_state))
+        @selected_state = @entry_states.first
+      end
+
+      @entry_districts = if @selected_state.present?
+        @selected_state.districts.joins(:markets).distinct.ordered
+      else
+        []
+      end
+
       @selected_district = District.find_by(id: params[:district_id]) || @daily_price_arrival_report.district
+      @selected_district = nil if @selected_district.present? && @entry_districts.exclude?(@selected_district)
+
       @entry_markets =
         if @selected_district.present?
           Market.includes(district: :state).where(district: @selected_district).ordered
@@ -151,6 +168,11 @@ class DailyPriceArrivalReportsController < ApplicationController
         price_unit: PriceUnit.find_by(id: params[:price_unit_id]) || defaults[:price_unit],
         arrival_unit: ArrivalUnit.find_by(id: params[:arrival_unit_id]) || defaults[:arrival_unit]
       }.compact
+    end
+
+    def invalid_entry_state_name?(name)
+      normalized_name = name.to_s.squish.downcase
+      normalized_name == "state" || normalized_name.start_with?("daily price arrival report")
     end
 
     def filter_params

@@ -1,0 +1,21 @@
+<% content_for :title, "#{@cotton_bulletin.title} Comparison Sheet" %>
+
+<section class="responsive-stack">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Excel Section</p>
+      <h1>Comparison Sheet (In Qtl)</h1>
+      <p class="muted-text">
+        <%= @cotton_bulletin.title %> · <%= @cotton_bulletin.report_date.strftime("%d %b %Y") %>
+      </p>
+    </div>
+    <div class="page-actions">
+      <% if admin_user? %>
+        <%= link_to "Add Line", new_cotton_bulletin_cotton_market_observation_path(@cotton_bulletin, category: "comparison_sheet", manual: true), class: "button button-primary" %>
+      <% end %>
+      <%= link_to "Back to Bulletin", cotton_bulletin_path(@cotton_bulletin), class: "button button-ghost" %>
+    </div>
+  </div>
+
+  <%= render "observation_section", bulletin: @cotton_bulletin, records: @comparison_observations, category: "comparison_sheet", title: "Comparison Sheet (In Qtl)" %>
+</section>

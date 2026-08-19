@@ -1,16 +1,21 @@
 class DashboardController < ApplicationController
   def index
-    @latest_report_date = DailyPriceArrivalReport.maximum(:arrival_date)
-    @total_reports = DailyPriceArrivalReport.count
-    @markets_covered = DailyPriceArrivalReport.distinct.count(:market_id)
-    @commodities_covered = DailyPriceArrivalReport.distinct.count(:commodity_id)
-    @today_arrival_quantity = DailyPriceArrivalReport.where(arrival_date: @latest_report_date).sum(:arrival_quantity)
-    @recent_reports = DailyPriceArrivalReport.recent_first.limit(8)
-    @latest_cotton_bulletin = CottonBulletin.recent_first.first
-    @state_summaries = DailyPriceArrivalReport.joins(:state)
-                                            .group("states.name")
-                                            .order(Arel.sql("COUNT(daily_price_arrival_reports.id) DESC"))
-                                            .limit(5)
-                                            .count
+    valid_reports = DailyPriceArrivalReport.includes(:state).recent_first.to_a.reject { |report| invalid_state_name?(report.state&.name) }
+
+    @total_reports = valid_reports.size
+    @recent_reports = valid_reports.first(8)
+    @today_reports = valid_reports.count { |report| report.arrival_date == Date.current }
+    @covered_mandis = valid_reports.map(&:market_id).uniq.size
+    @latest_arrival_date = valid_reports.map(&:arrival_date).compact.max
+    @latest_arrival_total = valid_reports
+      .select { |report| report.arrival_date == @latest_arrival_date }
+      .sum { |report| report.arrival_quantity.to_d }
+    @dashboard_time = Time.zone.now
   end
+
+  private
+    def invalid_state_name?(name)
+      normalized_name = name.to_s.squish.downcase
+      normalized_name == "state" || normalized_name.start_with?("daily price arrival report")
+    end
 end
