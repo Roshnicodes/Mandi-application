@@ -2,16 +2,16 @@
 <% attachment_accept = ".csv,.pdf,.xls,.xlsx,.jpg,.jpeg,.png,.webp,.doc,.docx,.txt,.zip,image/*,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" %>
 
 <section class="responsive-stack">
-  <div class="page-header">
+  <% content_for :page_heading do %>
     <div>
       <p class="eyebrow">Report Entry</p>
       <h1>Daily mandi quick entry</h1>
     </div>
-    <div class="page-actions">
-      <%= link_to "View saved reports", daily_price_arrival_reports_path, class: "button button-secondary" %>
-    </div>
-  </div>
+  <% end %>
 
+  <% content_for :page_actions do %>
+    <%= link_to "View saved reports", daily_price_arrival_reports_path, class: "button button-secondary" %>
+  <% end %>
   <%= render "shared/form_errors", record: @daily_price_arrival_report %>
 
   <div class="table-card report-sheet-card" data-grid-scope>
@@ -54,7 +54,7 @@
     >
       <div>
         <p class="eyebrow">Report Details</p>
-        <h3 class="daily-entry-defaults-title">Commodity details choose kariye</h3>
+        <h3 class="daily-entry-defaults-title">Commodity details</h3>
       </div>
 
       <div class="form-grid-six">
@@ -141,7 +141,7 @@
               <tr class="sheet-grid-summary-row">
                 <td><%= index + 1 %></td>
                 <td class="sheet-entry-fixed">
-                  <strong><%= market.name %></strong>
+                  <strong><%= mandi_display_name(market.name) %></strong>
                   <span class="sheet-inline-hint"><%= [market.district.state.name, market.district.name].join(" / ") %></span>
                   <% if latest_report.present? %>
                     <span class="sheet-inline-hint">Saved <%= l(latest_report.created_at.in_time_zone, format: :long) %></span>
@@ -179,7 +179,7 @@
                 <tr class="sheet-entry-previous-row">
                   <td><%= "#{index + 1}.#{previous_index + 2}" %></td>
                   <td class="sheet-entry-fixed">
-                    <strong><%= market.name %></strong>
+                    <strong><%= mandi_display_name(market.name) %></strong>
                     <span class="sheet-inline-hint">Saved <%= l(report.created_at.in_time_zone, format: :long) %></span>
                   </td>
                   <td><%= report.grade.name %></td>
@@ -225,7 +225,7 @@
                   <span class="sheet-inline-flag"><%= records.size + 1 %></span>
                 </td>
                 <td class="sheet-entry-fixed">
-                  <strong><%= market.name %></strong>
+                  <strong><%= mandi_display_name(market.name) %></strong>
                   <span class="sheet-inline-hint">Add one more entry</span>
                 </td>
                 <td>
@@ -254,7 +254,7 @@
               </tr>
               <tr class="sheet-entry-launch-row">
                 <td colspan="8" class="sheet-entry-launch-copy">
-                  <span>Add FAQ / Non FAQ entry for <strong><%= market.name %></strong></span>
+                  <span>Add FAQ / Non FAQ entry for <strong><%= mandi_display_name(market.name) %></strong></span>
                 </td>
                 <td class="sheet-entry-action-cell">
                   <div class="sheet-inline-actions">

@@ -1,23 +1,24 @@
-<div class="table-card report-sheet-card">
+<div class="table-card report-sheet-card" data-sheet-section>
   <div class="sheet-header">
     <div>
       <p class="eyebrow">Smart Info</p>
       <h2 class="table-title"><%= title %></h2>
-      <p class="table-subtitle">Parameter-wise candy rate entries for sheet comparison.</p>
     </div>
-    <div class="inline-actions">
-      <%= link_to "Add Candy Rate", new_cotton_bulletin_candy_rate_path(bulletin, category: category), class: "button button-secondary" %>
-    </div>
+    <% if admin_user? %>
+      <div class="inline-actions">
+        <%= link_to "Add Candy Rate", new_cotton_bulletin_candy_rate_path(bulletin, category: category), class: "button button-secondary" %>
+      </div>
+    <% end %>
   </div>
 
   <% if records.any? %>
     <div class="data-table-wrapper">
-      <table class="report-grid-table">
+      <table class="report-grid-table cotton-rate-table">
         <thead>
           <tr>
             <th rowspan="2">S. No</th>
             <th rowspan="2">Parameter</th>
-            <th colspan="1">Madhya Pradesh</th>
+            <th colspan="2">MP</th>
             <th colspan="2">Maharashtra</th>
             <th colspan="2">Odisha</th>
             <th rowspan="2">Reference</th>
@@ -27,9 +28,10 @@
             <% end %>
           </tr>
           <tr>
-            <th>Rate</th>
             <th>29 MM</th>
-            <th>31 MM</th>
+            <th>30 MM</th>
+            <th>29 MM</th>
+            <th>30 MM</th>
             <th>29 MM</th>
             <th>30 MM</th>
           </tr>
@@ -39,6 +41,7 @@
             <tr>
               <td><%= record.position.presence || index + 1 %></td>
               <td><%= record.parameter %></td>
+              <td><%= record.madhya_pradesh_29mm_rate.presence || "-" %></td>
               <td><%= record.madhya_pradesh_rate.presence || "-" %></td>
               <td><%= record.maharashtra_29mm_rate.presence || "-" %></td>
               <td><%= record.maharashtra_31mm_rate.presence || "-" %></td>
@@ -60,6 +63,6 @@
       </table>
     </div>
   <% else %>
-    <div class="empty-state"><%= title %> section abhi empty hai.</div>
+    <div class="empty-state"><%= title %> section is empty.</div>
   <% end %>
 </div>

@@ -1,18 +1,17 @@
 <% content_for :title, "Mandi Master" %>
 
 <section class="responsive-stack">
-  <div class="page-header">
+  <% content_for :page_heading do %>
     <div>
       <p class="eyebrow">Master Setup</p>
       <h1>Mandi / APMC master</h1>
-      <p class="muted-text">Daily Report ke dropdown me wahi mandis dikhenge jo yahan district ke saath mapped hain.</p>
     </div>
-    <div class="page-actions">
-      <%= link_to "District Master", districts_path, class: "button button-secondary" %>
-      <%= link_to "Add Mandi", new_market_path, class: "button button-primary" %>
-    </div>
-  </div>
+  <% end %>
 
+  <% content_for :page_actions do %>
+    <%= link_to "District Master", districts_path, class: "button button-secondary" %>
+    <%= link_to "Add Mandi", new_market_path, class: "button button-primary" %>
+  <% end %>
   <div class="table-card">
     <% if @markets.any? %>
       <div class="data-table-wrapper">
@@ -28,7 +27,7 @@
           <tbody>
             <% @markets.each do |market| %>
               <tr>
-                <td><%= market.name %></td>
+                <td><strong><%= mandi_display_name(market.name) %></strong></td>
                 <td><%= market.district.name %></td>
                 <td><%= market.district.state.name %></td>
                 <td>
@@ -43,7 +42,7 @@
         </table>
       </div>
     <% else %>
-      <div class="empty-state">Abhi tak koi mandi or APMC create nahi hua hai.</div>
+      <div class="empty-state">No mandi records yet.</div>
     <% end %>
   </div>
 </section>

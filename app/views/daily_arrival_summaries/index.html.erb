@@ -1,122 +1,129 @@
 <% content_for :title, "Arrival Summary" %>
 
-<section class="responsive-stack">
-  <div class="page-header">
+<section class="responsive-stack arrival-summary-page">
+  <% content_for :page_heading do %>
     <div>
-      <p class="eyebrow">Excel Summary</p>
+      <p class="eyebrow">Arrival intelligence</p>
       <h1>Daily arrival summary</h1>
     </div>
-  </div>
+  <% end %>
 
-  <div class="card">
+  <% content_for :page_actions do %>
+    <%= link_to "Open daily reports", daily_price_arrival_reports_path, class: "button button-ghost" %>
+    <%= link_to "Download Excel", export_daily_price_arrival_reports_path(request.query_parameters.slice("state_id", "from_date", "to_date")), class: "button button-primary" %>
+  <% end %>
+  <div class="card arrival-summary-filter-card">
     <div class="card-header">
       <div>
-        <h2 class="table-title">Summary filters</h2>
-        <p class="table-subtitle">Choose state and date window to build the report sheet.</p>
+        <h2 class="table-title">Reporting window</h2>
+        <p class="table-subtitle">Choose a state and date range; every card below updates together.</p>
       </div>
     </div>
 
-    <%= form_with url: daily_arrival_summaries_path, method: :get, class: "filters-form" do |form| %>
+    <%= form_with url: daily_arrival_summaries_path, method: :get, class: "filters-form filters-form-compact" do |form| %>
       <div class="form-grid-three">
         <div class="field-group">
           <%= form.label :state_id, "State" %>
           <%= form.collection_select :state_id, @states, :id, :name, { include_blank: "All states", selected: params[:state_id] } %>
         </div>
-
         <div class="field-group">
           <%= form.label :from_date, "From date" %>
           <%= form.date_field :from_date, value: params[:from_date] %>
         </div>
-
         <div class="field-group">
           <%= form.label :to_date, "To date" %>
           <%= form.date_field :to_date, value: params[:to_date] %>
         </div>
       </div>
-
       <div class="inline-actions">
-        <%= form.submit "Generate Summary", class: "button button-primary" %>
+        <%= form.submit "Update summary", class: "button button-primary" %>
         <%= link_to "Reset", daily_arrival_summaries_path, class: "button button-ghost" %>
       </div>
     <% end %>
   </div>
 
-  <div class="summary-report-card">
-    <p class="eyebrow">Generated Title</p>
+  <div class="summary-report-card arrival-summary-title-card">
+    <p class="eyebrow">Current report</p>
     <h2 class="summary-report-title"><%= @report_title %></h2>
   </div>
 
   <div class="metrics-grid">
     <div class="stat-card">
-      <span class="stat-label">Grouped blocks</span>
-      <strong><%= @grouped_reports.size %></strong>
+      <span class="stat-label">Districts covered</span>
+      <strong><%= number_with_delimiter(@grouped_reports.size) %></strong>
     </div>
     <div class="stat-card">
-      <span class="stat-label">Visible rows</span>
-      <strong><%= @reports.size %></strong>
+      <span class="stat-label">Report rows</span>
+      <strong><%= number_with_delimiter(@reports.size) %></strong>
     </div>
     <div class="stat-card">
-      <span class="stat-label">Arrival quantity total</span>
-      <strong><%= number_with_precision(@total_arrival_quantity, precision: 2) %></strong>
+      <span class="stat-label">Total arrival</span>
+      <strong><%= number_with_precision(@total_arrival_quantity, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %></strong>
     </div>
   </div>
 
   <% if @grouped_reports.any? %>
-    <% @grouped_reports.each do |district, reports| %>
-      <div class="table-card report-sheet-card">
-        <div class="sheet-header">
-          <div>
-            <p class="eyebrow">District Block</p>
-            <h2 class="table-title"><%= district.name %></h2>
-            <p class="table-subtitle">Grouped market rows for this district inside the selected summary window.</p>
-          </div>
-        </div>
+    <div class="arrival-summary-district-list">
+      <% @grouped_reports.each do |district, reports| %>
+        <% district_total = reports.sum(&:arrival_quantity) %>
+        <% district_markets = reports.map(&:market_id).uniq.size %>
+        <article class="table-card report-sheet-card arrival-summary-district-card">
+          <header class="arrival-summary-district-header">
+            <div>
+              <p class="eyebrow">District</p>
+              <h2 class="table-title"><%= district.name %></h2>
+              <p class="table-subtitle"><%= number_with_delimiter(district_markets) %> mandis · <%= number_with_delimiter(reports.size) %> saved rows</p>
+            </div>
+            <div class="arrival-summary-total">
+              <span>Arrival total</span>
+              <strong><%= number_with_precision(district_total, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %></strong>
+            </div>
+          </header>
 
-        <div class="data-table-wrapper">
-          <table class="report-grid-table">
-            <thead>
-              <tr>
-                <th>Created On</th>
-                <th>District</th>
-                <th>Mandi</th>
-                <th>Commodity Group</th>
-                <th>Commodity</th>
-                <th>Variety</th>
-                <th>Grade</th>
-                <th>Min Price</th>
-                <th>Max Price</th>
-                <th>Modal Price</th>
-                <th>Price Unit</th>
-                <th>Arrival Quantity</th>
-                <th>Arrival Unit</th>
-                <th>Arrival Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% reports.sort_by { |report| [report.market.name, -report.arrival_date.jd, -report.created_at.to_i] }.each do |report| %>
+          <div class="data-table-wrapper">
+            <table class="report-grid-table arrival-summary-table">
+              <thead>
                 <tr>
-                  <td><%= report.created_at.strftime("%d %b %Y, %I:%M %p") %></td>
-                  <td><%= report.district.name %></td>
-                  <td><%= report.market.name %></td>
-                  <td><%= report.commodity_group.name %></td>
-                  <td><%= report.commodity.name %></td>
-                  <td><%= report.variety.name %></td>
-                  <td><%= report.grade.name %></td>
-                  <td class="numeric-cell"><%= number_with_precision(report.min_price, precision: 2) %></td>
-                  <td class="numeric-cell"><%= number_with_precision(report.max_price, precision: 2) %></td>
-                  <td class="numeric-cell"><%= number_with_precision(report.modal_price, precision: 2) %></td>
-                  <td><%= report.price_unit.short_name.presence || report.price_unit.name %></td>
-                  <td class="numeric-cell"><%= number_with_precision(report.arrival_quantity, precision: 2) %></td>
-                  <td><%= report.arrival_unit.short_name.presence || report.arrival_unit.name %></td>
-                  <td><%= report.arrival_date.strftime("%d-%m-%Y") %></td>
+                  <th>Mandi</th>
+                  <th>Commodity</th>
+                  <th>Variety / Grade</th>
+                  <th>Min</th>
+                  <th>Max</th>
+                  <th>Modal</th>
+                  <th>Arrival</th>
+                  <th>Report date</th>
+                  <th>Reference</th>
                 </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    <% end %>
+              </thead>
+              <tbody>
+                <% reports.sort_by { |report| [report.market.name.downcase, -report.arrival_date.jd, -report.created_at.to_i] }.each do |report| %>
+                  <% price_unit = report.price_unit.short_name.presence || report.price_unit.name %>
+                  <% arrival_unit = report.arrival_unit.short_name.presence || report.arrival_unit.name %>
+                  <tr>
+                    <td><strong><%= mandi_display_name(report.market.name) %></strong></td>
+                    <td>
+                      <strong><%= report.commodity.name %></strong>
+                      <span class="arrival-summary-cell-detail"><%= report.commodity_group.name %></span>
+                    </td>
+                    <td>
+                      <strong><%= report.variety.name %></strong>
+                      <span class="arrival-summary-cell-detail"><%= report.grade.name %></span>
+                    </td>
+                    <td class="numeric-cell"><%= number_with_precision(report.min_price, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %><small><%= price_unit %></small></td>
+                    <td class="numeric-cell"><%= number_with_precision(report.max_price, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %><small><%= price_unit %></small></td>
+                    <td class="numeric-cell arrival-summary-modal"><%= number_with_precision(report.modal_price, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %><small><%= price_unit %></small></td>
+                    <td class="numeric-cell"><%= number_with_precision(report.arrival_quantity, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %><small><%= arrival_unit %></small></td>
+                    <td><%= report.arrival_date.strftime("%d %b %Y") %></td>
+                    <td class="arrival-summary-reference"><%= report.remarks.presence || "—" %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      <% end %>
+    </div>
   <% else %>
-    <div class="empty-state">Selected filters ke liye summary generate karne layak data abhi available nahi hai.</div>
+    <div class="empty-state">No summary data found for the selected filters.</div>
   <% end %>
 </section>

@@ -1,13 +1,12 @@
 <% content_for :title, "New Price Unit" %>
 
 <section class="responsive-stack">
-  <div class="page-header">
+  <% content_for :page_heading do %>
     <div>
       <p class="eyebrow">Master Setup</p>
       <h1>Create price unit</h1>
     </div>
-  </div>
-
+  <% end %>
   <div class="card">
     <%= render "form", price_unit: @price_unit %>
   </div>

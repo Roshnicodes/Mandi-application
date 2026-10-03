@@ -25,6 +25,6 @@ class ApplicationController < ActionController::Base
     def require_admin
       return if admin_user?
 
-      redirect_to root_path, alert: "Aapke user account ko is action ka access nahi hai."
+      redirect_to root_path
     end
 end

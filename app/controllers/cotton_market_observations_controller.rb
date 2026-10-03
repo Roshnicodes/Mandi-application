@@ -34,6 +34,7 @@ class CottonMarketObservationsController < CottonBulletinNestedController
     end
   end
 
+  skip_before_action :require_admin, only: %i[grid]
   before_action :set_cotton_market_observation, only: %i[edit update destroy]
   before_action :set_template_category, only: %i[grid save_grid]
   before_action :redirect_template_categories_to_grid, only: :new
@@ -102,7 +103,7 @@ class CottonMarketObservationsController < CottonBulletinNestedController
         district_id: @selected_district_id
       ), notice: "#{CottonMarketObservation::CATEGORIES.fetch(@category)} row added successfully."
     else
-      flash.now[:alert] = "Grid save nahi ho payi. Niche row-wise errors dekh lijiye."
+      flash.now[:alert] = "Grid could not be saved. Review the row errors below."
       render :grid, status: :unprocessable_entity
     end
   end
@@ -121,7 +122,7 @@ class CottonMarketObservationsController < CottonBulletinNestedController
         @category = @cotton_market_observation.category
         prepare_grid_state(@category)
         @show_custom_row = true
-        flash.now[:alert] = "Custom mandi save nahi ho payi. Errors niche dekh lijiye."
+        flash.now[:alert] = "Custom mandi could not be saved. Review the errors below."
         render :grid, status: :unprocessable_entity
       else
         render :new, status: :unprocessable_entity

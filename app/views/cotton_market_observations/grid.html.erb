@@ -2,16 +2,16 @@
 <% attachment_accept = ".csv,.pdf,.xls,.xlsx,.jpg,.jpeg,.png,.webp,.doc,.docx,.txt,.zip,image/*,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" %>
 
 <section class="responsive-stack">
-  <div class="page-header">
+  <% content_for :page_heading do %>
     <div>
       <p class="eyebrow">Cotton Sheet Builder</p>
       <h1><%= CottonMarketObservation::CATEGORIES.fetch(@category) %> quick entry</h1>
     </div>
-    <div class="page-actions">
-      <%= link_to "Back to Bulletin", cotton_bulletin_path(@cotton_bulletin, anchor: "observation-section-#{@category}"), class: "button button-ghost" %>
-    </div>
-  </div>
+  <% end %>
 
+  <% content_for :page_actions do %>
+    <%= link_to "Back to Bulletin", cotton_bulletin_path(@cotton_bulletin, anchor: "observation-section-#{@category}"), class: "button button-ghost" %>
+  <% end %>
   <% if @grid_errors.present? %>
     <div class="form-errors">
       <strong>Grid save errors</strong>
@@ -37,7 +37,7 @@
           grid_cotton_bulletin_cotton_market_observations_path(@cotton_bulletin, category: @category, state_id: @selected_state_id, district_id: @selected_district_id),
           class: ["sheet-tab-link", ("is-active" if @mandi_filter.blank?)].compact.join(" ") %>
         <% @mandi_names.each do |mandi_name| %>
-          <%= link_to mandi_name,
+          <%= link_to mandi_display_name(mandi_name),
             grid_cotton_bulletin_cotton_market_observations_path(@cotton_bulletin, category: @category, mandi: mandi_name, state_id: @selected_state_id, district_id: @selected_district_id),
             class: ["sheet-tab-link", ("is-active" if @mandi_filter == mandi_name)].compact.join(" ") %>
         <% end %>
@@ -64,38 +64,44 @@
           <h3>Manage list</h3>
         </div>
 
-        <%= form_with url: grid_cotton_bulletin_cotton_market_observations_path(@cotton_bulletin), method: :get, class: "sheet-filter-form", data: { market_form: true, districts: json_escape(@districts_data.to_json) } do %>
-          <%= hidden_field_tag :category, @category %>
-          <div class="field-group">
-            <%= label_tag :state_id, "State" %>
-            <%= select_tag :state_id, options_from_collection_for_select(@states, :id, :name, @selected_state_id), include_blank: "All states", data: { state_select: true } %>
-          </div>
-          <div class="field-group">
-            <%= label_tag :district_id, "District" %>
-            <%= select_tag :district_id, options_for_select([], @selected_district_id), include_blank: "All districts", data: { district_select: true, selected: @selected_district_id } %>
-          </div>
-          <div class="inline-actions">
-            <%= submit_tag "Apply", class: "button button-secondary button-compact" %>
-          </div>
-        <% end %>
+        <div class="sheet-master-group">
+          <p class="sheet-master-group-label">Filter by location</p>
+          <%= form_with url: grid_cotton_bulletin_cotton_market_observations_path(@cotton_bulletin), method: :get, class: "sheet-filter-form", data: { market_form: true, districts: json_escape(@districts_data.to_json) } do %>
+            <%= hidden_field_tag :category, @category %>
+            <div class="field-group">
+              <%= label_tag :state_id, "State" %>
+              <%= select_tag :state_id, options_from_collection_for_select(@states, :id, :name, @selected_state_id), include_blank: "All states", data: { state_select: true } %>
+            </div>
+            <div class="field-group">
+              <%= label_tag :district_id, "District" %>
+              <%= select_tag :district_id, options_for_select([], @selected_district_id), include_blank: "All districts", data: { district_select: true, selected: @selected_district_id } %>
+            </div>
+            <div class="inline-actions">
+              <%= submit_tag "Apply", class: "button button-secondary button-compact" %>
+            </div>
+          <% end %>
+        </div>
 
-        <%= form_with model: Market.new, url: markets_path, class: "sheet-filter-form", data: { market_form: true, districts: json_escape(@districts_data.to_json) }, html: { autocomplete: "off" } do |form| %>
-          <%= hidden_field_tag :return_to_cotton_grid, true %>
-          <%= hidden_field_tag :cotton_bulletin_id, @cotton_bulletin.id %>
-          <%= hidden_field_tag :category, @category %>
-          <%= hidden_field_tag :selected_state_id, @selected_state_id, data: { state_select: true } %>
-          <div class="field-group">
-            <%= form.label :district_id, "District" %>
-            <%= form.collection_select :district_id, District.none, :id, :name, { prompt: "Select district" }, { data: { district_select: true, selected: @selected_district_id } } %>
-          </div>
-          <div class="field-group">
-            <%= form.label :name, "New mandi name" %>
-            <%= form.text_field :name, placeholder: "Example: Alirajpur APMC" %>
-          </div>
-          <div class="inline-actions">
-            <%= form.submit "Add Mandi", class: "button button-primary button-compact" %>
-          </div>
-        <% end %>
+        <div class="sheet-master-group">
+          <p class="sheet-master-group-label">Add a new mandi</p>
+          <%= form_with model: Market.new, url: markets_path, class: "sheet-filter-form", data: { market_form: true, districts: json_escape(@districts_data.to_json) }, html: { autocomplete: "off" } do |form| %>
+            <%= hidden_field_tag :return_to_cotton_grid, true %>
+            <%= hidden_field_tag :cotton_bulletin_id, @cotton_bulletin.id %>
+            <%= hidden_field_tag :category, @category %>
+            <%= hidden_field_tag :selected_state_id, @selected_state_id, data: { state_select: true } %>
+            <div class="field-group">
+              <%= form.label :district_id, "District" %>
+              <%= form.collection_select :district_id, District.none, :id, :name, { prompt: "Select district" }, { data: { district_select: true, selected: @selected_district_id } } %>
+            </div>
+            <div class="field-group">
+              <%= form.label :name, "New mandi name" %>
+              <%= form.text_field :name, placeholder: "Example: Jobat" %>
+            </div>
+            <div class="inline-actions">
+              <%= form.submit "Add Mandi", class: "button button-primary button-compact" %>
+            </div>
+          <% end %>
+        </div>
       </div>
     <% end %>
 
@@ -163,9 +169,9 @@
             <tr class="sheet-grid-summary-row">
               <td><%= current_serial %></td>
               <td class="sheet-entry-fixed">
-                <strong><%= row.name %></strong>
+                <strong><%= mandi_display_name(row.name) %></strong>
                 <% if row.market.present? %>
-                  <span class="sheet-inline-hint"><%= [row.market.state&.name, row.market.district&.name, row.market.name].compact.join(" / ") %></span>
+                  <span class="sheet-inline-hint"><%= [row.market.state&.name, row.market.district&.name, mandi_display_name(row.market.name)].compact.join(" / ") %></span>
                 <% end %>
                 <% if current_record.present? %>
                   <span class="sheet-inline-hint">Saved <%= l(current_record.created_at.in_time_zone, format: :long) %></span>
@@ -202,7 +208,7 @@
               <tr class="sheet-entry-previous-row">
                 <td><%= previous_index + 2 %></td>
                 <td class="sheet-entry-fixed">
-                  <strong><%= row.name %></strong>
+                  <strong><%= mandi_display_name(row.name) %></strong>
                   <span class="sheet-inline-hint">Saved <%= l(record.created_at.in_time_zone, format: :long) %></span>
                 </td>
                 <td class="numeric-cell"><%= record.arrival_quantity.present? ? number_with_precision(record.arrival_quantity, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
@@ -248,7 +254,7 @@
                 <span class="sheet-inline-flag"><%= row.records.size + 1 %></span>
               </td>
               <td class="sheet-entry-fixed">
-                <strong><%= row.name %></strong>
+                <strong><%= mandi_display_name(row.name) %></strong>
                 <span class="sheet-inline-hint">Add one more entry</span>
               </td>
               <td>
@@ -278,7 +284,7 @@
             </tr>
             <tr class="sheet-entry-launch-row">
               <td colspan="7" class="sheet-entry-launch-copy">
-                <span>Add one more entry for <strong><%= row.name %></strong></span>
+                <span>Add one more entry for <strong><%= mandi_display_name(row.name) %></strong></span>
               </td>
               <td class="sheet-entry-action-cell">
                 <div class="sheet-inline-actions">

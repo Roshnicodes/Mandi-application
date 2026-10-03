@@ -84,21 +84,15 @@ end
 
 mandi_master = {
   "Madhya Pradesh" => {
-    "Betul" => [ "Betul APMC", "Sausar APMC", "Pandurna APMC" ],
-    "Ratlam" => [ "Ratlam APMC", "Raoti APMC", "Sailana APMC" ],
-    "Alirajpur" => [ "Alirajpur APMC", "Jobat APMC" ],
-    "Dhar" => [ "Dhar APMC", "Kukshi APMC", "Dhamnod APMC" ],
-    "Barwani" => [ "Barwani APMC", "Anjad APMC" ],
-    "Indore" => [ "Indore APMC", "Mhow APMC", "Sanwer APMC" ],
-    "Jhabua" => [ "Petlawad APMC" ]
-  },
-  "Maharashtra" => {
-    "Akola" => [ "Akola APMC" ],
-    "Nagpur" => [ "Nagpur APMC" ],
-    "Amravati" => [ "Amravati APMC", "Daryapur APMC" ],
-    "Yavatmal" => [ "Yavatmal APMC", "Pandharkawada APMC" ],
-    "Beed" => [ "Beed APMC" ],
-    "Jalna" => [ "Jalna APMC" ]
+    "Alirajpur" => [ "Jobat" ],
+    "Dhar" => [ "Kukshi" ],
+    "Jhabua" => [ "Petlawad" ],
+    "Barwani" => [ "Anjad" ],
+    "Chhindwara" => [ "Sausar", "Chhindwara" ],
+    "Ratlam" => [ "Ratlam", "Raoti" ],
+    "Betul" => [ "Betul" ],
+    "Mandla" => [ "Mandla", "Anjaniya" ],
+    "Dindori" => [ "Dindori" ]
   }
 }
 
@@ -109,6 +103,23 @@ mandi_master.each do |state_name, districts|
     district = upsert_district(state, district_name)
     market_names.each { |market_name| upsert_market(district, market_name) }
   end
+end
+
+[
+  [ "Alirajpur", "Jobat APMC", "Jobat" ],
+  [ "Dhar", "Kukshi APMC", "Kukshi" ],
+  [ "Jhabua", "Petlawad APMC", "Petlawad" ],
+  [ "Barwani", "Anjad APMC", "Anjad" ],
+  [ "Chhindwara", "Sausar APMC", "Sausar" ],
+  [ "Ratlam", "Ratlam APMC", "Ratlam" ],
+  [ "Ratlam", "Raoti APMC", "Raoti" ],
+  [ "Betul", "Betul APMC", "Betul" ]
+].each do |district_name, old_name, new_name|
+  district = District.find_by(name: district_name)
+  next if district.blank?
+  next if Market.exists?(district: district, name: new_name)
+
+  Market.find_by(district: district, name: old_name)&.update!(name: new_name)
 end
 
 CottonMarketObservation.find_each do |observation|

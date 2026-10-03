@@ -11,12 +11,18 @@ class CottonMarketObservation < ApplicationRecord
 
   TEMPLATE_ROW_PRESETS = {
     "mandi_wise" => [
-      { name: "Kukshi", position: 1, remarks: "Krishi Upaj Mandi - Kukshi" },
-      { name: "Anjad", position: 2, remarks: "Krishi Upaj Mandi - Anjad" },
-      { name: "Dhamnod", position: 3, remarks: "Krishi Upaj Mandi - Dhamnod" },
-      { name: "Sausar", position: 4, remarks: "Krishi Upaj Mandi - Sausar" },
-      { name: "Ratlam - DCH", position: 5, remarks: "Krishi Upaj Mandi - Ratlam" },
-      { name: "Petlawad (Bamnia) - DCH", position: 6, remarks: "Krishi Upaj Mandi - Petlawad" }
+      { name: "Jobat", position: 1, remarks: "Krishi Upaj Mandi - Jobat" },
+      { name: "Kukshi", position: 2, remarks: "Krishi Upaj Mandi - Kukshi" },
+      { name: "Petlawad", position: 3, remarks: "Krishi Upaj Mandi - Petlawad" },
+      { name: "Anjad", position: 4, remarks: "Krishi Upaj Mandi - Anjad" },
+      { name: "Sausar", position: 5, remarks: "Krishi Upaj Mandi - Sausar" },
+      { name: "Ratlam", position: 6, remarks: "Krishi Upaj Mandi - Ratlam" },
+      { name: "Chhindwara", position: 7, remarks: "Krishi Upaj Mandi - Chhindwara" },
+      { name: "Betul", position: 8, remarks: "Krishi Upaj Mandi - Betul" },
+      { name: "Raoti", position: 9, remarks: "Krishi Upaj Mandi - Raoti" },
+      { name: "Mandla", position: 10, remarks: "Krishi Upaj Mandi - Mandla" },
+      { name: "Anjaniya", position: 11, remarks: "Krishi Upaj Mandi - Anjaniya" },
+      { name: "Dindori", position: 12, remarks: "Krishi Upaj Mandi - Dindori" }
     ].freeze,
     "cci_mandi" => [
       { name: "Anjad CCI", position: 1, remarks: "Krishi Upaj Mandi - Anjad CCI" },

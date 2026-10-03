@@ -1,75 +1,145 @@
-<% content_for :title, "Cotton Bulletins" %>
+<% content_for :title, "Cotton Daily Reports" %>
 
 <section class="responsive-stack">
-  <div class="page-header">
-    <div>
-      <p class="eyebrow">Cotton Reporting</p>
-      <h1>Daily cotton bulletins</h1>
-      <p class="muted-text">Create one bulletin per date or mandi focus, then fill mandi wise, gin wise, candy and comparison sections exactly like your Excel sheets.</p>
+  <% content_for :page_heading do %>
+    <div class="page-header-with-icon">
+      <span class="page-header-icon tone-blue"><%= icon("document", size: 22) %></span>
+      <div>
+        <h1>Cotton Daily Reports</h1>
+        <p class="muted-text">Manage daily cotton market reports and import data from Excel.</p>
+      </div>
     </div>
-    <div class="page-actions">
-      <% if admin_user? %>
-        <%= link_to "Add Cotton Bulletin", new_cotton_bulletin_path, class: "button button-primary" %>
-      <% end %>
-      <% if @cotton_bulletins.first.present? %>
-        <%= link_to "Latest Market Update", market_update_cotton_bulletin_path(@cotton_bulletins.first), class: "button button-primary", target: "_blank", rel: "noopener" %>
+    <div class="page-header-trail">
+      <%# The two counts live in the header rather than a row of their own. %>
+      <span class="header-stat">
+        <strong><%= number_with_delimiter(@saved_count) %></strong>
+        <small>saved reports</small>
+      </span>
+      <span class="header-stat">
+        <strong><%= @latest_bulletin&.report_date&.strftime("%d %b %Y") || "No data" %></strong>
+        <small>latest report</small>
+      </span>
+    </div>
+  <% end %>
+
+  <% content_for :page_actions do %>
+        <%= link_to export_cotton_bulletin_path(@latest_bulletin), class: "button button-soft" do %>
+          <%= icon("download", size: 16) %> Download Latest
+        <% end %>
         <% if admin_user? %>
-          <%= link_to "View Latest Excel", export_cotton_bulletin_path(@cotton_bulletins.first, preview: true), class: "button button-secondary", target: "_blank", rel: "noopener" %>
-          <%= link_to "Download Latest Excel", export_cotton_bulletin_path(@cotton_bulletins.first), class: "button button-secondary" %>
-          <%= form_with url: import_cotton_bulletin_path(@cotton_bulletins.first), multipart: true, class: "import-inline-form" do %>
-            <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
-            <%= submit_tag "Import Latest Excel", class: "button button-secondary" %>
+          <%= link_to export_cotton_bulletin_path(@latest_bulletin, preview: true), class: "button button-soft", target: "_blank", rel: "noopener" do %>
+            <%= icon("eye", size: 16) %> View Latest
           <% end %>
         <% end %>
-      <% end %>
-    </div>
-  </div>
+  <% end %>
+  <% if admin_user? %>
+    <div class="direct-entry-grid">
+      <section class="direct-entry-card tone-blue">
+        <div class="direct-entry-card-head">
+          <span class="direct-entry-card-icon tone-blue"><%= icon("calendar", size: 22) %></span>
+          <div>
+            <h2>Open / Create Daily Report</h2>
+            <p class="muted-text">Select a date to open an existing report or create a new one.</p>
+          </div>
+        </div>
 
-  <div class="metrics-grid">
-    <div class="stat-card">
-      <span class="stat-label">Total bulletins</span>
-      <strong><%= number_with_delimiter(@cotton_bulletins.count) %></strong>
+        <%= form_with url: start_cotton_bulletins_path, class: "direct-cotton-date-form" do |form| %>
+          <div class="field-group">
+            <%= form.label :report_date, "Report Date" %>
+            <%= form.date_field :report_date, value: Date.current, required: true %>
+          </div>
+          <button type="submit" class="button button-primary"><%= icon("folder-open") %> Open Daily Entry</button>
+        <% end %>
+      </section>
+
+      <section class="direct-entry-card tone-green">
+        <div class="direct-entry-card-head">
+          <span class="direct-entry-card-icon tone-green"><%= icon("spreadsheet", size: 22) %></span>
+          <div>
+            <h2>Import from Excel</h2>
+            <p class="muted-text">Every dated sheet in the workbook is imported into its own daily report.</p>
+          </div>
+        </div>
+
+        <%= form_with url: import_daily_cotton_bulletins_path, multipart: true, class: "direct-cotton-import-form" do |form| %>
+          <div class="field-group direct-cotton-file-field">
+            <%= form.label :excel_file, "Cotton Excel File" %>
+            <%= form.file_field :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
+            <small class="field-hint">Sheet tabs named like 29.09.2026 set the report date automatically.</small>
+          </div>
+          <button type="submit" class="button button-success"><%= icon("upload") %> Import Excel</button>
+        <% end %>
+      </section>
     </div>
-    <div class="stat-card">
-      <span class="stat-label">Latest bulletin</span>
-      <strong><%= @cotton_bulletins.first&.report_date&.strftime("%d %b %Y") || "No data" %></strong>
-    </div>
-  </div>
+  <% end %>
+
+  <%= form_with url: cotton_bulletins_path, method: :get, class: "filter-bar" do |form| %>
+    <% if @sort == "date_asc" %>
+      <%= hidden_field_tag :sort, "date_asc" %>
+    <% end %>
+
+    <span class="filter-bar-search">
+      <%= icon("search", size: 16) %>
+      <%= form.text_field :q, value: @search, placeholder: "Search by date or report title…", aria: { label: "Search cotton reports" } %>
+    </span>
+
+    <span class="filter-bar-tag"><%= icon("sliders", size: 17) %> Filters</span>
+
+    <%= form.text_field :from_date, value: @from_date, placeholder: "From date", class: "filter-bar-date", data: { date_input: true }, aria: { label: "From date" } %>
+    <%= form.text_field :to_date, value: @to_date, placeholder: "To date", class: "filter-bar-date", data: { date_input: true }, aria: { label: "To date" } %>
+
+    <span class="filter-bar-actions">
+      <%= form.submit "Apply", class: "button button-primary" %>
+      <%= link_to "Clear", cotton_bulletins_path, class: "button button-outline" %>
+    </span>
+  <% end %>
 
   <div class="table-card">
+    <div class="table-card-header">
+      <h2 class="table-title">Saved Daily Reports</h2>
+      <span class="table-card-count"><%= number_with_delimiter(@total_count) %> <%= "report".pluralize(@total_count) %></span>
+    </div>
+
     <% if @cotton_bulletins.any? %>
       <div class="data-table-wrapper">
-        <table>
+        <table class="cotton-index-table">
           <thead>
             <tr>
-              <th>Report Date</th>
-              <th>Bulletin Title</th>
-              <th>Notes</th>
+              <th class="number-cell">#</th>
+              <th>
+                <%= link_to cotton_bulletins_path(request.query_parameters.symbolize_keys.merge(sort: @sort == "date_asc" ? nil : "date_asc", page: nil).compact), class: "sort-link" do %>
+                  Report Date <%= icon("sort", size: 13) %>
+                <% end %>
+              </th>
+              <th>Daily Report</th>
               <th>Section Rows</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <% @cotton_bulletins.each do |bulletin| %>
+            <% @cotton_bulletins.each_with_index do |bulletin, index| %>
               <tr>
+                <td class="number-cell"><%= (@page - 1) * @per_page + index + 1 %></td>
                 <td><%= bulletin.report_date.strftime("%d %b %Y") %></td>
-                <td><%= bulletin.title %></td>
-                <td><%= bulletin.notes.presence || "-" %></td>
+                <td><strong><%= bulletin.title %></strong></td>
                 <td class="numeric-cell">
                   <%= bulletin.cotton_market_observations.count + bulletin.cotton_seed_rates.count + bulletin.candy_rates.count + bulletin.cotton_regional_comparisons.count + bulletin.cotton_call_performances.count %>
                 </td>
                 <td>
                   <div class="inline-actions">
-                    <%= link_to "Open", cotton_bulletin_path(bulletin), class: "button button-primary" %>
-                    <%= link_to "Market Update", market_update_cotton_bulletin_path(bulletin), class: "button button-secondary", target: "_blank", rel: "noopener" %>
+                    <%= link_to cotton_bulletin_path(bulletin), class: "button button-primary button-compact" do %>
+                      <%= icon("folder-open", size: 15) %> Open
+                    <% end %>
+                    <%= link_to export_cotton_bulletin_path(bulletin), class: "button button-secondary button-compact" do %>
+                      <%= icon("download", size: 15) %> Excel
+                    <% end %>
                     <% if admin_user? %>
-                      <%= link_to "Excel", export_cotton_bulletin_path(bulletin), class: "button button-secondary" %>
-                      <%= form_with url: import_cotton_bulletin_path(bulletin), multipart: true, class: "import-inline-form" do %>
-                        <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
-                        <%= submit_tag "Import", class: "button button-secondary" %>
+                      <%= link_to edit_cotton_bulletin_path(bulletin), class: "button button-secondary button-compact" do %>
+                        <%= icon("pencil", size: 15) %> Edit
                       <% end %>
-                      <%= link_to "Edit", edit_cotton_bulletin_path(bulletin), class: "button button-secondary" %>
-                      <%= button_to "Delete", cotton_bulletin_path(bulletin), method: :delete, class: "button button-danger", form: { data: { turbo_confirm: "Delete this cotton bulletin?" }, class: "button-to-inline" } %>
+                      <%= button_to cotton_bulletin_path(bulletin), method: :delete, class: "button button-danger button-compact button-to-inline", form: { data: { turbo_confirm: "Delete this cotton bulletin?" } } do %>
+                        <%= icon("trash", size: 15) %> Delete
+                      <% end %>
                     <% end %>
                   </div>
                 </td>
@@ -78,8 +148,25 @@
           </tbody>
         </table>
       </div>
+
+      <div class="table-pagination">
+        <p class="muted-text">
+          Showing <%= (@page - 1) * @per_page + 1 %> to <%= [@page * @per_page, @total_count].min %> of <%= number_with_delimiter(@total_count) %> reports
+        </p>
+        <div class="pagination-controls">
+          <%= link_to icon("chevron-left", size: 16), cotton_bulletins_path(request.query_parameters.symbolize_keys.merge(page: [ @page - 1, 1 ].max)), class: "pagination-arrow#{" is-disabled" if @page <= 1}" %>
+          <span class="pagination-current"><%= @page %></span>
+          <%= link_to icon("chevron-right", size: 16), cotton_bulletins_path(request.query_parameters.symbolize_keys.merge(page: [ @page + 1, @total_pages ].min)), class: "pagination-arrow#{" is-disabled" if @page >= @total_pages}" %>
+        </div>
+      </div>
     <% else %>
-      <div class="empty-state">Abhi tak koi cotton bulletin create nahi hua hai.</div>
+      <div class="empty-state">
+        <% if @search.present? %>
+          No reports match "<%= @search %>".
+        <% else %>
+          No cotton report yet. Select a date above to start directly.
+        <% end %>
+      </div>
     <% end %>
   </div>
 </section>

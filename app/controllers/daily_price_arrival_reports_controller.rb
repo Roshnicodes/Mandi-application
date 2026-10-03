@@ -1,16 +1,34 @@
 class DailyPriceArrivalReportsController < ApplicationController
   include ReferenceCollections
 
-  before_action :require_admin, only: %i[export import edit update destroy]
+  before_action :require_admin, only: %i[new create import repair_imported_locations edit update destroy]
   before_action :set_daily_price_arrival_report, only: %i[edit update destroy]
   before_action :load_report_form_collections, only: %i[new create edit update]
   before_action :load_filter_collections, only: :index
 
+  # Columns the daily sheet can be sorted by, applied within each commodity card.
+  SORT_COLUMNS = {
+    "apmc" => ->(report) { report.market.name.to_s.downcase },
+    "arrival" => ->(report) { report.arrival_quantity.to_f },
+    "min" => ->(report) { report.min_price.to_f },
+    "max" => ->(report) { report.max_price.to_f },
+    "modal" => ->(report) { report.modal_price.to_f }
+  }.freeze
+
   def index
     @filters = filter_params.to_h.symbolize_keys
+    @sort_column = SORT_COLUMNS.key?(params[:sort_by]) ? params[:sort_by] : "apmc"
+    @sort_dir = params[:sort_dir] == "desc" ? "desc" : "asc"
     @reports = DailyPriceArrivalReport.filtered(@filters)
     @filtered_arrival_total = @reports.unscope(:order).sum(:arrival_quantity)
     @filtered_count = @reports.count
+    @imported_location_report_count = DailyPriceArrivalReport.joins(:district)
+      .where("LOWER(districts.name) = ?", MandiLocationResolver::IMPORTED_DISTRICT_NAME.downcase)
+      .count
+    @imported_location_market_count = DailyPriceArrivalReport.joins(:district, :market)
+      .where("LOWER(districts.name) = ?", MandiLocationResolver::IMPORTED_DISTRICT_NAME.downcase)
+      .distinct
+      .count("markets.id")
   end
 
   def export
@@ -44,8 +62,24 @@ class DailyPriceArrivalReportsController < ApplicationController
     end
   end
 
+  def repair_imported_locations
+    result = ImportedMandiLocationRepairer.new.repair
+    notice = "Location cleanup complete: #{result.moved} rows moved"
+    notice += ", #{result.deduplicated} duplicate rows merged" if result.deduplicated.positive?
+    notice += ", #{result.discarded} invalid date-label rows removed" if result.discarded.positive?
+    notice += "."
+
+    if result.unresolved_market_names.any?
+      redirect_to daily_price_arrival_reports_path,
+        alert: "#{notice} Still unmapped: #{result.unresolved_market_names.to_sentence}."
+    else
+      redirect_to daily_price_arrival_reports_path, notice: notice
+    end
+  end
+
   def new
     @daily_price_arrival_report = DailyPriceArrivalReport.new(entry_report_defaults)
+
     prepare_report_entry_grid
   end
 
@@ -176,7 +210,7 @@ class DailyPriceArrivalReportsController < ApplicationController
     end
 
     def filter_params
-      params.permit(:state_id, :district_id, :market_id, :commodity_group_id, :commodity_id, :variety_id, :from_date, :to_date)
+      params.permit(:q, :state_id, :district_id, :market_id, :commodity_group_id, :commodity_id, :variety_id, :from_date, :to_date)
     end
 
     def after_change_redirect_path(report)

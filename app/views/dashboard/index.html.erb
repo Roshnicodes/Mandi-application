@@ -1,74 +1,207 @@
 <% content_for :title, "Dashboard" %>
 <% content_for :dashboard_unified, true %>
 
-<% content_for :topbar_tools do %>
-  <div class="dashboard-card-actions">
-    <%= link_to "Add Daily Report", new_daily_price_arrival_report_path, class: "portal-primary-action" %>
-    <%= link_to "View all reports", daily_price_arrival_reports_path, class: "portal-secondary-action" %>
-  </div>
-<% end %>
+<% greeting = @dashboard_time.hour < 12 ? "Good morning" : @dashboard_time.hour < 17 ? "Good afternoon" : "Good evening" %>
 
-<section class="portal-dashboard portal-dashboard-integrated">
-  <div class="dashboard-overview-grid">
-    <article class="dashboard-overview-card dashboard-overview-card-strong">
-      <span>Latest report date</span>
-      <strong><%= @latest_arrival_date.present? ? @latest_arrival_date.strftime("%d %b %Y") : "No data" %></strong>
-      <p>Latest mandi snapshot</p>
-    </article>
+<section class="portal-dashboard portal-dashboard-integrated dashboard-vivid-page">
+  <% content_for :page_heading do %>
+    <div class="page-header-with-icon">
+      <span class="page-header-icon tone-sun"><%= icon("chart-bar", size: 22) %></span>
+      <div>
+        <h1><%= greeting %>, <%= current_user.name %></h1>
+        <p class="muted-text">Your live overview of mandi arrivals, quantity and market activity.</p>
+      </div>
+    </div>
+  <% end %>
+
+  <% content_for :page_actions do %>
+    <%= form_with url: root_path, method: :get, class: "dashboard-date-form" do %>
+      <% if @search.present? %>
+        <%= hidden_field_tag :q, @search %>
+      <% end %>
+      <span class="dashboard-date-icon"><%= icon("calendar", size: 16) %></span>
+      <%= date_field_tag :date, @filter_date&.iso8601, class: "dashboard-date-input", onchange: "this.form.requestSubmit()" %>
+      <span class="dashboard-date-chevron"><%= icon("chevron-down", size: 14) %></span>
+    <% end %>
+  <% end %>
+
+  <div class="dashboard-overview-grid dashboard-clean-overview">
     <article class="dashboard-overview-card">
-      <span>Total reports</span>
+      <span class="dashboard-overview-icon tone-blue"><%= icon("document", size: 18) %></span>
+      <span class="dashboard-overview-label">Total Reports</span>
       <strong><%= number_with_delimiter(@total_reports) %></strong>
-      <p>Saved entries</p>
+      <p>Saved mandi entries</p>
     </article>
+
     <article class="dashboard-overview-card">
-      <span>Today entries</span>
+      <span class="dashboard-overview-icon tone-green"><%= icon("calendar", size: 18) %></span>
+      <span class="dashboard-overview-label">Report Date</span>
+      <strong><%= @latest_arrival_date&.strftime("%d %b %Y") || "-" %></strong>
+      <p>Last report date</p>
+    </article>
+
+    <article class="dashboard-overview-card">
+      <span class="dashboard-overview-icon tone-purple"><%= icon("truck", size: 18) %></span>
+      <span class="dashboard-overview-label">Total Arrival</span>
+      <strong><%= number_with_precision(@latest_arrival_total, precision: 2, strip_insignificant_zeros: true) %></strong>
+      <p>Arrival on report date</p>
+    </article>
+
+    <article class="dashboard-overview-card">
+      <span class="dashboard-overview-icon tone-orange"><%= icon("calendar", size: 18) %></span>
+      <span class="dashboard-overview-label">Today Arrival</span>
       <strong><%= number_with_delimiter(@today_reports) %></strong>
       <p><%= Date.current.strftime("%d %b %Y") %></p>
     </article>
+
     <article class="dashboard-overview-card">
-      <span>Covered mandis</span>
+      <span class="dashboard-overview-icon tone-pink"><%= icon("map-pin", size: 18) %></span>
+      <span class="dashboard-overview-label">Total Mandis</span>
       <strong><%= number_with_delimiter(@covered_mandis) %></strong>
       <p>Active coverage</p>
     </article>
-    <article class="dashboard-overview-card dashboard-clock-card">
-      <div class="dashboard-clock-face" aria-hidden="true">
-        <span class="dashboard-clock-hand dashboard-clock-hour"></span>
-        <span class="dashboard-clock-hand dashboard-clock-minute"></span>
-        <span class="dashboard-clock-dot"></span>
+  </div>
+
+  <div class="dashboard-insights-grid">
+    <article class="dashboard-insight-card dashboard-trend-card">
+      <div class="dashboard-insight-heading">
+        <div>
+          <span class="dashboard-insight-icon tone-blue"><%= icon("chart-bar", size: 18) %></span>
+          <h2>Arrival trend</h2>
+          <p>Last 7 reporting days</p>
+        </div>
+        <span class="dashboard-reporting-date"><%= @dashboard_report_date.strftime("%d %b") %></span>
       </div>
-      <div>
-        <span>Live time</span>
-        <strong><%= @dashboard_time.strftime("%I:%M %p") %></strong>
-        <p><%= @dashboard_time.strftime("%d %b %Y") %></p>
+
+      <% if @arrival_trend_peak.positive? %>
+        <div class="arrival-chart" aria-label="Arrival trend chart">
+          <% @arrival_trend.each do |entry| %>
+            <% height = [((entry[:quantity] / @arrival_trend_peak) * 100).round, 8].max %>
+            <div class="arrival-chart-column">
+              <span class="arrival-chart-value"><%= number_with_delimiter(entry[:quantity].round) %></span>
+              <span class="arrival-chart-bar <%= "is-current" if entry[:date] == @dashboard_report_date %>" style="height: <%= height %>%"></span>
+              <small><%= entry[:date].strftime("%d %b") %></small>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="dashboard-insight-empty">Arrival trend will appear after daily reports are added.</div>
+      <% end %>
+    </article>
+
+    <article class="dashboard-insight-card dashboard-share-card">
+      <div class="dashboard-insight-heading">
+        <div>
+          <span class="dashboard-insight-icon tone-purple"><%= icon("package", size: 18) %></span>
+          <h2>Commodity wise share</h2>
+          <p>By arrival quantity</p>
+        </div>
+        <span class="dashboard-reporting-date"><%= @dashboard_report_date.strftime("%d %b") %></span>
       </div>
+
+      <% if @commodity_shares.any? %>
+        <div class="commodity-share-content">
+          <div class="commodity-donut" style="--donut-gradient: <%= @commodity_share_gradient %>">
+            <div>
+              <strong><%= number_with_delimiter(@dashboard_arrival_total.round) %></strong>
+              <span>Total qty</span>
+            </div>
+          </div>
+          <div class="commodity-share-legend">
+            <% @commodity_shares.each do |share| %>
+              <div>
+                <span class="commodity-share-dot" style="background-color: <%= share[:color] %>"></span>
+                <span title="<%= share[:name] %>"><%= truncate(share[:name], length: 18) %></span>
+                <strong><%= share[:percent] %>%</strong>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% else %>
+        <div class="dashboard-insight-empty">Commodity mix will appear after daily reports are added.</div>
+      <% end %>
+    </article>
+
+    <article class="dashboard-insight-card dashboard-mandi-card">
+      <div class="dashboard-insight-heading">
+        <div>
+          <span class="dashboard-insight-icon tone-orange"><%= icon("building", size: 18) %></span>
+          <h2>Top mandis</h2>
+          <p>By arrival quantity</p>
+        </div>
+        <%= link_to "View all", daily_price_arrival_reports_path, class: "dashboard-view-link" %>
+      </div>
+
+      <% if @top_markets.any? %>
+        <div class="top-mandi-list">
+          <% @top_markets.each do |market| %>
+            <% width = ((market[:quantity] / @top_market_peak) * 100).round %>
+            <div class="top-mandi-row">
+              <span title="<%= market[:name] %>"><%= truncate(mandi_display_name(market[:name]), length: 18) %></span>
+              <div class="top-mandi-track"><i style="width: <%= width %>%"></i></div>
+              <strong><%= number_with_delimiter(market[:quantity].round) %></strong>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="dashboard-insight-empty">Top mandis will appear after daily reports are added.</div>
+      <% end %>
     </article>
   </div>
 
-  <% if @recent_reports.any? %>
-    <div class="dashboard-latest-panel">
-      <div class="dashboard-latest-header">
+  <div class="dashboard-latest-panel">
+    <div class="dashboard-latest-header">
+      <div class="dashboard-latest-heading">
+        <span class="dashboard-latest-icon"><%= icon("sliders", size: 18) %></span>
         <div>
-          <p class="eyebrow">Latest Reports</p>
-          <h2>Recent mandi activity</h2>
-        </div>
-        <div class="dashboard-latest-meta">
-          <span><%= @recent_reports.size %> latest</span>
-          <strong><%= number_with_precision(@latest_arrival_total, precision: 2, strip_insignificant_zeros: true) %> latest qty</strong>
+          <h2>Recent Mandi Activity</h2>
+          <p>Latest mandi arrivals and reported quantities.</p>
         </div>
       </div>
+      <div class="dashboard-latest-tools">
+        <%= form_with url: root_path, method: :get, class: "table-search-form" do %>
+          <% if @filter_date %>
+            <%= hidden_field_tag :date, @filter_date&.iso8601 %>
+          <% end %>
+          <%= hidden_field_tag :per_page, @per_page %>
+          <span class="table-search-icon"><%= icon("search", size: 16) %></span>
+          <%= text_field_tag :q, @search, placeholder: "Search mandi, district or variety…", class: "table-search-input" %>
+        <% end %>
 
+        <%= form_with url: root_path, method: :get, class: "dashboard-per-page-form" do %>
+          <% if @filter_date %>
+            <%= hidden_field_tag :date, @filter_date&.iso8601 %>
+          <% end %>
+          <%= hidden_field_tag :q, @search.presence %>
+          <%= select_tag :per_page, options_for_select(DashboardController::PER_PAGE_OPTIONS.map { |n| ["Last #{n} Records", n] }, @per_page), onchange: "this.form.requestSubmit()", class: "dashboard-per-page-select" %>
+        <% end %>
+      </div>
+    </div>
+
+    <% if @recent_reports.any? %>
       <div class="portal-table-scroll">
         <table class="portal-report-table dashboard-report-table" data-unit-table>
           <thead>
             <tr>
-              <th>Arrival Date</th>
-              <th>Mandi</th>
-              <th>Commodity</th>
-              <th>Variety</th>
-              <th>Grade</th>
+              <th class="number-cell">#</th>
+              <% {
+                   "date" => "Report Date",
+                   "mandi" => "Mandi",
+                   "commodity" => "Commodity",
+                   "variety" => "Variety",
+                   "grade" => "Grade"
+                 }.each do |key, label| %>
+                <th>
+                  <%= link_to root_path(request.query_parameters.symbolize_keys.merge(sort_by: key, sort_dir: (@sort_column == key && @sort_dir == "asc") ? "desc" : "asc", page: nil).compact), class: "sort-link" do %>
+                    <%= label %> <%= icon("sort", size: 13) %>
+                  <% end %>
+                </th>
+              <% end %>
               <th>
                 <span class="unit-heading">
-                  Modal
+                  <%= link_to root_path(request.query_parameters.symbolize_keys.merge(sort_by: "modal", sort_dir: (@sort_column == "modal" && @sort_dir == "asc") ? "desc" : "asc", page: nil).compact), class: "sort-link" do %>
+                    Modal <%= icon("sort", size: 13) %>
+                  <% end %>
                   <select class="unit-select" data-unit-control="price" aria-label="Modal price unit">
                     <option value="qtl">Qtl</option>
                     <option value="kg">Kg</option>
@@ -78,7 +211,9 @@
               </th>
               <th>
                 <span class="unit-heading">
-                  Arrival
+                  <%= link_to root_path(request.query_parameters.symbolize_keys.merge(sort_by: "arrival", sort_dir: (@sort_column == "arrival" && @sort_dir == "asc") ? "desc" : "asc", page: nil).compact), class: "sort-link" do %>
+                    Arrival <%= icon("sort", size: 13) %>
+                  <% end %>
                   <select class="unit-select" data-unit-control="arrival" aria-label="Arrival quantity unit">
                     <option value="qtl">Qtl</option>
                     <option value="kg">Kg</option>
@@ -89,11 +224,12 @@
             </tr>
           </thead>
           <tbody>
-            <% @recent_reports.each do |report| %>
+            <% @recent_reports.each_with_index do |report, index| %>
               <tr>
+                <td class="number-cell"><%= (@page - 1) * @per_page + index + 1 %></td>
                 <td><strong><%= report.arrival_date.strftime("%d/%m/%Y") %></strong></td>
                 <td>
-                  <%= report.market.name %>
+                  <strong><%= mandi_display_name(report.market.name) %></strong>
                   <span class="sheet-inline-hint"><%= [report.state.name, report.district.name].join(" / ") %></span>
                 </td>
                 <td><%= report.commodity.name %></td>
@@ -107,15 +243,32 @@
         </table>
       </div>
 
-      <div class="portal-table-footer">
-        <span>Showing <strong>1</strong> to <strong><%= @recent_reports.size %></strong> of <strong><%= number_with_delimiter(@total_reports) %></strong> entries</span>
-        <%= link_to "View all reports", daily_price_arrival_reports_path %>
+      <div class="table-pagination">
+        <p class="muted-text">
+          Showing <%= (@page - 1) * @per_page + 1 %> to <%= [@page * @per_page, @total_count].min %> of <%= number_with_delimiter(@total_count) %> records
+        </p>
+        <div class="pagination-controls">
+          <%= link_to icon("chevron-left", size: 16), root_path(request.query_parameters.symbolize_keys.merge(page: [@page - 1, 1].max)), class: "pagination-arrow#{" is-disabled" if @page <= 1}" %>
+          <% pagination_window(@page, @total_pages).each do |entry| %>
+            <% if entry == :gap %>
+              <span class="pagination-gap">…</span>
+            <% elsif entry == @page %>
+              <span class="pagination-current"><%= entry %></span>
+            <% else %>
+              <%= link_to entry, root_path(request.query_parameters.symbolize_keys.merge(page: entry)), class: "pagination-page" %>
+            <% end %>
+          <% end %>
+          <%= link_to icon("chevron-right", size: 16), root_path(request.query_parameters.symbolize_keys.merge(page: [@page + 1, @total_pages].min)), class: "pagination-arrow#{" is-disabled" if @page >= @total_pages}" %>
+        </div>
       </div>
-    </div>
-  <% else %>
-    <div class="portal-empty-state">
-      No daily reports yet.
-      <%= link_to "Add Daily Report", new_daily_price_arrival_report_path, class: "portal-primary-action dashboard-empty-action" %>
-    </div>
-  <% end %>
+    <% else %>
+      <div class="portal-empty-state">
+        <% if @search.present? %>
+          No reports match "<%= @search %>".
+        <% else %>
+          No daily reports yet.
+        <% end %>
+      </div>
+    <% end %>
+  </div>
 </section>

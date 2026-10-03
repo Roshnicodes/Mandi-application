@@ -1,14 +1,12 @@
 <% content_for :title, "Edit Cotton Observation" %>
 
 <section class="responsive-stack">
-  <div class="page-header">
+  <% content_for :page_heading do %>
     <div>
       <p class="eyebrow">Cotton Sheet Builder</p>
       <h1>Edit cotton observation</h1>
-      <p class="muted-text">Update the row values and keep the compiled sheet aligned.</p>
     </div>
-  </div>
-
+  <% end %>
   <div class="card">
     <%= render "form", cotton_bulletin: @cotton_bulletin, cotton_market_observation: @cotton_market_observation %>
   </div>

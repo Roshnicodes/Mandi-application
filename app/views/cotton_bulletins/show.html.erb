@@ -1,8 +1,8 @@
 <% content_for :title, @cotton_bulletin.title %>
 
 <section class="responsive-stack">
-  <div class="page-header">
-    <div>
+  <% content_for :page_heading do %>
+    <div class="page-header-copy">
       <p class="eyebrow">Cotton Sheet Builder</p>
       <h1><%= @cotton_bulletin.title %></h1>
       <p class="muted-text">
@@ -12,49 +12,70 @@
         <% end %>
       </p>
     </div>
-    <div class="page-actions">
-      <%= link_to "Market Update", market_update_cotton_bulletin_path(@cotton_bulletin), class: "button button-primary", target: "_blank", rel: "noopener" %>
-      <% if admin_user? %>
-        <%= link_to "View Excel", export_cotton_bulletin_path(@cotton_bulletin, preview: true), class: "button button-secondary", target: "_blank", rel: "noopener" %>
-        <%= link_to "Download Excel", export_cotton_bulletin_path(@cotton_bulletin), class: "button button-primary" %>
-        <%= form_with url: import_cotton_bulletin_path(@cotton_bulletin), multipart: true, class: "import-inline-form" do %>
-          <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
-          <%= submit_tag "Import Excel", class: "button button-secondary" %>
-        <% end %>
-        <%= link_to "Edit Bulletin", edit_cotton_bulletin_path(@cotton_bulletin), class: "button button-secondary" %>
+  <% end %>
+
+  <% content_for :page_actions do %>
+    <%= link_to export_cotton_bulletin_path(@cotton_bulletin), class: "button button-primary" do %>
+      <%= icon("download", size: 16) %> Excel
+    <% end %>
+    <% if admin_user? %>
+      <%= link_to export_cotton_bulletin_path(@cotton_bulletin, preview: true), class: "button button-soft", target: "_blank", rel: "noopener" do %>
+        <%= icon("eye", size: 16) %> View
       <% end %>
-      <%= link_to "Back to Bulletins", cotton_bulletins_path, class: "button button-ghost" %>
-    </div>
+      <%= form_with url: import_cotton_bulletin_path(@cotton_bulletin), multipart: true, class: "import-inline-form" do %>
+        <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
+        <%= submit_tag "Import", class: "button button-soft" %>
+      <% end %>
+      <%= link_to edit_cotton_bulletin_path(@cotton_bulletin), class: "button button-soft" do %>
+        <%= icon("pencil", size: 16) %> Edit
+      <% end %>
+    <% end %>
+    <%= link_to cotton_bulletins_path, class: "button button-outline" do %>
+      <%= icon("chevron-left", size: 16) %> Back
+    <% end %>
+  <% end %>
+  <%# Search and the row counts share one line: the sheet is already rendered,
+      so the search filters the sections below in place. %>
+  <div class="filter-bar sheet-search-bar">
+    <span class="filter-bar-search">
+      <%= icon("search", size: 16) %>
+      <%= search_field_tag :sheet_search, nil, placeholder: "Search mandi, gin, parameter or remark…", data: { sheet_search: true }, autocomplete: "off", aria: { label: "Search rows in this report" } %>
+    </span>
+    <span class="sheet-search-status" data-sheet-search-status aria-live="polite"></span>
+
+    <span class="sheet-count-group">
+      <span class="header-stat">
+        <strong><%= @cotton_bulletin.cotton_market_observations.count %></strong>
+        <small>observation rows</small>
+      </span>
+      <span class="header-stat">
+        <strong><%= @cotton_bulletin.cotton_seed_rates.count + @cotton_bulletin.candy_rates.count %></strong>
+        <small>candy + seed</small>
+      </span>
+      <span class="header-stat">
+        <strong><%= @cotton_bulletin.cotton_regional_comparisons.count + @cotton_bulletin.cotton_call_performances.count %></strong>
+        <small>comparison</small>
+      </span>
+    </span>
   </div>
 
-  <div class="metrics-grid">
-    <div class="stat-card">
-      <span class="stat-label">Observation rows</span>
-      <strong><%= @cotton_bulletin.cotton_market_observations.count %></strong>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">Candy + seed rows</span>
-      <strong><%= @cotton_bulletin.cotton_seed_rates.count + @cotton_bulletin.candy_rates.count %></strong>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">Comparison rows</span>
-      <strong><%= @cotton_bulletin.cotton_regional_comparisons.count + @cotton_bulletin.cotton_call_performances.count %></strong>
-    </div>
-  </div>
-
-  <div class="report-sheet-grid report-sheet-grid-two">
+  <%# The mandi table carries the most columns, so it gets a full-width row of its own. %>
+  <div class="report-sheet-grid">
     <%= render "observation_section", bulletin: @cotton_bulletin, records: @mandi_observations, category: "mandi_wise", title: "Raw Cotton Rate - Mandi Wise" %>
-    <%= render "observation_section", bulletin: @cotton_bulletin, records: @gin_observations, category: "gin_wise", title: "Raw Cotton Rate - Gin Wise" %>
   </div>
 
   <div class="report-sheet-grid report-sheet-grid-two">
+    <%= render "observation_section", bulletin: @cotton_bulletin, records: @gin_observations, category: "gin_wise", title: "Raw Cotton Rate - Gin Wise" %>
     <%= render "observation_section", bulletin: @cotton_bulletin, records: @cci_observations, category: "cci_mandi", title: "CCI Mandi Rates" %>
-    <div class="table-card report-sheet-card comparison-launch-card" id="observation-section-comparison_sheet">
+  </div>
+
+  <div class="report-sheet-grid report-sheet-grid-two">
+    <%= render "observation_section", bulletin: @cotton_bulletin, records: @tdn_observations, category: "tdn_moisture", title: "TDN / Moisture Rates" %>
+    <div class="table-card report-sheet-card comparison-launch-card" id="observation-section-comparison_sheet" data-sheet-section>
       <div class="sheet-header">
         <div>
           <p class="eyebrow">Excel Section</p>
           <h2 class="table-title">Comparison Sheet (In Qtl)</h2>
-          <p class="table-subtitle">Comparison sheet ko alag page par clean grid me dekhiye aur update kariye.</p>
         </div>
         <div class="inline-actions">
           <%= link_to "Open Comparison Sheet", comparison_sheet_cotton_bulletin_path(@cotton_bulletin), class: "button button-primary" %>
@@ -67,12 +88,17 @@
     </div>
   </div>
 
-  <div class="report-sheet-grid report-sheet-grid-two">
+  <div class="report-sheet-grid">
     <%= render "seed_rate_section", bulletin: @cotton_bulletin, records: @seed_rates %>
   </div>
 
   <div class="report-sheet-grid report-sheet-grid-two">
     <%= render "candy_rate_section", bulletin: @cotton_bulletin, records: @mch_rates, category: "mch", title: "Candy Rate (MCH)" %>
     <%= render "candy_rate_section", bulletin: @cotton_bulletin, records: @dch_rates, category: "dch", title: "Candy Rate (DCH)" %>
+  </div>
+
+  <div class="report-sheet-grid report-sheet-grid-two">
+    <%= render "regional_comparison_section", bulletin: @cotton_bulletin, records: @regional_comparisons %>
+    <%= render "call_performance_section", bulletin: @cotton_bulletin, records: @call_performances %>
   </div>
 </section>

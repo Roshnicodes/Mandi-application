@@ -1,14 +1,12 @@
 <% content_for :title, "Edit State" %>
 
 <section class="responsive-stack">
-  <div class="page-header">
+  <% content_for :page_heading do %>
     <div>
       <p class="eyebrow">Master Setup</p>
       <h1>Edit state</h1>
-      <p class="muted-text">State details ko update karke downstream masters ko consistent rakhiye.</p>
     </div>
-  </div>
-
+  <% end %>
   <div class="card">
     <%= render "form", state: @state %>
   </div>

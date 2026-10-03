@@ -28,7 +28,7 @@
       </div>
 
       <div class="field-group">
-        <%= form.label :market_id, "Mandi / APMC" %>
+        <%= form.label :market_id, "Mandi" %>
         <%= form.collection_select :market_id, Market.none, :id, :name, { prompt: "Select mandi" }, { data: { market_select: true, selected: daily_price_arrival_report.market_id } } %>
       </div>
 
@@ -41,7 +41,7 @@
     <div class="daily-entry-defaults">
       <div>
         <p class="eyebrow">Report Details</p>
-        <h3 class="daily-entry-defaults-title">Commodity aur unit details</h3>
+        <h3 class="daily-entry-defaults-title">Commodity and unit details</h3>
       </div>
       <div class="form-grid-three">
         <div class="field-group">

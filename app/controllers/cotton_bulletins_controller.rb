@@ -1,9 +1,35 @@
 class CottonBulletinsController < ApplicationController
-  before_action :require_admin, except: %i[index show market_update comparison_sheet]
-  before_action :set_cotton_bulletin, only: %i[show edit update destroy export market_update comparison_sheet import]
+  before_action :require_admin, except: %i[index show export comparison_sheet]
+  before_action :set_cotton_bulletin, only: %i[show edit update destroy export comparison_sheet import]
+
+  PER_PAGE = 15
 
   def index
-    @cotton_bulletins = CottonBulletin.recent_first
+    @latest_bulletin = CottonBulletin.recent_first.first
+    @search = params[:q].to_s.strip
+    @from_date = params[:from_date].presence
+    @to_date = params[:to_date].presence
+    @sort = params[:sort] == "date_asc" ? "date_asc" : "date_desc"
+    scope = @sort == "date_asc" ? CottonBulletin.order(report_date: :asc, created_at: :asc) : CottonBulletin.recent_first
+    if @search.present?
+      term = "%#{@search}%"
+      scope = scope.where(
+        "title ILIKE :term OR to_char(report_date, 'DD Mon YYYY') ILIKE :term OR report_date::text ILIKE :term",
+        term: term
+      )
+    end
+
+    scope = scope.where("report_date >= ?", @from_date) if @from_date
+    scope = scope.where("report_date <= ?", @to_date) if @to_date
+
+    @per_page = PER_PAGE
+    @saved_count = CottonBulletin.count
+    @total_count = scope.count
+    @total_pages = [ (@total_count.to_f / PER_PAGE).ceil, 1 ].max
+    @page = params[:page].to_i
+    @page = 1 if @page < 1
+    @page = @total_pages if @page > @total_pages
+    @cotton_bulletins = scope.offset((@page - 1) * PER_PAGE).limit(PER_PAGE)
   end
 
   def show
@@ -34,11 +60,6 @@ class CottonBulletinsController < ApplicationController
     end
   end
 
-  def market_update
-    preload_sections
-    render :market_update, layout: false
-  end
-
   def import
     if params[:excel_file].blank?
       redirect_back fallback_location: cotton_bulletin_path(@cotton_bulletin), alert: "Please choose an Excel file to import."
@@ -54,8 +75,38 @@ class CottonBulletinsController < ApplicationController
     end
   end
 
+  def start
+    @cotton_bulletin = CottonBulletin.daily_for(direct_report_date)
+    redirect_to cotton_bulletin_path(@cotton_bulletin), notice: "Daily cotton report is ready for #{@cotton_bulletin.report_date.strftime("%d %b %Y")}."
+  rescue ArgumentError
+    redirect_to cotton_bulletins_path, alert: "Choose a valid report date."
+  end
+
+  def import_daily
+    if params[:excel_file].blank?
+      redirect_to cotton_bulletins_path, alert: "Choose a cotton Excel file to import."
+      return
+    end
+
+    result = CottonBulletinExcelImporter.import_workbook(params[:excel_file], fallback_date: direct_report_date)
+
+    if result.errors.any?
+      redirect_to cotton_bulletins_path, alert: result.errors.first(3).to_sentence
+      return
+    end
+
+    if result.bulletins.empty?
+      redirect_to cotton_bulletins_path, alert: "No dated sheets were found in this workbook."
+      return
+    end
+
+    redirect_to import_target_path(result), notice: import_notice(result)
+  rescue ArgumentError
+    redirect_to cotton_bulletins_path, alert: "Choose a valid report date."
+  end
+
   def new
-    @cotton_bulletin = CottonBulletin.new
+    redirect_to cotton_bulletins_path, notice: "Choose a report date below to open a daily cotton entry."
   end
 
   def create
@@ -141,5 +192,25 @@ class CottonBulletinsController < ApplicationController
 
     def cotton_bulletin_params
       permit_with_attachments(:cotton_bulletin, :report_date, :title, :notes)
+    end
+
+    # One workbook normally spans a month of sheets, so land on the index when
+    # several dates were written and on the report itself when only one was.
+    def import_target_path(result)
+      result.bulletins.one? ? cotton_bulletin_path(result.bulletins.first) : cotton_bulletins_path
+    end
+
+    def import_notice(result)
+      dates = "#{result.bulletins.size} #{"date".pluralize(result.bulletins.size)} (#{result.date_range_label})"
+      summary = "Cotton Excel import complete for #{dates}: #{result.created} new, #{result.updated} updated rows."
+      return summary if result.skipped_sheets.empty?
+
+      "#{summary} #{result.skipped_sheets.size} hidden #{"sheet".pluralize(result.skipped_sheets.size)} skipped."
+    end
+
+    def direct_report_date
+      return Date.current if params[:report_date].blank?
+
+      Date.parse(params[:report_date])
     end
 end

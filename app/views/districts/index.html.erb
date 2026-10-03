@@ -1,18 +1,17 @@
 <% content_for :title, "District Master" %>
 
 <section class="responsive-stack">
-  <div class="page-header">
+  <% content_for :page_heading do %>
     <div>
       <p class="eyebrow">Master Setup</p>
       <h1>District master</h1>
-      <p class="muted-text">Pehle district ko state se map karein; phir Mandi Master me APMC/mandi add karein.</p>
     </div>
-    <div class="page-actions">
-      <%= link_to "Mandi Master", markets_path, class: "button button-secondary" %>
-      <%= link_to "Add District", new_district_path, class: "button button-primary" %>
-    </div>
-  </div>
+  <% end %>
 
+  <% content_for :page_actions do %>
+    <%= link_to "Mandi Master", markets_path, class: "button button-secondary" %>
+    <%= link_to "Add District", new_district_path, class: "button button-primary" %>
+  <% end %>
   <div class="table-card">
     <% if @districts.any? %>
       <div class="data-table-wrapper">
@@ -41,7 +40,7 @@
         </table>
       </div>
     <% else %>
-      <div class="empty-state">Abhi tak koi district master create nahi hua hai.</div>
+      <div class="empty-state">No district records yet.</div>
     <% end %>
   </div>
 </section>

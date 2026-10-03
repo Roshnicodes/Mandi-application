@@ -16,12 +16,14 @@ Rails.application.routes.draw do
     collection do
       get :export
       post :import
+      post :repair_imported_locations
     end
   end
   resources :cotton_bulletins do
+    post :start, on: :collection
+    post :import_daily, on: :collection
     member do
       get :export
-      get :market_update
       get :comparison_sheet
       post :import
     end

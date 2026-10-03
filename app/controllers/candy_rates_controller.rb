@@ -41,6 +41,7 @@ class CandyRatesController < CottonBulletinNestedController
         :candy_rate,
         :category,
         :parameter,
+        :madhya_pradesh_29mm_rate,
         :madhya_pradesh_rate,
         :maharashtra_29mm_rate,
         :maharashtra_31mm_rate,

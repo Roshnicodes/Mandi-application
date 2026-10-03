@@ -1,46 +1,29 @@
 <% content_for :title, "Cotton Overview" %>
 
 <section class="responsive-stack">
-  <div class="page-header">
+  <% content_for :page_heading do %>
     <div>
       <p class="eyebrow">Overall Sheet</p>
       <h1>Cotton market overview</h1>
-      <p class="muted-text">Review historical bulletin lanes in one wide overview, similar to your monthly Kukshi / Anjad Excel sheet.</p>
     </div>
-  </div>
+  <% end %>
+  <%= form_with url: cotton_market_overviews_path, method: :get, class: "filter-bar" do |form| %>
+    <span class="filter-bar-search">
+      <%= icon("search", size: 16) %>
+      <%= form.text_field :q, value: params[:q], placeholder: "Search mandi, gin or report date…", aria: { label: "Search cotton reports" } %>
+    </span>
 
-  <div class="card">
-    <div class="card-header">
-      <div>
-        <h2 class="table-title">Overview filters</h2>
-        <p class="table-subtitle">Filter by bulletin title and date range to build the historical sheet.</p>
-      </div>
-    </div>
+    <span class="filter-bar-tag"><%= icon("sliders", size: 17) %> Filters</span>
 
-    <%= form_with url: cotton_market_overviews_path, method: :get, class: "filters-form" do |form| %>
-      <div class="form-grid-three">
-        <div class="field-group">
-          <%= form.label :title, "Bulletin title" %>
-          <%= form.select :title, @titles, { include_blank: "All bulletin titles", selected: params[:title] } %>
-        </div>
+    <%= form.select :title, @titles, { include_blank: "All bulletin titles", selected: params[:title] }, aria: { label: "Bulletin title" } %>
+    <%= form.text_field :from_date, value: params[:from_date], placeholder: "From date", class: "filter-bar-date", data: { date_input: true }, aria: { label: "From date" } %>
+    <%= form.text_field :to_date, value: params[:to_date], placeholder: "To date", class: "filter-bar-date", data: { date_input: true }, aria: { label: "To date" } %>
 
-        <div class="field-group">
-          <%= form.label :from_date, "From date" %>
-          <%= form.date_field :from_date, value: params[:from_date] %>
-        </div>
-
-        <div class="field-group">
-          <%= form.label :to_date, "To date" %>
-          <%= form.date_field :to_date, value: params[:to_date] %>
-        </div>
-      </div>
-
-      <div class="inline-actions">
-        <%= form.submit "Build Overview", class: "button button-primary" %>
-        <%= link_to "Reset", cotton_market_overviews_path, class: "button button-ghost" %>
-      </div>
-    <% end %>
-  </div>
+    <span class="filter-bar-actions">
+      <%= form.submit "Build Overview", class: "button button-primary" %>
+      <%= link_to "Reset", cotton_market_overviews_path, class: "button button-outline" %>
+    </span>
+  <% end %>
 
   <% if @grouped_bulletins.any? %>
     <% @grouped_bulletins.each do |title, bulletins| %>
@@ -66,7 +49,7 @@
           <div class="table-card overview-lane">
             <div class="sheet-header compact">
               <div>
-                <h3 class="sheet-mini-title">Kukshi Mandi Rates</h3>
+                <h3 class="sheet-mini-title">Mandi Wise Rates</h3>
               </div>
             </div>
             <% if mandi_rows.any? %>
@@ -75,6 +58,7 @@
                   <thead>
                     <tr>
                       <th>Date</th>
+                      <th>Mandi</th>
                       <th>Arrival Qty</th>
                       <th>Min</th>
                       <th>Max</th>
@@ -85,6 +69,7 @@
                     <% mandi_rows.each do |bulletin, row| %>
                       <tr>
                         <td><%= bulletin.report_date.strftime("%d-%b-%y") %></td>
+                        <td class="overview-name-cell"><%= row.name %></td>
                         <td class="numeric-cell"><%= number_with_precision(row.arrival_quantity, precision: 2, strip_insignificant_zeros: false) %></td>
                         <td class="numeric-cell"><%= number_with_precision(row.minimum_price, precision: 0) %></td>
                         <td class="numeric-cell"><%= number_with_precision(row.maximum_price, precision: 0) %></td>
@@ -111,6 +96,7 @@
                   <thead>
                     <tr>
                       <th>Date</th>
+                      <th>Mandi</th>
                       <th>Arrival Qty</th>
                       <th>Min</th>
                       <th>Max</th>
@@ -121,6 +107,7 @@
                     <% cci_rows.each do |bulletin, row| %>
                       <tr>
                         <td><%= bulletin.report_date.strftime("%d-%b-%y") %></td>
+                        <td class="overview-name-cell"><%= row.name %></td>
                         <td class="numeric-cell"><%= row.arrival_quantity.present? ? number_with_precision(row.arrival_quantity, precision: 2, strip_insignificant_zeros: false) : "-" %></td>
                         <td class="numeric-cell"><%= row.minimum_price.present? ? number_with_precision(row.minimum_price, precision: 0) : "-" %></td>
                         <td class="numeric-cell"><%= row.maximum_price.present? ? number_with_precision(row.maximum_price, precision: 0) : "-" %></td>
@@ -245,6 +232,6 @@
       </div>
     <% end %>
   <% else %>
-    <div class="empty-state">Selected filters ke liye koi cotton overview data nahi mila.</div>
+    <div class="empty-state">No cotton overview data found for the selected filters.</div>
   <% end %>
 </section>

@@ -68,8 +68,31 @@ class DailyPriceArrivalReport < ApplicationRecord
       reports = reports.where("arrival_date <= ?", filters[:to_date])
     end
 
+    reports = reports.matching_text(filters[:q]) if filters[:q].present?
+
     reports
   end
+
+  # Free-text search across the names a user would type: the mandi, what was
+  # sold there, and the source noted against the row.
+  SEARCH_COLUMNS = [
+    "markets.name",
+    "commodities.name",
+    "commodity_groups.name",
+    "varieties.name",
+    "grades.name",
+    "districts.name",
+    "states.name",
+    "daily_price_arrival_reports.remarks"
+  ].freeze
+
+  scope :matching_text, lambda { |term|
+    text = term.to_s.strip
+    next all if text.blank?
+
+    joins(:market, :commodity, :commodity_group, :variety, :grade, :district, :state)
+      .where(SEARCH_COLUMNS.map { |column| "#{column} ILIKE :term" }.join(" OR "), term: "%#{sanitize_sql_like(text)}%")
+  }
 
   private
     def align_hierarchy

@@ -20,17 +20,16 @@
   end
 %>
 
-<div class="table-card report-sheet-card" id="observation-section-<%= category %>">
+<div class="table-card report-sheet-card" id="observation-section-<%= category %>" data-sheet-section>
   <div class="sheet-header">
     <div>
       <p class="eyebrow">Excel Section</p>
       <h2 class="table-title"><%= display_title %></h2>
-      <p class="table-subtitle">Fill this section exactly the way the daily cotton sheet is maintained.</p>
     </div>
     <div class="inline-actions">
       <% if CottonMarketObservation.template_grid_supported?(category) %>
         <%= link_to "Open Grid", grid_cotton_bulletin_cotton_market_observations_path(bulletin, category: category), class: "button button-secondary" %>
-      <% else %>
+      <% elsif admin_user? %>
         <%= link_to "Add Line", new_cotton_bulletin_cotton_market_observation_path(bulletin, category: category), class: "button button-secondary" %>
       <% end %>
     </div>
@@ -91,9 +90,9 @@
               <% when "mandi_wise", "cci_mandi" %>
                 <td><%= record.position.presence || index + 1 %></td>
                 <td>
-                  <%= record.name %>
+                  <%= mandi_display_name(record.name) %>
                   <% if record.market.present? %>
-                    <span class="sheet-inline-hint"><%= [record.state&.name, record.district&.name, record.market.name].compact.join(" / ") %></span>
+                    <span class="sheet-inline-hint"><%= [record.state&.name, record.district&.name, mandi_display_name(record.market.name)].compact.join(" / ") %></span>
                   <% end %>
                 </td>
                 <td class="numeric-cell"><%= number_with_precision(record.arrival_quantity, precision: 2, strip_insignificant_zeros: false) %></td>
@@ -151,6 +150,6 @@
       </table>
     </div>
   <% else %>
-    <div class="empty-state">Is section me abhi koi line add nahi hui hai.</div>
+    <div class="empty-state">No rows in this section yet.</div>
   <% end %>
 </div>

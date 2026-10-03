@@ -4,7 +4,6 @@
   <div class="field-group">
     <%= form.label :category, "Section category" %>
     <%= form.select :category, CottonMarketObservation::CATEGORIES.map { |key, label| [ label, key ] }, { prompt: "Select section" } %>
-    <p class="field-note">`Mandi wise` aur `CCI` me min-max-modal bhariye. `Gin wise` aur `TDN` me moisture/arrival price. `Comparison sheet` me total arrival, traders buying, traders %, CCI buying aur CCI % bhariye.</p>
   </div>
 
   <div class="form-grid-three">
@@ -16,7 +15,6 @@
     <div class="field-group">
       <%= form.label :market_id, "Linked Mandi / APMC" %>
       <%= form.collection_select :market_id, Market.includes(district: :state).ordered, :id, :name, { prompt: "Auto from name or choose mandi" } %>
-      <p class="field-note">Mandi wise rows me state/district yahin se auto save honge.</p>
     </div>
 
     <div class="field-group">
@@ -32,7 +30,6 @@
     <div class="field-group">
       <%= form.label :observation_date, "Row date" %>
       <%= form.date_field :observation_date %>
-      <p class="field-note">Comparison sheet aur historical cotton rows ke liye useful. Blank chhodoge to bulletin date use hogi.</p>
     </div>
 
     <div class="field-group">
@@ -83,7 +80,6 @@
     <div class="field-group">
       <%= form.label :cci_percentage, "CCI %" %>
       <%= form.number_field :cci_percentage, step: :any %>
-      <p class="field-note">Purana single percentage field bhi compatible rahega, lekin ab exact comparison format ke liye alag CCI % save hoga.</p>
     </div>
 
     <div class="field-group">

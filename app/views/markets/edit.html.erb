@@ -1,14 +1,12 @@
 <% content_for :title, "Edit Mandi" %>
 
 <section class="responsive-stack">
-  <div class="page-header">
+  <% content_for :page_heading do %>
     <div>
       <p class="eyebrow">Master Setup</p>
       <h1>Edit mandi</h1>
-      <p class="muted-text">Mandi hierarchy aur labels ko updated rakhiye.</p>
     </div>
-  </div>
-
+  <% end %>
   <div class="card">
     <%= render "form", market: @market %>
   </div>

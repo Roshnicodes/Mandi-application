@@ -14,6 +14,6 @@
       <% end %>
     <% end %>
   </div>
-<% else %>
-  <span>-</span>
+<% elsif local_assigns.fetch(:empty_label, "-").present? %>
+  <span><%= local_assigns.fetch(:empty_label, "-") %></span>
 <% end %>

@@ -9,7 +9,7 @@ class CandyRate < ApplicationRecord
   belongs_to :cotton_bulletin
 
   normalizes :category, with: ->(value) { value.to_s }
-  normalizes :parameter, :madhya_pradesh_rate, :maharashtra_29mm_rate, :maharashtra_31mm_rate, :odisha_29mm_rate, :odisha_30mm_rate, :reference,
+  normalizes :parameter, :madhya_pradesh_29mm_rate, :madhya_pradesh_rate, :maharashtra_29mm_rate, :maharashtra_31mm_rate, :odisha_29mm_rate, :odisha_30mm_rate, :reference,
              with: ->(value) { value.to_s.squish.presence }
 
   validates :category, presence: true, inclusion: { in: CATEGORIES.keys }

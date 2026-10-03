@@ -36,8 +36,6 @@
   <div class="auth-card">
     <p class="eyebrow">Welcome Back</p>
     <h2>Sign in to your mandi workspace</h2>
-    <p class="muted-text">Use your credentials to continue to the reporting dashboard.</p>
-
     <%= form_with url: session_path, class: "auth-form" do |form| %>
       <div class="field-group">
         <%= form.label :email_address, "Email address" %>

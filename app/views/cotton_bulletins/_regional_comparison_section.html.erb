@@ -1,13 +1,14 @@
-<div class="table-card report-sheet-card">
+<div class="table-card report-sheet-card" data-sheet-section>
   <div class="sheet-header">
     <div>
       <p class="eyebrow">Comparison Matrix</p>
       <h2 class="table-title">Regional price comparison</h2>
-      <p class="table-subtitle">OC Cotton, Bonus, Total aur Moisture jaise row items ko multi-location matrix me save kariye.</p>
     </div>
-    <div class="inline-actions">
-      <%= link_to "Add Comparison Line", new_cotton_bulletin_cotton_regional_comparison_path(bulletin), class: "button button-secondary" %>
-    </div>
+    <% if admin_user? %>
+      <div class="inline-actions">
+        <%= link_to "Add Comparison Line", new_cotton_bulletin_cotton_regional_comparison_path(bulletin), class: "button button-secondary" %>
+      </div>
+    <% end %>
   </div>
 
   <% if records.any? %>
@@ -59,6 +60,6 @@
       </table>
     </div>
   <% else %>
-    <div class="empty-state">Regional comparison matrix abhi empty hai.</div>
+    <div class="empty-state">Regional comparison matrix is empty.</div>
   <% end %>
 </div>

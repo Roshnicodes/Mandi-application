@@ -1,14 +1,12 @@
 <% content_for :title, "New Commodity" %>
 
 <section class="responsive-stack">
-  <div class="page-header">
+  <% content_for :page_heading do %>
     <div>
       <p class="eyebrow">Master Setup</p>
       <h1>Create commodity</h1>
-      <p class="muted-text">Commodity ko reporting group aur organic flag ke saath add kariye.</p>
     </div>
-  </div>
-
+  <% end %>
   <div class="card">
     <%= render "form", commodity: @commodity %>
   </div>

@@ -26,10 +26,20 @@ class DailyArrivalSummariesController < ApplicationController
     end
 
     def build_report_title
-      start_label = @filters[:from_date].presence || "start"
-      end_label = @filters[:to_date].presence || "today"
       state_label = @selected_state&.name || "All States"
+      start_date = Date.parse(@filters[:from_date]) if @filters[:from_date].present?
+      end_date = Date.parse(@filters[:to_date]) if @filters[:to_date].present?
+      period_label =
+        if start_date && end_date
+          "#{start_date.strftime("%d %b %Y")} – #{end_date.strftime("%d %b %Y")}"
+        elsif start_date
+          "From #{start_date.strftime("%d %b %Y")}"
+        elsif end_date
+          "Up to #{end_date.strftime("%d %b %Y")}"
+        else
+          "All available dates"
+        end
 
-      "Daily Price Arrival Report - #{start_label} to #{end_label} for #{state_label}"
+      "#{state_label} · #{period_label}"
     end
 end

@@ -1,5 +1,5 @@
 class CottonBulletinNestedController < ApplicationController
-  before_action :require_admin, only: %i[edit update destroy]
+  before_action :require_admin
   before_action :set_cotton_bulletin
 
   private

@@ -1,164 +1,179 @@
-<% content_for :title, "Daily Price Arrival Reports" %>
+<% content_for :title, "Daily Mandi Reports" %>
 
-<section class="responsive-stack">
-  <div class="page-header">
-    <div>
-      <p class="eyebrow">Report Entry</p>
-      <h1>Daily price arrival reports</h1>
+<%
+  sort_link = lambda do |key, label|
+    next_dir = (@sort_column == key && @sort_dir == "asc") ? "desc" : "asc"
+    link_to daily_price_arrival_reports_path(request.query_parameters.symbolize_keys.merge(sort_by: key, sort_dir: next_dir)),
+      class: [ "daily-sort-link", ("is-active" if @sort_column == key) ] do
+      safe_join([ label, icon("sort", size: 13) ], " ")
+    end
+  end
+%>
+
+<section class="responsive-stack daily-reports-page">
+  <% content_for :page_heading do %>
+    <div class="page-header-with-icon">
+      <span class="page-header-icon tone-blue"><%= icon("document", size: 22) %></span>
+      <div>
+        <h1>Daily Mandi Reports</h1>
+        <p class="muted-text">View, import and manage daily mandi reports.</p>
+      </div>
     </div>
-    <div class="page-actions">
-      <%= link_to "Add Daily Report", new_daily_price_arrival_report_path, class: "button button-primary" %>
+  <% end %>
+
+  <div class="daily-report-commandbar">
+    <% if admin_user? %>
+      <%= form_with url: import_daily_price_arrival_reports_path, multipart: true, class: "daily-upload-bar" do %>
+        <span class="daily-file-picker">
+          <%= icon("spreadsheet", size: 17) %>
+          <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true, aria: { label: "Choose daily mandi Excel workbook" } %>
+        </span>
+        <%= button_tag type: :submit, class: "button button-primary" do %>
+          <%= icon("upload", size: 17) %> Upload Excel
+        <% end %>
+        <%= link_to new_daily_price_arrival_report_path, class: "button button-outline" do %>
+          <%= icon("plus", size: 17) %> Add Report
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <div class="daily-report-actions">
+      <%= link_to export_daily_price_arrival_reports_path(request.query_parameters), class: "button button-soft" do %>
+        <%= icon("download", size: 17) %> Download Excel
+      <% end %>
       <% if admin_user? %>
-        <%= link_to "View Excel", export_daily_price_arrival_reports_path(request.query_parameters.merge(preview: true)), class: "button button-secondary", target: "_blank", rel: "noopener" %>
-        <%= link_to "Download Excel", export_daily_price_arrival_reports_path(request.query_parameters), class: "button button-secondary" %>
-        <%= form_with url: import_daily_price_arrival_reports_path, multipart: true, class: "import-inline-form" do %>
-          <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
-          <%= submit_tag "Import Excel", class: "button button-secondary" %>
+        <%= link_to export_daily_price_arrival_reports_path(request.query_parameters.merge(preview: true)), class: "button button-soft", target: "_blank", rel: "noopener" do %>
+          <%= icon("eye", size: 17) %> Preview
         <% end %>
       <% end %>
     </div>
   </div>
 
-  <div class="card report-filter-card">
-    <div class="card-header">
+  <% if admin_user? && @imported_location_report_count.positive? %>
+    <aside class="import-location-notice" aria-label="Imported location cleanup">
       <div>
-        <h2 class="table-title">Filter reports</h2>
+        <p class="eyebrow">Data quality</p>
+        <strong><%= number_with_delimiter(@imported_location_report_count) %> imported rows need district cleanup</strong>
+        <p>Older workbooks had mandi and state only. New imports now map known MP APMCs to their district automatically.</p>
       </div>
-      <div class="report-filter-stats">
-        <span><strong><%= number_with_delimiter(@filtered_count) %></strong> reports</span>
-        <span><strong><%= number_with_precision(@filtered_arrival_total, precision: 2, strip_insignificant_zeros: true) %></strong> arrival</span>
-      </div>
-    </div>
+      <%= button_to "Fix locations", repair_imported_locations_daily_price_arrival_reports_path, method: :post, class: "button button-primary", form: { data: { turbo_confirm: "Move #{@imported_location_market_count} imported mandis to their mapped districts and remove invalid date-label rows?" } } %>
+    </aside>
+  <% end %>
 
-    <%= form_with url: daily_price_arrival_reports_path, method: :get, class: "filters-form filters-form-compact" do |form| %>
-      <div class="form-grid-three">
-        <div class="field-group">
-          <%= form.label :state_id, "State" %>
-          <%= form.collection_select :state_id, @states, :id, :name, { include_blank: "All states", selected: params[:state_id] } %>
-        </div>
+  <%= form_with url: daily_price_arrival_reports_path, method: :get, class: "filter-bar" do |form| %>
+    <span class="filter-bar-search">
+      <%= icon("search", size: 16) %>
+      <%= form.text_field :q, value: params[:q], placeholder: "Search mandi or commodity…", aria: { label: "Search reports" } %>
+    </span>
 
-        <div class="field-group">
-          <%= form.label :district_id, "District" %>
-          <%= form.collection_select :district_id, @districts, :id, :name, { include_blank: "All districts", selected: params[:district_id] } %>
-        </div>
+    <span class="filter-bar-tag"><%= icon("sliders", size: 17) %> Filters</span>
 
-        <div class="field-group">
-          <%= form.label :market_id, "Mandi" %>
-          <%= form.collection_select :market_id, @markets, :id, :name, { include_blank: "All mandis", selected: params[:market_id] } %>
-        </div>
+    <%= form.collection_select :state_id, @states, :id, :name, { include_blank: "All states", selected: params[:state_id] }, aria: { label: "State" } %>
+    <%= form.collection_select :district_id, @districts, :id, :name, { include_blank: "All districts", selected: params[:district_id] }, aria: { label: "District" } %>
+    <%= form.collection_select :market_id, @markets, :id, :name, { include_blank: "All APMCs", selected: params[:market_id] }, aria: { label: "APMC" } %>
+    <%= form.collection_select :commodity_group_id, @commodity_groups, :id, :name, { include_blank: "All groups", selected: params[:commodity_group_id] }, aria: { label: "Commodity group" } %>
+    <%= form.collection_select :commodity_id, @commodities, :id, :name, { include_blank: "All commodities", selected: params[:commodity_id] }, aria: { label: "Commodity" } %>
+    <%= form.collection_select :variety_id, @varieties, :id, :name, { include_blank: "All varieties", selected: params[:variety_id] }, aria: { label: "Variety" } %>
 
-        <div class="field-group">
-          <%= form.label :commodity_group_id, "Commodity group" %>
-          <%= form.collection_select :commodity_group_id, @commodity_groups, :id, :name, { include_blank: "All groups", selected: params[:commodity_group_id] } %>
-        </div>
+    <%# Rendered as a text box so the placeholder reads "From date"; the shared
+        UI script swaps it to a native date picker on focus. %>
+    <%= form.text_field :from_date, value: params[:from_date], placeholder: "From date", class: "filter-bar-date", data: { date_input: true }, aria: { label: "From date" } %>
+    <%= form.text_field :to_date, value: params[:to_date], placeholder: "To date", class: "filter-bar-date", data: { date_input: true }, aria: { label: "To date" } %>
 
-        <div class="field-group">
-          <%= form.label :commodity_id, "Commodity" %>
-          <%= form.collection_select :commodity_id, @commodities, :id, :name, { include_blank: "All commodities", selected: params[:commodity_id] } %>
-        </div>
+    <span class="filter-bar-actions">
+      <%= form.submit "Apply", class: "button button-primary" %>
+      <%= link_to "Clear", daily_price_arrival_reports_path, class: "button button-outline" %>
+    </span>
+  <% end %>
 
-        <div class="field-group">
-          <%= form.label :variety_id, "Variety" %>
-          <%= form.collection_select :variety_id, @varieties, :id, :name, { include_blank: "All varieties", selected: params[:variety_id] } %>
-        </div>
-
-        <div class="field-group">
-          <%= form.label :from_date, "From date" %>
-          <%= form.date_field :from_date, value: params[:from_date] %>
-        </div>
-
-        <div class="field-group">
-          <%= form.label :to_date, "To date" %>
-          <%= form.date_field :to_date, value: params[:to_date] %>
-        </div>
-      </div>
-
-      <div class="inline-actions">
-        <%= form.submit "Apply filters", class: "button button-primary" %>
-        <%= link_to "Reset", daily_price_arrival_reports_path, class: "button button-ghost" %>
-      </div>
-    <% end %>
-  </div>
-
-  <div class="table-card">
-    <div class="table-card-header">
-      <div>
-        <h2 class="table-title">Saved reports</h2>
-      </div>
-    </div>
+  <section class="daily-report-sheet-list" aria-label="Daily mandi reports">
     <% if @reports.any? %>
-      <div class="data-table-wrapper">
-        <table data-unit-table>
-          <thead>
-            <tr>
-              <th>Created On</th>
-              <th>Arrival Date</th>
-              <th>Mandi</th>
-              <th>Commodity</th>
-              <th>Variety</th>
-              <th>Grade</th>
-              <th>Min</th>
-              <th>Max</th>
-              <th>
-                <span class="unit-heading">
-                  Modal
-                  <select class="unit-select" data-unit-control="price" aria-label="Modal price unit">
-                    <option value="qtl">Qtl</option>
-                    <option value="kg">Kg</option>
-                    <option value="mt">MT</option>
-                  </select>
-                </span>
-              </th>
-              <th>
-                <span class="unit-heading">
-                  Arrival Qty
-                  <select class="unit-select" data-unit-control="arrival" aria-label="Arrival quantity unit">
-                    <option value="qtl">Qtl</option>
-                    <option value="kg">Kg</option>
-                    <option value="mt">MT</option>
-                  </select>
-                </span>
-              </th>
-              <th>Attachments</th>
-              <% if admin_user? %>
-                <th>Actions</th>
-              <% end %>
-            </tr>
-          </thead>
-          <tbody>
-            <% @reports.each do |report| %>
-              <tr>
-                <td><%= report.created_at.strftime("%d %b %Y, %I:%M %p") %></td>
-                <td><%= report.arrival_date.strftime("%d %b %Y") %></td>
-                <td>
-                  <%= report.market.name %>
-                  <span class="sheet-inline-hint"><%= [report.state.name, report.district.name].join(" / ") %></span>
-                </td>
-                <td><%= report.commodity.name %></td>
-                <td><%= report.variety.name %></td>
-                <td><%= report.grade.name %></td>
-                <td class="numeric-cell"><%= number_with_precision(report.min_price, precision: 2) %></td>
-                <td class="numeric-cell"><%= number_with_precision(report.max_price, precision: 2) %></td>
-                <td class="numeric-cell" data-unit-value data-unit-kind="price" data-source-value="<%= report.modal_price %>" data-source-unit="<%= report.price_unit.short_name.presence || report.price_unit.name %>"><%= number_with_precision(report.modal_price, precision: 2) %></td>
-                <td class="numeric-cell" data-unit-value data-unit-kind="arrival" data-source-value="<%= report.arrival_quantity %>" data-source-unit="<%= report.arrival_unit.short_name.presence || report.arrival_unit.name %>"><%= number_with_precision(report.arrival_quantity, precision: 2) %></td>
-                <td>
-                  <%= render "shared/attachment_links", record: report %>
-                </td>
-                <% if admin_user? %>
-                  <td>
-                    <div class="inline-actions">
-                      <%= link_to "Edit", edit_daily_price_arrival_report_path(report), class: "button button-secondary" %>
-                      <%= button_to "Delete", daily_price_arrival_report_path(report), method: :delete, class: "button button-danger", form: { class: "button-to-inline" } %>
-                    </div>
-                  </td>
+      <% report_sections = @reports.to_a.group_by { |report| [ report.commodity_id, report.state_id, report.arrival_date ] } %>
+      <% report_sections.sort_by { |(_ids, reports)| [ -reports.first.arrival_date.jd, reports.first.commodity.name.downcase, reports.first.state.name.downcase ] }.each do |_ids, section_reports| %>
+        <% first_report = section_reports.first %>
+        <% report_date = first_report.arrival_date %>
+        <% arrival_units = section_reports.map { |report| report.arrival_unit.short_name.presence || report.arrival_unit.name }.uniq %>
+        <% price_units = section_reports.map { |report| report.price_unit.short_name.presence || report.price_unit.name }.uniq %>
+        <% arrival_unit_label = arrival_units.one? ? arrival_units.first : "Reported unit" %>
+        <% price_unit_label = price_units.one? ? price_units.first : "Reported unit" %>
+        <% rows = sorted_daily_reports(section_reports, @sort_column, @sort_dir) %>
+
+        <article class="daily-mandi-sheet-card">
+          <header class="daily-mandi-sheet-header">
+            <div class="daily-mandi-sheet-title">
+              <span class="daily-mandi-commodity-icon"><%= icon("leaf", size: 19) %></span>
+              <div>
+                <h2><%= first_report.commodity.name %></h2>
+                <p><%= report_date.strftime("%d %b %Y") %> <span class="daily-mandi-dot">&bull;</span> <%= state_display_name(first_report.state) %></p>
+              </div>
+            </div>
+            <span class="daily-mandi-sheet-count"><%= section_reports.size %> APMCs</span>
+          </header>
+
+          <div class="data-table-wrapper daily-mandi-table-wrapper">
+            <table class="daily-mandi-table">
+              <thead>
+                <tr>
+                  <th class="daily-mandi-number-cell">#</th>
+                  <th><%= sort_link.call("apmc", "APMC") %></th>
+                  <th><%= sort_link.call("arrival", "Arrivals (in #{arrival_unit_label})") %></th>
+                  <th><%= sort_link.call("min", "Minimum Price (#{price_unit_label})") %></th>
+                  <th><%= sort_link.call("max", "Maximum Price (#{price_unit_label})") %></th>
+                  <th><%= sort_link.call("modal", "Modal Price (#{price_unit_label})") %></th>
+                  <th>Reference</th>
+                  <% if admin_user? %><th>Actions</th><% end %>
+                </tr>
+              </thead>
+              <tbody>
+                <% rows.each_with_index do |report, index| %>
+                  <tr>
+                    <td class="daily-mandi-number-cell"><%= index + 1 %></td>
+                    <td class="daily-mandi-market-cell">
+                      <strong><%= mandi_display_name(report.market.name) %></strong>
+                      <% unless report.variety.name == DailyPriceArrivalReport::DEFAULT_VARIETY_NAME && report.grade.name == DailyPriceArrivalReport::DEFAULT_GRADE_NAME %>
+                        <span><%= [ report.variety.name, report.grade.name ].join(" · ") %></span>
+                      <% end %>
+                    </td>
+                    <td class="daily-mandi-value-cell"><%= number_with_precision(report.arrival_quantity, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %></td>
+                    <td class="daily-mandi-value-cell"><%= number_with_precision(report.min_price, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %></td>
+                    <td class="daily-mandi-value-cell"><%= number_with_precision(report.max_price, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %></td>
+                    <td class="daily-mandi-value-cell daily-mandi-modal-price"><%= number_with_precision(report.modal_price, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %></td>
+                    <td class="daily-mandi-reference-cell">
+                      <span><%= report.remarks.presence || "-" %></span>
+                      <%= render "shared/attachment_links", record: report, empty_label: nil %>
+                    </td>
+                    <% if admin_user? %>
+                      <td class="daily-mandi-actions-cell">
+                        <span class="daily-mandi-row-actions">
+                          <%= link_to edit_daily_price_arrival_report_path(report), class: "button button-icon-edit", title: "Edit report", aria: { label: "Edit report" } do %>
+                            <%= icon("pencil", size: 15) %>
+                          <% end %>
+                          <%= button_to daily_price_arrival_report_path(report), method: :delete, class: "button button-icon-delete", title: "Delete report", aria: { label: "Delete report" }, form: { class: "button-to-inline" } do %>
+                            <%= icon("trash", size: 15) %>
+                          <% end %>
+                        </span>
+                      </td>
+                    <% end %>
+                  </tr>
                 <% end %>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
+              </tbody>
+            </table>
+          </div>
+
+          <footer class="daily-mandi-sheet-footer">
+            <p>Showing 1 to <%= rows.size %> of <%= rows.size %> records</p>
+            <div class="pagination-controls">
+              <span class="pagination-arrow is-disabled"><%= icon("chevron-left", size: 16) %></span>
+              <span class="pagination-current">1</span>
+              <span class="pagination-arrow is-disabled"><%= icon("chevron-right", size: 16) %></span>
+            </div>
+          </footer>
+        </article>
+      <% end %>
     <% else %>
-      <div class="empty-state">Selected filters ke liye koi daily report nahi mila.</div>
+      <div class="empty-state daily-report-empty-state">
+        <p>No reports yet.</p>
+      </div>
     <% end %>
-  </div>
+  </section>
 </section>

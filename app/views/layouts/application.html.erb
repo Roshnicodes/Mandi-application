@@ -4,7 +4,7 @@
     <title><%= app_title(content_for(:title)) %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Mandi App">
+    <meta name="application-name" content="IMAN">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -26,7 +26,7 @@
       <div class="app-shell">
         <aside class="sidebar" id="app-sidebar" data-app-sidebar>
           <div class="sidebar-mobile-header">
-            <span class="sidebar-mobile-brand">Mandi Pro</span>
+            <span class="sidebar-mobile-brand">IMAN</span>
             <button type="button" class="sidebar-close-button" data-sidebar-close aria-label="Close navigation">
               <span></span>
               <span></span>
@@ -35,11 +35,11 @@
 
           <div class="brand-card">
             <div class="brand-top">
-              <div class="brand-mark">MP</div>
+              <div class="brand-mark">IM</div>
             </div>
 
             <div class="brand-copy">
-              <h1>Mandi Pro</h1>
+              <h1>IMAN</h1>
             </div>
           </div>
 
@@ -47,7 +47,10 @@
             <div class="nav-group">
               <p class="nav-label">Workspace</p>
               <% primary_navigation.each do |item| %>
-                <%= link_to item[:label], item[:path], class: ["nav-link", item[:active] ? "active" : nil] %>
+                <%= link_to item[:path], class: ["nav-link", item[:active] ? "active" : nil] do %>
+                  <%= icon(item[:icon], class_name: "nav-link-icon") %>
+                  <span><%= item[:label] %></span>
+                <% end %>
               <% end %>
             </div>
 
@@ -55,7 +58,10 @@
               <div class="nav-group">
                 <p class="nav-label">Masters</p>
                 <% master_navigation.each do |item| %>
-                  <%= link_to item[:label], item[:path], class: ["nav-link", item[:active] ? "active" : nil] %>
+                  <%= link_to item[:path], class: ["nav-link", item[:active] ? "active" : nil] do %>
+                    <%= icon(item[:icon], class_name: "nav-link-icon") %>
+                    <span><%= item[:label] %></span>
+                  <% end %>
                 <% end %>
               </div>
             <% end %>
@@ -65,109 +71,62 @@
         <button type="button" class="sidebar-overlay" data-sidebar-overlay aria-hidden="true" tabindex="-1"></button>
 
         <main class="app-main">
-          <% if content_for?(:dashboard_unified) %>
-            <div class="workspace-shell">
-              <header class="topbar topbar-integrated">
-                <div class="topbar-leading">
-                  <button
-                    type="button"
-                    class="mobile-nav-button"
-                    data-sidebar-toggle
-                    aria-expanded="false"
-                    aria-controls="app-sidebar"
-                  >
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <em>Menu</em>
-                  </button>
-                  <button
-                    type="button"
-                    class="desktop-sidebar-toggle"
-                    data-sidebar-toggle
-                    aria-expanded="true"
-                    aria-controls="app-sidebar"
-                    title="Toggle menu"
-                    aria-label="Toggle menu"
-                  >
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                  </button>
+          <%# One card carries the page heading, the page's own actions and the
+              account controls, instead of a thin bar stacked over a title card. %>
+          <header class="app-topbar<%= " app-topbar-integrated" if content_for?(:dashboard_unified) %>">
+            <button
+              type="button"
+              class="mobile-nav-button"
+              data-sidebar-toggle
+              aria-expanded="false"
+              aria-controls="app-sidebar"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+              <em>Menu</em>
+            </button>
+            <button
+              type="button"
+              class="desktop-sidebar-toggle"
+              data-sidebar-toggle
+              aria-expanded="true"
+              aria-controls="app-sidebar"
+              title="Toggle menu"
+              aria-label="Toggle menu"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
 
-                  <div class="topbar-copy">
-                    <h2><%= content_for?(:title) ? yield(:title) : "Mandi Pro" %></h2>
-                  </div>
-
-                  <% if content_for?(:topbar_tools) %>
-                    <%= yield :topbar_tools %>
-                  <% end %>
-                </div>
-
-                <div class="topbar-actions">
-                  <div class="user-pill">
-                    <span class="user-pill-name"><%= current_user.name %></span>
-                    <span class="user-pill-meta"><%= Date.current.strftime("%d %b %Y") %></span>
-                  </div>
-                  <%= button_to "Logout", session_path, method: :delete, class: "button button-ghost" %>
-                </div>
-              </header>
-
-              <div class="page-frame page-frame-integrated">
-                <%= render "shared/flash" %>
-                <%= yield %>
-              </div>
+            <div class="app-topbar-heading">
+              <% if content_for?(:page_heading) %>
+                <%= yield :page_heading %>
+              <% else %>
+                <h1><%= content_for?(:title) ? yield(:title) : "IMAN" %></h1>
+              <% end %>
             </div>
-          <% else %>
-            <header class="topbar">
-              <div class="topbar-leading">
-                <button
-                  type="button"
-                  class="mobile-nav-button"
-                  data-sidebar-toggle
-                  aria-expanded="false"
-                  aria-controls="app-sidebar"
-                >
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                  <em>Menu</em>
-                </button>
-                <button
-                  type="button"
-                  class="desktop-sidebar-toggle"
-                  data-sidebar-toggle
-                  aria-expanded="true"
-                  aria-controls="app-sidebar"
-                  title="Toggle menu"
-                  aria-label="Toggle menu"
-                >
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </button>
 
-                <% unless content_for?(:suppress_topbar_title) %>
-                  <div class="topbar-copy">
-                    <h2><%= content_for?(:title) ? yield(:title) : "Mandi Pro" %></h2>
-                  </div>
-                <% end %>
+            <% if content_for?(:page_actions) %>
+              <div class="app-topbar-trail">
+                <div class="page-actions"><%= yield :page_actions %></div>
               </div>
+            <% end %>
 
-              <div class="topbar-actions">
-                <div class="user-pill">
-                  <span class="user-pill-name"><%= current_user.name %></span>
-                  <span class="user-pill-meta"><%= Date.current.strftime("%d %b %Y") %></span>
-                </div>
-                <%= button_to "Logout", session_path, method: :delete, class: "button button-ghost" %>
+            <div class="app-topbar-account">
+              <div class="user-pill">
+                <span class="user-pill-name"><%= current_user.name %></span>
+                <span class="user-pill-meta"><%= Date.current.strftime("%d %b %Y") %></span>
               </div>
-            </header>
-
-            <div class="page-frame">
-              <%= render "shared/flash" %>
-              <%= yield %>
+              <%= button_to "Logout", session_path, method: :delete, class: "button button-ghost" %>
             </div>
-          <% end %>
+          </header>
+
+          <div class="page-frame">
+            <%= render "shared/flash" %>
+            <%= yield %>
+          </div>
         </main>
       </div>
     <% else %>

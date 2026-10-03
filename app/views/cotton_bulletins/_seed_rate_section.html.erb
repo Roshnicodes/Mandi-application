@@ -1,23 +1,24 @@
-<div class="table-card report-sheet-card">
+<div class="table-card report-sheet-card" data-sheet-section>
   <div class="sheet-header">
     <div>
       <p class="eyebrow">Smart Info</p>
       <h2 class="table-title">Cotton seed rate</h2>
-      <p class="table-subtitle">Particular-wise MP, Odisha aur Maharashtra rates yahan store kariye.</p>
     </div>
-    <div class="inline-actions">
-      <%= link_to "Add Seed Rate", new_cotton_bulletin_cotton_seed_rate_path(bulletin), class: "button button-secondary" %>
-    </div>
+    <% if admin_user? %>
+      <div class="inline-actions">
+        <%= link_to "Add Seed Rate", new_cotton_bulletin_cotton_seed_rate_path(bulletin), class: "button button-secondary" %>
+      </div>
+    <% end %>
   </div>
 
   <% if records.any? %>
     <div class="data-table-wrapper">
-      <table class="report-grid-table">
+      <table class="report-grid-table cotton-rate-table seed-rate-table">
         <thead>
           <tr>
             <th>S. No</th>
             <th>Particular</th>
-            <th>Madhya Pradesh</th>
+            <th>MP</th>
             <th>Odisha</th>
             <th>Maharashtra</th>
             <th>Reference</th>
@@ -51,6 +52,6 @@
       </table>
     </div>
   <% else %>
-    <div class="empty-state">Cotton seed rate section abhi empty hai.</div>
+    <div class="empty-state">Cotton seed rate section is empty.</div>
   <% end %>
 </div>

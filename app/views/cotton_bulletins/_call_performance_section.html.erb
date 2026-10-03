@@ -1,13 +1,14 @@
-<div class="table-card report-sheet-card">
+<div class="table-card report-sheet-card" data-sheet-section>
   <div class="sheet-header">
     <div>
       <p class="eyebrow">Call Sheet</p>
       <h2 class="table-title">Call performance</h2>
-      <p class="table-subtitle">Total call, fully satisfied, call again aur wrong call numbers yahan capture honge.</p>
     </div>
-    <div class="inline-actions">
-      <%= link_to "Add Call Row", new_cotton_bulletin_cotton_call_performance_path(bulletin), class: "button button-secondary" %>
-    </div>
+    <% if admin_user? %>
+      <div class="inline-actions">
+        <%= link_to "Add Call Row", new_cotton_bulletin_cotton_call_performance_path(bulletin), class: "button button-secondary" %>
+      </div>
+    <% end %>
   </div>
 
   <% if records.any? %>
@@ -53,6 +54,6 @@
       </table>
     </div>
   <% else %>
-    <div class="empty-state">Call performance rows abhi add nahi hui hain.</div>
+    <div class="empty-state">No call performance rows yet.</div>
   <% end %>
 </div>

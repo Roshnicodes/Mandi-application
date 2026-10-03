@@ -7,8 +7,21 @@ class CottonMarketOverviewsController < ApplicationController
   end
 
   private
+    # Matches the report title or date, and the mandi and gin names recorded
+    # inside it, so a user can pull up every sheet that mentions one mandi.
+    def search_bulletins(scope, term)
+      text = "%#{CottonBulletin.sanitize_sql_like(term.to_s.strip)}%"
+
+      scope.where(
+        "cotton_bulletins.title ILIKE :term
+           OR to_char(cotton_bulletins.report_date, 'DD Mon YYYY') ILIKE :term
+           OR cotton_bulletins.id IN (SELECT cotton_bulletin_id FROM cotton_market_observations WHERE name ILIKE :term)",
+        term: text
+      )
+    end
+
     def overview_filter_params
-      params.permit(:title, :from_date, :to_date)
+      params.permit(:q, :title, :from_date, :to_date)
     end
 
     def filtered_bulletins
@@ -23,6 +36,7 @@ class CottonMarketOverviewsController < ApplicationController
       scope = scope.where(title: @filters[:title]) if @filters[:title].present?
       scope = scope.where("report_date >= ?", @filters[:from_date]) if @filters[:from_date].present?
       scope = scope.where("report_date <= ?", @filters[:to_date]) if @filters[:to_date].present?
+      scope = search_bulletins(scope, @filters[:q]) if @filters[:q].present?
       scope.to_a.sort_by(&:report_date)
     end
 end

@@ -1,17 +1,16 @@
 <% content_for :title, "Commodity Master" %>
 
 <section class="responsive-stack">
-  <div class="page-header">
+  <% content_for :page_heading do %>
     <div>
       <p class="eyebrow">Master Setup</p>
       <h1>Commodity master</h1>
-      <p class="muted-text">Maintain commodity list, organic flag and reporting group mapping.</p>
     </div>
-    <div class="page-actions">
-      <%= link_to "Add Commodity", new_commodity_path, class: "button button-primary" %>
-    </div>
-  </div>
+  <% end %>
 
+  <% content_for :page_actions do %>
+    <%= link_to "Add Commodity", new_commodity_path, class: "button button-primary" %>
+  <% end %>
   <div class="table-card">
     <% if @commodities.any? %>
       <div class="data-table-wrapper">
@@ -48,7 +47,7 @@
         </table>
       </div>
     <% else %>
-      <div class="empty-state">Abhi tak koi commodity master create nahi hua hai.</div>
+      <div class="empty-state">No commodity records yet.</div>
     <% end %>
   </div>
 </section>

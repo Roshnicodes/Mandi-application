@@ -1,13 +1,12 @@
 <% content_for :title, "New Arrival Unit" %>
 
 <section class="responsive-stack">
-  <div class="page-header">
+  <% content_for :page_heading do %>
     <div>
       <p class="eyebrow">Master Setup</p>
       <h1>Create arrival unit</h1>
     </div>
-  </div>
-
+  <% end %>
   <div class="card">
     <%= render "form", arrival_unit: @arrival_unit %>
   </div>

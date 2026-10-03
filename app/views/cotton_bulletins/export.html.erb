@@ -265,7 +265,7 @@
         <% end %>
 
         <tr class="blank-row">
-          <td colspan="13"></td>
+          <td colspan="15"></td>
         </tr>
 
         <tr class="thick-top">
@@ -298,17 +298,18 @@
         </tr>
 
         <tr class="thick-top">
-          <td colspan="13" class="section-cell">Candy Rate (MCH)</td>
+          <td colspan="15" class="section-cell">Candy Rate (MCH)</td>
         </tr>
         <tr>
-          <td colspan="13" class="section-cell">Smart Info</td>
+          <td colspan="15" class="section-cell">Smart Info</td>
         </tr>
         <tr>
           <th class="header-cell">S. No</th>
-          <th colspan="2" class="header-cell tint-peach">Parameter (29 mm)</th>
+          <th colspan="2" class="header-cell tint-peach">Parameter</th>
           <th colspan="2" class="header-cell tint-lavender">Madhya Pradesh<br>29 MM</th>
+          <th colspan="2" class="header-cell tint-lavender">Madhya Pradesh<br>30 MM</th>
           <th colspan="2" class="header-cell tint-lavender">Maharashtra<br>29 MM</th>
-          <th colspan="2" class="header-cell tint-lavender">Maharashtra<br>31 MM</th>
+          <th colspan="2" class="header-cell tint-lavender">Maharashtra<br>30 MM</th>
           <th colspan="2" class="header-cell tint-blue">Odisha<br>29 MM</th>
           <th colspan="2" class="header-cell tint-blue">Odisha<br>30 MM</th>
         </tr>
@@ -316,6 +317,7 @@
           <tr>
             <td class="center-cell"><%= row.position.presence || index + 1 %></td>
             <td colspan="2"><%= row.parameter %></td>
+            <td colspan="2" class="number-cell"><%= dash.call(row.madhya_pradesh_29mm_rate) %></td>
             <td colspan="2" class="number-cell"><%= dash.call(row.madhya_pradesh_rate) %></td>
             <td colspan="2" class="number-cell"><%= dash.call(row.maharashtra_29mm_rate) %></td>
             <td colspan="2" class="number-cell"><%= dash.call(row.maharashtra_31mm_rate) %></td>
@@ -329,17 +331,18 @@
         </tr>
 
         <tr class="thick-top">
-          <td colspan="13" class="section-cell">Candy Rate (DCH)</td>
+          <td colspan="15" class="section-cell">Candy Rate (DCH)</td>
         </tr>
         <tr>
-          <td colspan="13" class="section-cell">MM Service Wise</td>
+          <td colspan="15" class="section-cell">MM Service Wise</td>
         </tr>
         <tr class="header-row">
           <th class="header-cell">S. No</th>
           <th colspan="2" class="header-cell tint-peach">Parameter</th>
-          <th colspan="2" class="header-cell tint-peach">Madhya Pradesh</th>
+          <th colspan="2" class="header-cell tint-peach">Madhya Pradesh 29 MM</th>
+          <th colspan="2" class="header-cell tint-peach">Madhya Pradesh 30 MM</th>
           <th colspan="2" class="header-cell tint-lavender">Maharashtra 29 MM</th>
-          <th colspan="2" class="header-cell tint-lavender">Maharashtra 31 MM</th>
+          <th colspan="2" class="header-cell tint-lavender">Maharashtra 30 MM</th>
           <th colspan="2" class="header-cell tint-blue">Odisha 29 MM</th>
           <th colspan="2" class="header-cell tint-blue">Odisha 30 MM</th>
         </tr>
@@ -347,6 +350,7 @@
           <tr>
             <td class="center-cell"><%= row.position.presence || index + 1 %></td>
             <td colspan="2"><%= row.parameter %></td>
+            <td colspan="2" class="number-cell"><%= dash.call(row.madhya_pradesh_29mm_rate) %></td>
             <td colspan="2" class="number-cell"><%= dash.call(row.madhya_pradesh_rate) %></td>
             <td colspan="2" class="number-cell"><%= dash.call(row.maharashtra_29mm_rate) %></td>
             <td colspan="2" class="number-cell"><%= dash.call(row.maharashtra_31mm_rate) %></td>

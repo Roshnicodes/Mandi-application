@@ -14,6 +14,17 @@ class CottonBulletin < ApplicationRecord
 
   scope :recent_first, -> { order(report_date: :desc, created_at: :desc) }
 
+  def self.daily_for(report_date)
+    recent_first.find_by(report_date: report_date) || create!(
+      report_date: report_date,
+      title: default_title_for(report_date)
+    )
+  end
+
+  def self.default_title_for(report_date)
+    "Cotton Market Report · #{report_date.strftime("%d %b %Y")}"
+  end
+
   def observations_for(category)
     cotton_market_observations.where(category: category).ordered
   end

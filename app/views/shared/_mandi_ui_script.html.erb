@@ -531,7 +531,88 @@
     });
   };
 
+  // Date filters render as text so the box reads "From date" while empty, and
+  // become native date pickers the moment the user interacts with them.
+  const setupPlaceholderDateInputs = () => {
+    document.querySelectorAll("input[data-date-input]").forEach((input) => {
+      if (input.dataset.dateInputReady === "true") return;
+      input.dataset.dateInputReady = "true";
+
+      const asDate = () => {
+        if (input.type !== "date") input.type = "date";
+      };
+
+      const asText = () => {
+        if (!input.value) input.type = "text";
+      };
+
+      if (input.value) asDate();
+
+      input.addEventListener("focus", asDate);
+      input.addEventListener("pointerdown", asDate);
+      input.addEventListener("blur", asText);
+    });
+  };
+
+  // Filters the rows of every section on a cotton report in place. The whole
+  // sheet is already rendered, so typing never needs a round trip.
+  const setupSheetSearch = () => {
+    const input = document.querySelector("[data-sheet-search]");
+    if (!input) return;
+
+    const status = document.querySelector("[data-sheet-search-status]");
+    const sections = Array.from(document.querySelectorAll("[data-sheet-section]"));
+    if (sections.length === 0) return;
+
+    const applyFilter = () => {
+      const term = input.value.trim().toLowerCase();
+      let shownRows = 0;
+      let shownSections = 0;
+
+      sections.forEach((section) => {
+        const rows = Array.from(section.querySelectorAll("tbody tr"));
+        const heading = section.querySelector(".sheet-header");
+        // Searching a section name ("candy rate") keeps that whole section,
+        // so the name in the heading counts as a match for every row in it.
+        const headingHit = term !== "" && heading !== null &&
+          heading.textContent.toLowerCase().includes(term);
+        let visibleRows = 0;
+
+        rows.forEach((row) => {
+          const matched = term === "" || headingHit || row.textContent.toLowerCase().includes(term);
+          row.hidden = !matched;
+          if (matched) visibleRows += 1;
+        });
+
+        // A section with no table of its own (the comparison launcher) can only
+        // match on its heading.
+        const keep = rows.length > 0 ? term === "" || visibleRows > 0 : term === "" || headingHit;
+
+        section.hidden = !keep;
+        if (keep) shownSections += 1;
+        shownRows += visibleRows;
+      });
+
+      if (!status) return;
+
+      if (term === "") {
+        status.textContent = "";
+      } else if (shownSections === 0) {
+        status.textContent = "No rows match \u201C" + input.value.trim() + "\u201D";
+      } else {
+        status.textContent = shownRows + (shownRows === 1 ? " row" : " rows") + " in " +
+          shownSections + (shownSections === 1 ? " section" : " sections");
+      }
+    };
+
+    input.addEventListener("input", applyFilter);
+    input.addEventListener("search", applyFilter);
+    applyFilter();
+  };
+
   const bootMandiUi = () => {
+    setupPlaceholderDateInputs();
+    setupSheetSearch();
     setupMarketForm();
     setupGradeForm();
     setupReportForm();

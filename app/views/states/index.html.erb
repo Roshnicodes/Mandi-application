@@ -1,22 +1,20 @@
 <% content_for :title, "State Master" %>
 
 <section class="responsive-stack">
-  <div class="page-header">
+  <% content_for :page_heading do %>
     <div>
       <p class="eyebrow">Master Setup</p>
       <h1>State master</h1>
-      <p class="muted-text">Build the top-level geography used across districts, markets and report forms.</p>
     </div>
-    <div class="page-actions">
-      <%= link_to "Add State", new_state_path, class: "button button-primary" %>
-    </div>
-  </div>
+  <% end %>
 
+  <% content_for :page_actions do %>
+    <%= link_to "Add State", new_state_path, class: "button button-primary" %>
+  <% end %>
   <div class="table-card">
     <div class="table-card-header">
       <div>
         <h2 class="table-title">Configured states</h2>
-        <p class="table-subtitle">Top-level geography used for district, market and daily report entry.</p>
       </div>
     </div>
 
@@ -47,7 +45,7 @@
         </table>
       </div>
     <% else %>
-      <div class="empty-state">Abhi tak koi state master create nahi hua hai.</div>
+      <div class="empty-state">No state records yet.</div>
     <% end %>
   </div>
 </section>
