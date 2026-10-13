@@ -3,33 +3,61 @@ require "test_helper"
 class DailyPriceArrivalReportsTest < ActionDispatch::IntegrationTest
   setup do
     @admin = users(:one)
-    state = State.create!(name: "Madhya Pradesh")
-    district = District.create!(state: state, name: "Agar")
-    market = Market.create!(district: district, name: "Agar")
-    group = CommodityGroup.create!(name: "Oilseeds")
-    commodity = Commodity.create!(commodity_group: group, name: "Soybean")
-    variety = Variety.create!(commodity: commodity, name: "Other")
-    grade = Grade.create!(commodity: commodity, variety: variety, name: "Non-FAQ")
-    price_unit = PriceUnit.create!(name: "Rs./Quintal", short_name: "Rs./Quintal")
-    arrival_unit = ArrivalUnit.create!(name: "Qtl", short_name: "Qtl")
+    @regular_user = users(:two)
+    @state = State.create!(name: "Madhya Pradesh")
+    @district = District.create!(state: @state, name: "Agar")
+    @market = Market.create!(district: @district, name: "Agar")
+    @group = CommodityGroup.create!(name: "Oilseeds")
+    @commodity = Commodity.create!(commodity_group: @group, name: "Soybean")
+    @variety = Variety.create!(commodity: @commodity, name: "Other")
+    @grade = Grade.create!(commodity: @commodity, variety: @variety, name: "Non-FAQ")
+    @price_unit = PriceUnit.create!(name: "Rs./Quintal", short_name: "Rs./Quintal")
+    @arrival_unit = ArrivalUnit.create!(name: "Qtl", short_name: "Qtl")
 
-    DailyPriceArrivalReport.create!(
+    @report = DailyPriceArrivalReport.create!(
       arrival_date: Date.new(2026, 9, 29),
-      state: state,
-      district: district,
-      market: market,
-      commodity_group: group,
-      commodity: commodity,
-      variety: variety,
-      grade: grade,
-      price_unit: price_unit,
-      arrival_unit: arrival_unit,
+      state: @state,
+      district: @district,
+      market: @market,
+      commodity_group: @group,
+      commodity: @commodity,
+      variety: @variety,
+      grade: @grade,
+      price_unit: @price_unit,
+      arrival_unit: @arrival_unit,
       arrival_quantity: 9995,
       min_price: 1925,
       max_price: 5750,
       modal_price: 5300,
       remarks: "agmarknet"
     )
+  end
+
+  test "regular user can create a report but cannot edit or delete a saved report" do
+    sign_in_as(@regular_user)
+
+    assert_difference("DailyPriceArrivalReport.count", 1) do
+      post daily_price_arrival_reports_path, params: { daily_price_arrival_report: report_params }
+    end
+    assert_redirected_to new_daily_price_arrival_report_path(
+      state_id: @state.id,
+      district_id: @district.id,
+      market_id: @market.id,
+      commodity_group_id: @group.id,
+      commodity_id: @commodity.id,
+      variety_id: @variety.id,
+      grade_id: @grade.id,
+      price_unit_id: @price_unit.id,
+      arrival_unit_id: @arrival_unit.id
+    )
+
+    get edit_daily_price_arrival_report_path(@report)
+    assert_redirected_to root_path
+
+    assert_no_difference("DailyPriceArrivalReport.count") do
+      delete daily_price_arrival_report_path(@report)
+    end
+    assert_redirected_to root_path
   end
 
   test "renders saved reports in the APMC daily sheet layout" do
@@ -92,4 +120,25 @@ class DailyPriceArrivalReportsTest < ActionDispatch::IntegrationTest
     assert_match(/Soybean Commodity Arrival and Rates - 29th Sep, 2026 State - MP/, response.body)
     assert_match(/Arrivals<br>\(In Qtl\)/, response.body)
   end
+
+  private
+    def report_params
+      {
+        arrival_date: Date.new(2026, 9, 30),
+        state_id: @state.id,
+        district_id: @district.id,
+        market_id: @market.id,
+        commodity_group_id: @group.id,
+        commodity_id: @commodity.id,
+        variety_id: @variety.id,
+        grade_id: @grade.id,
+        price_unit_id: @price_unit.id,
+        arrival_unit_id: @arrival_unit.id,
+        arrival_quantity: 100,
+        min_price: 1000,
+        max_price: 1200,
+        modal_price: 1100,
+        remarks: "manual entry"
+      }
+    end
 end

@@ -1,7 +1,9 @@
 class DailyPriceArrivalReportsController < ApplicationController
   include ReferenceCollections
 
-  before_action :require_admin, only: %i[new create import repair_imported_locations edit update destroy]
+  # Any signed-in user may add reports or import a workbook. Changing an
+  # existing report manually and repair jobs remain administrator-only.
+  before_action :require_admin, only: %i[repair_imported_locations edit update destroy]
   before_action :set_daily_price_arrival_report, only: %i[edit update destroy]
   before_action :load_report_form_collections, only: %i[new create edit update]
   before_action :load_filter_collections, only: :index

@@ -7,7 +7,7 @@ class DownloadPermissionsTest < ActionDispatch::IntegrationTest
     @bulletin = CottonBulletin.create!(report_date: Date.current, title: "Test Cotton Bulletin")
   end
 
-  test "regular user can download daily report excel but cannot import or create" do
+  test "regular user can download, import, and manually enter daily reports" do
     sign_in_as(@regular_user)
 
     get export_daily_price_arrival_reports_path
@@ -15,10 +15,14 @@ class DownloadPermissionsTest < ActionDispatch::IntegrationTest
     assert_equal "application/vnd.ms-excel", response.media_type
 
     post import_daily_price_arrival_reports_path
-    assert_redirected_to root_path
+    assert_redirected_to daily_price_arrival_reports_path
 
     get new_daily_price_arrival_report_path
-    assert_redirected_to root_path
+    assert_response :success
+
+    get daily_price_arrival_reports_path
+    assert_select "a[href=?]", new_daily_price_arrival_report_path, text: /Add Report/
+    assert_select "form.daily-upload-bar", count: 1
   end
 
   test "regular user can download cotton excel but cannot import or create" do

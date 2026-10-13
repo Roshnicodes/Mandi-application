@@ -22,19 +22,18 @@
   <% end %>
 
   <div class="daily-report-commandbar">
-    <% if admin_user? %>
-      <%= form_with url: import_daily_price_arrival_reports_path, multipart: true, class: "daily-upload-bar" do %>
-        <span class="daily-file-picker">
-          <%= icon("spreadsheet", size: 17) %>
-          <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true, aria: { label: "Choose daily mandi Excel workbook" } %>
-        </span>
-        <%= button_tag type: :submit, class: "button button-primary" do %>
-          <%= icon("upload", size: 17) %> Upload Excel
-        <% end %>
-        <%= link_to new_daily_price_arrival_report_path, class: "button button-outline" do %>
-          <%= icon("plus", size: 17) %> Add Report
-        <% end %>
+    <%= form_with url: import_daily_price_arrival_reports_path, multipart: true, class: "daily-upload-bar" do %>
+      <span class="daily-file-picker">
+        <%= icon("spreadsheet", size: 17) %>
+        <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true, aria: { label: "Choose daily mandi Excel workbook" } %>
+      </span>
+      <%= button_tag type: :submit, class: "button button-primary" do %>
+        <%= icon("upload", size: 17) %> Upload Excel
       <% end %>
+    <% end %>
+
+    <%= link_to new_daily_price_arrival_report_path, class: "button button-outline" do %>
+      <%= icon("plus", size: 17) %> Add Report
     <% end %>
 
     <div class="daily-report-actions">
