@@ -34,7 +34,6 @@ class CottonMarketObservationsController < CottonBulletinNestedController
     end
   end
 
-  skip_before_action :require_admin, only: %i[grid]
   before_action :set_cotton_market_observation, only: %i[edit update destroy]
   before_action :set_template_category, only: %i[grid save_grid]
   before_action :redirect_template_categories_to_grid, only: :new

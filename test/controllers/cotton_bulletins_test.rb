@@ -3,7 +3,36 @@ require "test_helper"
 class CottonBulletinsTest < ActionDispatch::IntegrationTest
   setup do
     @admin = users(:one)
+    @regular_user = users(:two)
     @report_date = Date.new(2030, 1, 15)
+  end
+
+  test "regular user can add cotton rows but cannot edit or delete reports" do
+    sign_in_as(@regular_user)
+
+    assert_difference("CottonBulletin.count", 1) do
+      post start_cotton_bulletins_path, params: { report_date: @report_date }
+    end
+    bulletin = CottonBulletin.find_by!(report_date: @report_date)
+
+    get cotton_bulletin_path(bulletin)
+    assert_response :success
+    assert_select "a[href=?]", new_cotton_bulletin_cotton_seed_rate_path(bulletin), text: /Add Seed Rate/
+    assert_select "form.import-inline-form", count: 1
+
+    assert_difference("CottonSeedRate.count", 1) do
+      post cotton_bulletin_cotton_seed_rates_path(bulletin), params: {
+        cotton_seed_rate: { particular: "Test seed rate" }
+      }
+    end
+
+    get edit_cotton_bulletin_path(bulletin)
+    assert_redirected_to root_path
+
+    assert_no_difference("CottonBulletin.count") do
+      delete cotton_bulletin_path(bulletin)
+    end
+    assert_redirected_to root_path
   end
 
   test "opens a daily cotton report directly and reuses its date" do

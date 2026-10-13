@@ -4,11 +4,9 @@
       <p class="eyebrow">Smart Info</p>
       <h2 class="table-title"><%= title %></h2>
     </div>
-    <% if admin_user? %>
-      <div class="inline-actions">
-        <%= link_to "Add Candy Rate", new_cotton_bulletin_candy_rate_path(bulletin, category: category), class: "button button-secondary" %>
-      </div>
-    <% end %>
+    <div class="inline-actions">
+      <%= link_to "Add Candy Rate", new_cotton_bulletin_candy_rate_path(bulletin, category: category), class: "button button-secondary" %>
+    </div>
   </div>
 
   <% if records.any? %>

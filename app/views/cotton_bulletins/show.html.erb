@@ -22,13 +22,13 @@
       <%= link_to export_cotton_bulletin_path(@cotton_bulletin, preview: true), class: "button button-soft", target: "_blank", rel: "noopener" do %>
         <%= icon("eye", size: 16) %> View
       <% end %>
-      <%= form_with url: import_cotton_bulletin_path(@cotton_bulletin), multipart: true, class: "import-inline-form" do %>
-        <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
-        <%= submit_tag "Import", class: "button button-soft" %>
-      <% end %>
       <%= link_to edit_cotton_bulletin_path(@cotton_bulletin), class: "button button-soft" do %>
         <%= icon("pencil", size: 16) %> Edit
       <% end %>
+    <% end %>
+    <%= form_with url: import_cotton_bulletin_path(@cotton_bulletin), multipart: true, class: "import-inline-form" do %>
+      <%= file_field_tag :excel_file, accept: ".xls,.xlsx,.html,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
+      <%= submit_tag "Import", class: "button button-soft" %>
     <% end %>
     <%= link_to cotton_bulletins_path, class: "button button-outline" do %>
       <%= icon("chevron-left", size: 16) %> Back

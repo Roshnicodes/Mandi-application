@@ -29,7 +29,7 @@
     <div class="inline-actions">
       <% if CottonMarketObservation.template_grid_supported?(category) %>
         <%= link_to "Open Grid", grid_cotton_bulletin_cotton_market_observations_path(bulletin, category: category), class: "button button-secondary" %>
-      <% elsif admin_user? %>
+      <% else %>
         <%= link_to "Add Line", new_cotton_bulletin_cotton_market_observation_path(bulletin, category: category), class: "button button-secondary" %>
       <% end %>
     </div>

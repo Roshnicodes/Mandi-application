@@ -25,7 +25,7 @@ class DownloadPermissionsTest < ActionDispatch::IntegrationTest
     assert_select "form.daily-upload-bar", count: 1
   end
 
-  test "regular user can download cotton excel but cannot import or create" do
+  test "regular user can download and import cotton Excel" do
     sign_in_as(@regular_user)
 
     get export_cotton_bulletin_path(@bulletin)
@@ -33,10 +33,16 @@ class DownloadPermissionsTest < ActionDispatch::IntegrationTest
     assert_equal "application/vnd.ms-excel", response.media_type
 
     post import_cotton_bulletin_path(@bulletin)
-    assert_redirected_to root_path
+    assert_redirected_to cotton_bulletin_path(@bulletin)
+
+    post import_daily_cotton_bulletins_path
+    assert_redirected_to cotton_bulletins_path
 
     get new_cotton_bulletin_path
-    assert_redirected_to root_path
+    assert_redirected_to cotton_bulletins_path
+
+    get cotton_bulletins_path
+    assert_select "form.direct-cotton-import-form", count: 1
   end
 
   test "admin can import entry points" do

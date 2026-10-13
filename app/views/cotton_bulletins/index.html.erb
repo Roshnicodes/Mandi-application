@@ -34,8 +34,7 @@
         <% end %>
     <% end %>
   <% end %>
-  <% if admin_user? %>
-    <div class="direct-entry-grid">
+  <div class="direct-entry-grid">
       <section class="direct-entry-card tone-blue">
         <div class="direct-entry-card-head">
           <span class="direct-entry-card-icon tone-blue"><%= icon("calendar", size: 22) %></span>
@@ -72,8 +71,7 @@
           <button type="submit" class="button button-success"><%= icon("upload") %> Import Excel</button>
         <% end %>
       </section>
-    </div>
-  <% end %>
+  </div>
 
   <%= form_with url: cotton_bulletins_path, method: :get, class: "filter-bar" do |form| %>
     <% if @sort == "date_asc" %>

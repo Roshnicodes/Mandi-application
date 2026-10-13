@@ -1,5 +1,7 @@
 class CottonBulletinsController < ApplicationController
-  before_action :require_admin, except: %i[index show export comparison_sheet]
+  # Signed-in users can create/import cotton reports. Existing reports remain
+  # editable and deletable by administrators only.
+  before_action :require_admin, only: %i[edit update destroy]
   before_action :set_cotton_bulletin, only: %i[show edit update destroy export comparison_sheet import]
 
   PER_PAGE = 15
