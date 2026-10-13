@@ -137,4 +137,14 @@ class CottonBulletinsTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to cotton_bulletins_path
   end
+
+  test "renders the empty state when no cotton reports exist" do
+    sign_in_as(@admin)
+
+    get cotton_bulletins_path
+
+    assert_response :success
+    assert_select ".empty-state", text: /No cotton report yet/
+    assert_select "a", text: /Download Latest/, count: 0
+  end
 end

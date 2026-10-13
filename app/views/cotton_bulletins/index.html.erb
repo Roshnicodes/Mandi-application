@@ -23,6 +23,7 @@
   <% end %>
 
   <% content_for :page_actions do %>
+    <% if @latest_bulletin.present? %>
         <%= link_to export_cotton_bulletin_path(@latest_bulletin), class: "button button-soft" do %>
           <%= icon("download", size: 16) %> Download Latest
         <% end %>
@@ -31,6 +32,7 @@
             <%= icon("eye", size: 16) %> View Latest
           <% end %>
         <% end %>
+    <% end %>
   <% end %>
   <% if admin_user? %>
     <div class="direct-entry-grid">
