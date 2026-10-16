@@ -69,7 +69,7 @@ class DailyPriceArrivalReportsTest < ActionDispatch::IntegrationTest
     assert_select ".daily-reports-page"
     assert_select ".daily-report-commandbar"
     assert_select "form.daily-upload-bar"
-    assert_select ".app-topbar .app-topbar-heading h1", text: "Daily Mandi Reports"
+    assert_select ".page-hero .page-hero-heading h1", text: "Daily Mandi Reports"
     assert_select ".filter-bar input[placeholder=?]", "From date"
     assert_select ".daily-mandi-sheet-footer", text: /Showing 1 to \d+ of \d+ records/
     assert_select "th a.daily-sort-link", text: /Modal Price/
@@ -119,6 +119,17 @@ class DailyPriceArrivalReportsTest < ActionDispatch::IntegrationTest
     assert_equal "application/vnd.ms-excel", response.media_type
     assert_match(/Soybean Commodity Arrival and Rates - 29th Sep, 2026 State - MP/, response.body)
     assert_match(/Arrivals<br>\(In Qtl\)/, response.body)
+  end
+
+  test "exports attachment download links" do
+    sign_in_as(@admin)
+    @report.attachments.attach(io: StringIO.new("mandi sheet"), filename: "agar-sheet.pdf", content_type: "application/pdf")
+
+    get export_daily_price_arrival_reports_path
+
+    assert_response :success
+    assert_match(/<th class="column-heading">Attachments<\/th>/, response.body)
+    assert_match(%r{<a href="http://www\.example\.com/rails/active_storage/blobs/redirect/[^"]+/agar-sheet\.pdf\?disposition=attachment">agar-sheet\.pdf</a>}, response.body)
   end
 
   private

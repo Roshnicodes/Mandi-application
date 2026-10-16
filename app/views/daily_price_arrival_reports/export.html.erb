@@ -14,10 +14,12 @@
     th, td { border: 1px solid #2e3a31; padding: 7px 8px; vertical-align: middle; mso-number-format: "\\@"; }
     .report-title { padding: 11px; font-size: 18px; line-height: 1.35; font-weight: 700; text-align: center; background: #f8ead9; color: #24342a; }
     .column-heading { min-height: 58px; font-size: 13px; line-height: 1.25; font-weight: 700; text-align: center; background: #fbfcfa; }
-    .market-cell { width: 23%; font-weight: 700; }
-    .arrival-cell { width: 14%; text-align: right; }
-    .price-cell { width: 16%; text-align: right; }
-    .reference-cell { width: 15%; color: #47584d; }
+    .market-cell { width: 19%; font-weight: 700; }
+    .arrival-cell { width: 12%; text-align: right; }
+    .price-cell { width: 14%; text-align: right; }
+    .reference-cell { width: 13%; color: #47584d; }
+    .attachment-cell { width: 14%; font-size: 12px; word-break: break-word; }
+    .attachment-cell a { color: #1f5535; }
     .report-row:nth-child(even) td { background: #fbfdfb; }
     .sheet-meta { display: flex; justify-content: space-between; gap: 12px; padding: 9px 12px; border-bottom: 1px solid #dce4de; color: #597062; font-size: 12px; }
     .empty { max-width: 700px; margin: 40px auto; padding: 28px; border: 1px dashed #9fb1a5; color: #53685a; text-align: center; background: #ffffff; }
@@ -57,7 +59,7 @@
         <table>
           <thead>
             <tr>
-              <th colspan="6" class="report-title"><%= commodity_name %> Commodity Arrival and Rates - <%= "#{report_date.day.ordinalize} #{report_date.strftime('%b, %Y')}" %> State - <%= state_label %></th>
+              <th colspan="7" class="report-title"><%= commodity_name %> Commodity Arrival and Rates - <%= "#{report_date.day.ordinalize} #{report_date.strftime('%b, %Y')}" %> State - <%= state_label %></th>
             </tr>
             <tr>
               <th class="column-heading">APMC</th>
@@ -66,6 +68,7 @@
               <th class="column-heading">Maximum Price<br>(<%= price_unit_label %>)</th>
               <th class="column-heading">Modal Price<br>(<%= price_unit_label %>)</th>
               <th class="column-heading">Reference</th>
+              <th class="column-heading">Attachments</th>
             </tr>
           </thead>
           <tbody>
@@ -77,6 +80,13 @@
                 <td class="price-cell"><%= number_with_precision(report.max_price, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %></td>
                 <td class="price-cell"><%= number_with_precision(report.modal_price, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %></td>
                 <td class="reference-cell"><%= report.remarks.presence || "-" %></td>
+                <td class="attachment-cell">
+                  <% if report.attachments.attached? %>
+                    <%= safe_join(report.attachments.map { |attachment| link_to(attachment.filename.to_s, rails_blob_url(attachment, disposition: "attachment")) }, tag.br(style: "mso-data-placement: same-cell;")) %>
+                  <% else %>
+                    -
+                  <% end %>
+                </td>
               </tr>
             <% end %>
           </tbody>

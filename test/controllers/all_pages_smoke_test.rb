@@ -1,7 +1,7 @@
 require "test_helper"
 
 class AllPagesSmokeTest < ActionDispatch::IntegrationTest
-  test "every page renders with the unified header" do
+  test "every page renders with the topbar and page banner" do
     sign_in_as(users(:one))
 
     state = State.create!(name: "Smoke State")
@@ -45,7 +45,7 @@ class AllPagesSmokeTest < ActionDispatch::IntegrationTest
 
       doc = Nokogiri::HTML(response.body)
       failures << "#{path} -> no .app-topbar" if doc.css(".app-topbar").empty?
-      failures << "#{path} -> heading empty" if doc.css(".app-topbar-heading").text.strip.empty?
+      failures << "#{path} -> heading empty" if doc.css(".page-hero .page-hero-heading h1").text.strip.empty?
       failures << "#{path} -> leftover .page-header card" if doc.css(".page-header").any?
     end
 

@@ -54,7 +54,11 @@ module ApplicationHelper
     "logout" => '<path d="M9 21H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/><path d="M16 17l5-5-5-5M21 12H9"/>',
     "truck" => '<rect x="1.5" y="7" width="13" height="10" rx="1"/><path d="M14.5 10.5H18l3.5 3.5V17a1 1 0 0 1-1 1h-1.5"/><circle cx="6" cy="18.5" r="1.6"/><circle cx="17.5" cy="18.5" r="1.6"/>',
     "sliders" => '<path d="M4 6h10M17 6h3M4 12h3M9 12h11M4 18h7M14 18h6"/><circle cx="16" cy="6" r="2"/><circle cx="7" cy="12" r="2"/><circle cx="12" cy="18" r="2"/>',
-    "chevron-down" => '<path d="m5 8.5 7 7 7-7"/>'
+    "chevron-down" => '<path d="m5 8.5 7 7 7-7"/>',
+    "rupee" => '<path d="M6 4h12M6 9h12M14.5 4c3.5 0 3.5 10-3.5 10H7l8 7"/>',
+    "scale" => '<path d="M12 3v18M7 21h10M5 7h14"/><path d="m5 7-3 7a3 3 0 0 0 6 0L5 7ZM19 7l-3 7a3 3 0 0 0 6 0l-3-7Z"/>',
+    "info" => '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+    "cotton" => '<circle cx="12" cy="9" r="3.2"/><circle cx="8" cy="12.5" r="3"/><circle cx="16" cy="12.5" r="3"/><path d="M12 15.5V21M9 21h6"/>'
   }.freeze
 
   def icon(name, size: 18, class_name: nil)
@@ -89,24 +93,28 @@ module ApplicationHelper
         label: "Dashboard",
         path: root_path,
         icon: "home",
+        tone: "blue",
         active: controller_name == "dashboard"
       },
       {
         label: "Daily Reports",
         path: daily_price_arrival_reports_path,
         icon: "document",
+        tone: "green",
         active: controller_name == "daily_price_arrival_reports"
       },
       {
         label: "Arrival Summary",
         path: daily_arrival_summaries_path,
-        icon: "document",
+        icon: "truck",
+        tone: "indigo",
         active: controller_name == "daily_arrival_summaries"
       },
       {
         label: "Cotton Bulletins",
         path: cotton_bulletins_path,
-        icon: "document",
+        icon: "cotton",
+        tone: "pink",
         active: %w[
           cotton_bulletins
           cotton_market_observations
@@ -120,6 +128,7 @@ module ApplicationHelper
         label: "Cotton Overview",
         path: cotton_market_overviews_path,
         icon: "chart-bar",
+        tone: "orange",
         active: controller_name == "cotton_market_overviews"
       }
     ]
@@ -129,23 +138,30 @@ module ApplicationHelper
     return [] unless admin_user?
 
     [
-      [ "State Master", states_path, "shield" ],
-      [ "District Master", districts_path, "map-pin" ],
-      [ "Mandi / APMC", markets_path, "building" ],
-      [ "Commodity Group", commodity_groups_path, "folder" ],
-      [ "Commodity", commodities_path, "package" ],
-      [ "Variety", varieties_path, "tag" ],
-      [ "Grade", grades_path, "badge" ],
-      [ "Price Unit", price_units_path, "tag" ],
-      [ "Arrival Unit", arrival_units_path, "tag" ]
-    ].map do |label, path, icon_name|
+      [ "State Master", states_path, "shield", "teal" ],
+      [ "District Master", districts_path, "map-pin", "blue" ],
+      [ "Mandi / APMC", markets_path, "building", "orange" ],
+      [ "Commodity Group", commodity_groups_path, "folder", "pink" ],
+      [ "Commodity", commodities_path, "package", "green" ],
+      [ "Variety", varieties_path, "leaf", "lime" ],
+      [ "Grade", grades_path, "badge", "indigo" ],
+      [ "Price Unit", price_units_path, "rupee", "amber" ],
+      [ "Arrival Unit", arrival_units_path, "scale", "violet" ]
+    ].map do |label, path, icon_name, tone|
       {
         label: label,
         path: path,
         icon: icon_name,
-        active: current_page?(path)
+        tone: tone,
+        # Highlight the master on its new/edit screens as well as its list.
+        active: controller_name == path.delete_prefix("/").tr("-", "_") || current_page?(path)
       }
     end
+  end
+
+  # Navigation entry for the current screen; the page banner borrows its icon.
+  def current_navigation_item
+    (primary_navigation + master_navigation).find { |item| item[:active] }
   end
 
   def masters_section_active?

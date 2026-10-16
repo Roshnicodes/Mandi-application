@@ -325,6 +325,23 @@
 
     if (!sidebar || !overlay || toggleButtons.length === 0) return;
 
+    const preferenceKey = "iman-sidebar-collapsed";
+    const readCollapsedPreference = () => {
+      try {
+        return window.localStorage.getItem(preferenceKey) === "true";
+      } catch (_error) {
+        return false;
+      }
+    };
+
+    const saveCollapsedPreference = (collapsed) => {
+      try {
+        window.localStorage.setItem(preferenceKey, String(collapsed));
+      } catch (_error) {
+        // Navigation remains usable when storage is unavailable.
+      }
+    };
+
     const setExpanded = (expanded) => {
       toggleButtons.forEach((button) => button.setAttribute("aria-expanded", expanded ? "true" : "false"));
     };
@@ -352,7 +369,9 @@
 
       document.body.classList.toggle("sidebar-collapsed");
       document.body.classList.remove("sidebar-open");
-      setExpanded(!document.body.classList.contains("sidebar-collapsed"));
+      const collapsed = document.body.classList.contains("sidebar-collapsed");
+      saveCollapsedPreference(collapsed);
+      setExpanded(!collapsed);
     };
 
     toggleButtons.forEach((button) => {
@@ -388,6 +407,7 @@
       closeSidebar();
     } else {
       document.body.classList.remove("sidebar-open");
+      document.body.classList.toggle("sidebar-collapsed", readCollapsedPreference());
       setExpanded(!document.body.classList.contains("sidebar-collapsed"));
     }
   };

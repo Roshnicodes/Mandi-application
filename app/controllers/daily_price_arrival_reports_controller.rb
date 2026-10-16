@@ -35,7 +35,7 @@ class DailyPriceArrivalReportsController < ApplicationController
 
   def export
     @filters = filter_params.to_h.symbolize_keys
-    @reports = DailyPriceArrivalReport.filtered(@filters)
+    @reports = DailyPriceArrivalReport.filtered(@filters).with_attached_attachments
 
     if params[:preview].present?
       render :export, formats: :html, layout: false

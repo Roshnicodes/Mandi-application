@@ -4,8 +4,8 @@
     {
       "name": "mandi",
       "runtimeExecutable": "bin/rails",
-      "runtimeArgs": ["server", "-p", "3000"],
-      "port": 3000
+      "runtimeArgs": ["server", "-p", "3001"],
+      "port": 3001
     }
   ]
 }

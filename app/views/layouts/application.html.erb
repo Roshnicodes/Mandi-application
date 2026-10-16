@@ -21,8 +21,19 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   </head>
 
-  <body class="<%= authenticated? ? "app-shell-body" : "auth-shell-body" %><%= " dashboard-unified-page" if content_for?(:dashboard_unified) %>">
+  <body
+    class="<%= authenticated? ? "app-shell-body" : "auth-shell-body" %><%= " dashboard-unified-page" if content_for?(:dashboard_unified) %>"
+    <% if authenticated? %>style="--mandi-market-image: url('<%= asset_path("login_gallery/mandi-grains.png") %>'); --mandi-hero-image: url('<%= asset_path("mandi-hero-banner.webp") %>');"<% end %>
+  >
     <% if authenticated? %>
+      <%# Apply the saved collapsed-menu choice before first paint so the page doesn't jump. %>
+      <script>
+        try {
+          if (window.innerWidth > 980 && window.localStorage.getItem("iman-sidebar-collapsed") === "true") {
+            document.body.classList.add("sidebar-collapsed");
+          }
+        } catch (_error) {}
+      </script>
       <div class="app-shell">
         <aside class="sidebar" id="app-sidebar" data-app-sidebar>
           <div class="sidebar-mobile-header">
@@ -35,11 +46,12 @@
 
           <div class="brand-card">
             <div class="brand-top">
-              <div class="brand-mark">IM</div>
+              <div class="brand-mark"><%= icon("leaf", size: 25) %></div>
             </div>
 
             <div class="brand-copy">
-              <h1>IMAN</h1>
+              <strong class="brand-name">IMAN</strong>
+              <p class="brand-copy-text">Mandi Information &amp; Analytics Network</p>
             </div>
           </div>
 
@@ -47,9 +59,9 @@
             <div class="nav-group">
               <p class="nav-label">Workspace</p>
               <% primary_navigation.each do |item| %>
-                <%= link_to item[:path], class: ["nav-link", item[:active] ? "active" : nil] do %>
-                  <%= icon(item[:icon], class_name: "nav-link-icon") %>
-                  <span><%= item[:label] %></span>
+                <%= link_to item[:path], class: ["nav-link", item[:active] ? "active" : nil], title: item[:label], aria: { current: (item[:active] ? "page" : nil) } do %>
+                  <span class="nav-icon tone-<%= item[:tone] %>"><%= icon(item[:icon], size: 16, class_name: "nav-link-icon") %></span>
+                  <span class="nav-text"><%= item[:label] %></span>
                 <% end %>
               <% end %>
             </div>
@@ -58,22 +70,25 @@
               <div class="nav-group">
                 <p class="nav-label">Masters</p>
                 <% master_navigation.each do |item| %>
-                  <%= link_to item[:path], class: ["nav-link", item[:active] ? "active" : nil] do %>
-                    <%= icon(item[:icon], class_name: "nav-link-icon") %>
-                    <span><%= item[:label] %></span>
+                  <%= link_to item[:path], class: ["nav-link", item[:active] ? "active" : nil], title: item[:label], aria: { current: (item[:active] ? "page" : nil) } do %>
+                    <span class="nav-icon tone-<%= item[:tone] %>"><%= icon(item[:icon], size: 16, class_name: "nav-link-icon") %></span>
+                    <span class="nav-text"><%= item[:label] %></span>
                   <% end %>
                 <% end %>
               </div>
             <% end %>
           </nav>
+
+          <div class="sidebar-footer">
+            <span class="sidebar-footer-mark"><%= icon("leaf", size: 17) %></span>
+            <span><strong>Better markets</strong><small>Brighter farmers</small></span>
+          </div>
         </aside>
 
         <button type="button" class="sidebar-overlay" data-sidebar-overlay aria-hidden="true" tabindex="-1"></button>
 
         <main class="app-main">
-          <%# One card carries the page heading, the page's own actions and the
-              account controls, instead of a thin bar stacked over a title card. %>
-          <header class="app-topbar<%= " app-topbar-integrated" if content_for?(:dashboard_unified) %>">
+          <header class="app-topbar">
             <button
               type="button"
               class="mobile-nav-button"
@@ -92,39 +107,61 @@
               data-sidebar-toggle
               aria-expanded="true"
               aria-controls="app-sidebar"
-              title="Toggle menu"
-              aria-label="Toggle menu"
+              title="Show / hide menu"
+              aria-label="Show or hide menu"
             >
               <span></span>
               <span></span>
               <span></span>
             </button>
 
-            <div class="app-topbar-heading">
-              <% if content_for?(:page_heading) %>
-                <%= yield :page_heading %>
-              <% else %>
-                <h1><%= content_for?(:title) ? yield(:title) : "IMAN" %></h1>
-              <% end %>
-            </div>
-
-            <% if content_for?(:page_actions) %>
-              <div class="app-topbar-trail">
-                <div class="page-actions"><%= yield :page_actions %></div>
-              </div>
+            <%= form_with url: daily_price_arrival_reports_path, method: :get, class: "app-global-search", role: "search" do %>
+              <%= icon("search", size: 16) %>
+              <%= text_field_tag :q, nil, placeholder: "Search mandi, district, commodity…", aria: { label: "Search mandi reports" } %>
             <% end %>
 
             <div class="app-topbar-account">
               <div class="user-pill">
-                <span class="user-pill-name"><%= current_user.name %></span>
-                <span class="user-pill-meta"><%= Date.current.strftime("%d %b %Y") %></span>
+                <span class="user-avatar" aria-hidden="true"><%= current_user.name.to_s.first.upcase %></span>
+                <span>
+                  <span class="user-pill-name"><%= current_user.name %></span>
+                  <span class="user-pill-meta"><%= Date.current.strftime("%d %b %Y") %></span>
+                </span>
               </div>
-              <%= button_to "Logout", session_path, method: :delete, class: "button button-ghost" %>
+              <%= button_to session_path, method: :delete, class: "button button-ghost app-logout", title: "Logout", aria: { label: "Logout" } do %>
+                <%= icon("logout", size: 16) %><span>Logout</span>
+              <% end %>
             </div>
           </header>
 
           <div class="page-frame">
             <%= render "shared/flash" %>
+
+            <%# Page banner: the screen's heading and actions over a mandi photo. %>
+            <% nav_item = current_navigation_item %>
+            <section class="page-hero">
+              <span class="page-hero-icon tone-<%= nav_item&.dig(:tone) || "green" %>"><%= icon(nav_item&.dig(:icon) || "leaf", size: 24) %></span>
+              <div class="page-hero-heading">
+                <% if content_for?(:page_heading) %>
+                  <%= yield :page_heading %>
+                <% else %>
+                  <h1><%= content_for?(:title) ? yield(:title) : "IMAN" %></h1>
+                <% end %>
+              </div>
+              <span class="page-hero-art" aria-hidden="true"></span>
+              <div class="page-hero-side">
+                <% if content_for?(:page_actions) %>
+                  <div class="page-actions"><%= yield :page_actions %></div>
+                <% end %>
+                <% unless content_for?(:dashboard_unified) %>
+                  <div class="page-hero-date">
+                    <%= icon("calendar", size: 18) %>
+                    <span><strong><%= Date.current.strftime("%d %b %Y") %></strong><small>Today</small></span>
+                  </div>
+                <% end %>
+              </div>
+            </section>
+
             <%= yield %>
           </div>
         </main>

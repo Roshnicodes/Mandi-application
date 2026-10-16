@@ -16,7 +16,7 @@
       <span class="page-header-icon tone-blue"><%= icon("document", size: 22) %></span>
       <div>
         <h1>Daily Mandi Reports</h1>
-        <p class="muted-text">View, import and manage daily mandi reports.</p>
+        <p class="muted-text">Market trends and mandi-wise arrival &amp; price details</p>
       </div>
     </div>
   <% end %>
@@ -32,16 +32,15 @@
       <% end %>
     <% end %>
 
-    <%= link_to new_daily_price_arrival_report_path, class: "button button-outline" do %>
-      <%= icon("plus", size: 17) %> Add Report
-    <% end %>
-
     <div class="daily-report-actions">
-      <%= link_to export_daily_price_arrival_reports_path(request.query_parameters), class: "button button-soft" do %>
+      <%= link_to new_daily_price_arrival_report_path, class: "button button-primary" do %>
+        <%= icon("plus", size: 17) %> Add Report
+      <% end %>
+      <%= link_to export_daily_price_arrival_reports_path(request.query_parameters), class: "button button-blue" do %>
         <%= icon("download", size: 17) %> Download Excel
       <% end %>
       <% if admin_user? %>
-        <%= link_to export_daily_price_arrival_reports_path(request.query_parameters.merge(preview: true)), class: "button button-soft", target: "_blank", rel: "noopener" do %>
+        <%= link_to export_daily_price_arrival_reports_path(request.query_parameters.merge(preview: true)), class: "button button-violet", target: "_blank", rel: "noopener" do %>
           <%= icon("eye", size: 17) %> Preview
         <% end %>
       <% end %>
@@ -50,12 +49,12 @@
 
   <% if admin_user? && @imported_location_report_count.positive? %>
     <aside class="import-location-notice" aria-label="Imported location cleanup">
+      <span class="import-location-notice-icon"><%= icon("info", size: 18) %></span>
       <div>
-        <p class="eyebrow">Data quality</p>
         <strong><%= number_with_delimiter(@imported_location_report_count) %> imported rows need district cleanup</strong>
         <p>Older workbooks had mandi and state only. New imports now map known MP APMCs to their district automatically.</p>
       </div>
-      <%= button_to "Fix locations", repair_imported_locations_daily_price_arrival_reports_path, method: :post, class: "button button-primary", form: { data: { turbo_confirm: "Move #{@imported_location_market_count} imported mandis to their mapped districts and remove invalid date-label rows?" } } %>
+      <%= button_to "Fix locations", repair_imported_locations_daily_price_arrival_reports_path, method: :post, class: "button button-violet", form: { data: { turbo_confirm: "Move #{@imported_location_market_count} imported mandis to their mapped districts and remove invalid date-label rows?" } } %>
     </aside>
   <% end %>
 
@@ -106,7 +105,7 @@
                 <p><%= report_date.strftime("%d %b %Y") %> <span class="daily-mandi-dot">&bull;</span> <%= state_display_name(first_report.state) %></p>
               </div>
             </div>
-            <span class="daily-mandi-sheet-count"><%= section_reports.size %> APMCs</span>
+            <span class="daily-mandi-sheet-count"><%= icon("building", size: 14) %> <%= section_reports.size %> APMCs</span>
           </header>
 
           <div class="data-table-wrapper daily-mandi-table-wrapper">
@@ -128,7 +127,7 @@
                   <tr>
                     <td class="daily-mandi-number-cell"><%= index + 1 %></td>
                     <td class="daily-mandi-market-cell">
-                      <strong><%= mandi_display_name(report.market.name) %></strong>
+                      <strong><span class="daily-mandi-pin pin-tone-<%= index % 5 %>"><%= icon("map-pin", size: 14) %></span><%= mandi_display_name(report.market.name) %></strong>
                       <% unless report.variety.name == DailyPriceArrivalReport::DEFAULT_VARIETY_NAME && report.grade.name == DailyPriceArrivalReport::DEFAULT_GRADE_NAME %>
                         <span><%= [ report.variety.name, report.grade.name ].join(" · ") %></span>
                       <% end %>
@@ -136,7 +135,7 @@
                     <td class="daily-mandi-value-cell"><%= number_with_precision(report.arrival_quantity, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %></td>
                     <td class="daily-mandi-value-cell"><%= number_with_precision(report.min_price, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %></td>
                     <td class="daily-mandi-value-cell"><%= number_with_precision(report.max_price, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %></td>
-                    <td class="daily-mandi-value-cell daily-mandi-modal-price"><%= number_with_precision(report.modal_price, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %></td>
+                    <td class="daily-mandi-value-cell daily-mandi-modal-price"><span class="price-pill">&#8377; <%= number_with_precision(report.modal_price, precision: 2, strip_insignificant_zeros: true, delimiter: ",") %></span></td>
                     <td class="daily-mandi-reference-cell">
                       <span><%= report.remarks.presence || "-" %></span>
                       <%= render "shared/attachment_links", record: report, empty_label: nil %>
