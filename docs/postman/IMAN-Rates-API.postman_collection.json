@@ -1,0 +1,209 @@
+{
+  "info": {
+    "name": "IMAN Mandi Rates API",
+    "description": "Read-only rates API.\n\nSetup: collection Variables me `base_url` aur `api_token` bhariye. Har request `Authorization: Bearer {{api_token}}` bhejti hai (collection Authorization tab).\n\nErrors: 401 galat/missing token, 503 server par token set nahi, 400 galat date, 404 cotton report nahi mili.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{api_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3001",
+      "description": "Local: http://localhost:3001 | Live: https://mandi.ploughmanagro.com"
+    },
+    {
+      "key": "api_token",
+      "value": "PASTE_YOUR_API_TOKEN",
+      "description": "Server ka MANDI_API_TOKEN"
+    }
+  ],
+  "item": [
+    {
+      "name": "Daily Report Rates",
+      "item": [
+        {
+          "name": "Latest date rates",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/daily_rates",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "daily_rates"
+              ],
+              "query": []
+            },
+            "description": "Sabse taaza report date ke saare mandi rates."
+          },
+          "response": []
+        },
+        {
+          "name": "Rates for one date",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/daily_rates?date=2026-09-29",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "daily_rates"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-09-29",
+                  "description": "YYYY-MM-DD"
+                }
+              ]
+            },
+            "description": "Ek din ke rates."
+          },
+          "response": []
+        },
+        {
+          "name": "Date range + filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/daily_rates?from_date=2026-09-23&to_date=2026-09-29&q=soybean&page=1&per_page=100",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "daily_rates"
+              ],
+              "query": [
+                {
+                  "key": "from_date",
+                  "value": "2026-09-23",
+                  "description": "YYYY-MM-DD"
+                },
+                {
+                  "key": "to_date",
+                  "value": "2026-09-29",
+                  "description": "YYYY-MM-DD"
+                },
+                {
+                  "key": "q",
+                  "value": "soybean",
+                  "description": "Mandi / commodity / district naam se search"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "per_page",
+                  "value": "100",
+                  "description": "1-500, default 100"
+                }
+              ]
+            },
+            "description": "Optional filters jo aur jod sakte hain: state_id, district_id, market_id, commodity_group_id, commodity_id, variety_id."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cotton Rates",
+      "item": [
+        {
+          "name": "Latest cotton report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/cotton_rates",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cotton_rates"
+              ],
+              "query": []
+            },
+            "description": "Sabse taaza cotton report: raw cotton (mandi/gin/CCI/TDN), candy (MCH/DCH), seed rates, regional comparison."
+          },
+          "response": []
+        },
+        {
+          "name": "Cotton report for a date",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/cotton_rates?date=2026-09-29",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cotton_rates"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-09-29",
+                  "description": "YYYY-MM-DD"
+                }
+              ]
+            },
+            "description": "Us din ki cotton report; na mile to 404."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

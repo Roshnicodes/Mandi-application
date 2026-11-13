@@ -43,6 +43,14 @@ Rails.application.routes.draw do
   get "arrival-summary" => "daily_arrival_summaries#index", as: :daily_arrival_summaries
   get "cotton-overview" => "cotton_market_overviews#index", as: :cotton_market_overviews
 
+  # Read-only rates API for other apps; see Api::V1::BaseController for auth.
+  namespace :api, defaults: { format: :json } do
+    namespace :v1 do
+      get "daily_rates" => "daily_rates#index"
+      get "cotton_rates" => "cotton_rates#index"
+    end
+  end
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
